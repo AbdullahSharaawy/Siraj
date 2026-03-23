@@ -13,7 +13,7 @@ namespace TheCharityPL
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            builder.Configuration.AddEnvironmentVariables();
             builder.Services.TheCharityEnhancedConnectionString(builder.Configuration);
             builder.Services.TheCharityDependencyInjection();
             builder.Services.TheCharityIdentity(builder.Configuration);
