@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '/home/mohamed/Documents/TheCharity/Website/FrontEnd/src/app/Services/Authentication';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-sign-in',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './sign-in.html',
   styleUrl: './sign-in.css',
 })
@@ -28,7 +29,7 @@ export class SignIn {
     private router: Router
   ) {}
 
-  // ── Validation ──────────────────────────────────────────────
+  // Validation
   validateEmail(): void {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     this.emailError = !this.email
@@ -48,7 +49,7 @@ export class SignIn {
     return !this.emailError && !this.passwordError;
   }
 
-  // ── Email / password submit ──────────────────────────────────
+  // Email / password submit
   async onSubmit(): Promise<void> {
     this.apiError = '';
     if (!this.validateAll()) return;
@@ -72,7 +73,7 @@ export class SignIn {
     }
   }
 
-  // ── Google OAuth ─────────────────────────────────────────────
+  // Google OAuth
   loginWithGoogle(): void {
     const returnUrl = encodeURIComponent(window.location.href);
     window.location.href =
