@@ -39,12 +39,12 @@ namespace TheCharityBLL.Services.Abstraction
         Task<ServiceResponse<bool>> RestoreContactMethod(int contactMethodId);
         Task<ServiceResponse<IEnumerable<OrgContactMethodResponseDto>>> GetContactMethodsByType(int organizationId, ContactType type);
 
-        Task<ServiceResponse<PaymentInfoResponseDto>> GetPaymentInfoByOrganizationId(int organizationId);
-        Task<ServiceResponse<PaymentInfoResponseDto>> GetPaymentInfoById(int paymentInfoId);
-        Task<ServiceResponse<PaymentInfoResponseDto>> CreatePaymentInfo(CreatePaymentInfoDto paymentInfo);
-        Task<ServiceResponse<PaymentInfoResponseDto>> UpdatePaymentInfo(int id,UpdatePaymentInfoDto paymentInfo);
-        Task<ServiceResponse<bool>> DeletePaymentInfo(int paymentInfoId);
-        Task<ServiceResponse<bool>> RestorePaymentInfo(int paymentInfoId);
+        //Task<ServiceResponse<PaymentInfoResponseDto>> GetPaymentInfoByOrganizationId(int organizationId);
+        //Task<ServiceResponse<PaymentInfoResponseDto>> GetPaymentInfoById(int paymentInfoId);
+        //Task<ServiceResponse<PaymentInfoResponseDto>> CreatePaymentInfo(CreatePaymentInfoDto paymentInfo);
+        //Task<ServiceResponse<PaymentInfoResponseDto>> UpdatePaymentInfo(int id,UpdatePaymentInfoDto paymentInfo);
+        //Task<ServiceResponse<bool>> DeletePaymentInfo(int paymentInfoId);
+        //Task<ServiceResponse<bool>> RestorePaymentInfo(int paymentInfoId);
         //Task<ServiceResponse<bool>> HasPaymentInfo(int organizationId);
 
         Task<ServiceResponse<IEnumerable<OrganizationResponseDto>>> GetOrganizationsByCampaignCount(int minCampaigns = 1);

@@ -196,47 +196,47 @@ namespace TheCharityPL.Controllers
 
         //payment
 
-        [HttpGet("{orgId}/payment")]
-        public async Task<IActionResult> GetPaymentByOrganization(int orgId)
-        {
-            var result = await _organizationService.GetPaymentInfoByOrganizationId(orgId);
-            return result.Success ? Ok(result) : NotFound(result);
-        }
+        //[HttpGet("{orgId}/payment")]
+        //public async Task<IActionResult> GetPaymentByOrganization(int orgId)
+        //{
+        //    var result = await _organizationService.GetPaymentInfoByOrganizationId(orgId);
+        //    return result.Success ? Ok(result) : NotFound(result);
+        //}
 
-        [HttpGet("payment/{paymentId}")]
-        public async Task<IActionResult> GetPaymentById(int paymentId)
-        {
-            var result = await _organizationService.GetPaymentInfoById(paymentId);
-            return result.Success ? Ok(result) : NotFound(result);
-        }
+        //[HttpGet("payment/{paymentId}")]
+        //public async Task<IActionResult> GetPaymentById(int paymentId)
+        //{
+        //    var result = await _organizationService.GetPaymentInfoById(paymentId);
+        //    return result.Success ? Ok(result) : NotFound(result);
+        //}
 
-        [HttpPost("payment")]
-        public async Task<IActionResult> CreatePayment(CreatePaymentInfoDto dto)
-        {
-            var result = await _organizationService.CreatePaymentInfo(dto);
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
+        //[HttpPost("payment")]
+        //public async Task<IActionResult> CreatePayment(CreatePaymentInfoDto dto)
+        //{
+        //    var result = await _organizationService.CreatePaymentInfo(dto);
+        //    return result.Success ? Ok(result) : BadRequest(result);
+        //}
 
-        [HttpPut("{paymentId:int}/payment")]
-        public async Task<IActionResult> UpdatePayment(int paymentId, UpdatePaymentInfoDto dto)
-        {
-            var result = await _organizationService.UpdatePaymentInfo(paymentId,dto);
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
+        //[HttpPut("{paymentId:int}/payment")]
+        //public async Task<IActionResult> UpdatePayment(int paymentId, UpdatePaymentInfoDto dto)
+        //{
+        //    var result = await _organizationService.UpdatePaymentInfo(paymentId,dto);
+        //    return result.Success ? Ok(result) : BadRequest(result);
+        //}
 
-        [HttpDelete("payment/{paymentId}")]
-        public async Task<IActionResult> DeletePayment(int paymentId)
-        {
-            var result = await _organizationService.DeletePaymentInfo(paymentId);
-            return result.Success ? Ok(result) : NotFound(result);
-        }
+        //[HttpDelete("payment/{paymentId}")]
+        //public async Task<IActionResult> DeletePayment(int paymentId)
+        //{
+        //    var result = await _organizationService.DeletePaymentInfo(paymentId);
+        //    return result.Success ? Ok(result) : NotFound(result);
+        //}
 
-        [HttpPost("payment/restore/{paymentId}")]
-        public async Task<IActionResult> RestorePayment(int paymentId)
-        {
-            var result = await _organizationService.RestorePaymentInfo(paymentId);
-            return result.Success ? Ok(result) : NotFound(result);
-        }
+        //[HttpPost("payment/restore/{paymentId}")]
+        //public async Task<IActionResult> RestorePayment(int paymentId)
+        //{
+        //    var result = await _organizationService.RestorePaymentInfo(paymentId);
+        //    return result.Success ? Ok(result) : NotFound(result);
+        //}
 
         [HttpGet("payment/none")]
         public async Task<IActionResult> GetOrganizationsWithoutPaymentInfo()

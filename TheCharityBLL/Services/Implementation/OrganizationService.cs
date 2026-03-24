@@ -73,35 +73,35 @@ namespace TheCharityBLL.Services.Implementation
             };
         }
 
-        public async Task<ServiceResponse<PaymentInfoResponseDto>> CreatePaymentInfo(CreatePaymentInfoDto paymentInfo)
-        {
-            if (!await _repository.OrganizationExistsAsync(paymentInfo.OrganizationId))
-            {
-                return new ServiceResponse<PaymentInfoResponseDto>
-                {
-                    Success = false,
-                    Message = $"Organization with ID {paymentInfo.OrganizationId} not found."
-                };
-            }
+        //public async Task<ServiceResponse<PaymentInfoResponseDto>> CreatePaymentInfo(CreatePaymentInfoDto paymentInfo)
+        //{
+        //    if (!await _repository.OrganizationExistsAsync(paymentInfo.OrganizationId))
+        //    {
+        //        return new ServiceResponse<PaymentInfoResponseDto>
+        //        {
+        //            Success = false,
+        //            Message = $"Organization with ID {paymentInfo.OrganizationId} not found."
+        //        };
+        //    }
 
-            if (await _repository.HasPaymentInfoAsync(paymentInfo.OrganizationId))
-            {
-                return new ServiceResponse<PaymentInfoResponseDto>
-                {
-                    Success = false,
-                    Message = "Organization already has payment info registered."
-                };
-            }
-            var payment = _mapper.MapToPaymentInfo(paymentInfo);
-            var createPayment = await _repository.AddPaymentInfoAsync(payment);
-            var paymentDto = _mapper.MapToPaymentInfoResponseDto(createPayment);
-            return new ServiceResponse<PaymentInfoResponseDto>
-            {
-                Success = true,
-                Data = paymentDto,
-                Message = "Payment info linked successfully."
-            };
-        }
+        //    if (await _repository.HasPaymentInfoAsync(paymentInfo.OrganizationId))
+        //    {
+        //        return new ServiceResponse<PaymentInfoResponseDto>
+        //        {
+        //            Success = false,
+        //            Message = "Organization already has payment info registered."
+        //        };
+        //    }
+        //    var payment = _mapper.MapToPaymentInfo(paymentInfo);
+        //    var createPayment = await _repository.AddPaymentInfoAsync(payment);
+        //    var paymentDto = _mapper.MapToPaymentInfoResponseDto(createPayment);
+        //    return new ServiceResponse<PaymentInfoResponseDto>
+        //    {
+        //        Success = true,
+        //        Data = paymentDto,
+        //        Message = "Payment info linked successfully."
+        //    };
+        //}
 
         public async Task<ServiceResponse<bool>> DeleteContactMethod(int contactMethodId)
         {
@@ -140,25 +140,25 @@ namespace TheCharityBLL.Services.Implementation
             };
         }
 
-        public async Task<ServiceResponse<bool>> DeletePaymentInfo(int paymentInfoId)
-        {
-            var paymentInfo = await _repository.GetPaymentInfoByIdAsync(paymentInfoId);
-            if (paymentInfo == null)
-            {
-                return new ServiceResponse<bool>
-                {
-                    Success = false,
-                    Message = $"Payment Info with ID {paymentInfoId} not found."
-                };
-            }
+        //public async Task<ServiceResponse<bool>> DeletePaymentInfo(int paymentInfoId)
+        //{
+        //    var paymentInfo = await _repository.GetPaymentInfoByIdAsync(paymentInfoId);
+        //    if (paymentInfo == null)
+        //    {
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Success = false,
+        //            Message = $"Payment Info with ID {paymentInfoId} not found."
+        //        };
+        //    }
 
-            await _repository.DeletePaymentInfoAsync(paymentInfoId);
-            return new ServiceResponse<bool>
-            {
-                Success = true,
-                Message = "Payment info deleted successfully."
-            };
-        }
+        //    await _repository.DeletePaymentInfoAsync(paymentInfoId);
+        //    return new ServiceResponse<bool>
+        //    {
+        //        Success = true,
+        //        Message = "Payment info deleted successfully."
+        //    };
+        //}
 
         public async Task<ServiceResponse<int>> GetActiveOrganizationsCount()
         {
@@ -571,33 +571,33 @@ namespace TheCharityBLL.Services.Implementation
             };
         }
 
-        public async Task<ServiceResponse<PaymentInfoResponseDto>> GetPaymentInfoByOrganizationId(int organizationId)
-        {
-            if (!await _repository.OrganizationExistsAsync(organizationId))
-            {
-                return new ServiceResponse<PaymentInfoResponseDto>
-                {
-                    Success = false,
-                    Message = $"Organization with ID {organizationId} not found."
-                };
-            }
-            var payment = await _repository.GetPaymentInfoByOrganizationIdAsync(organizationId);
-            if (payment == null)
-            {
-                return new ServiceResponse<PaymentInfoResponseDto>
-                {
-                    Success = false,
-                    Message = "No payment info found for this organization."
-                };
-            }
-            var paymentDto = _mapper.MapToPaymentInfoResponseDto(payment);
-            return new ServiceResponse<PaymentInfoResponseDto>
-            {
-                Success = true,
-                Data = paymentDto,
-                Message = $"Payment info for organization retrived successfully"
-            };
-        }
+        //public async Task<ServiceResponse<PaymentInfoResponseDto>> GetPaymentInfoByOrganizationId(int organizationId)
+        //{
+        //    if (!await _repository.OrganizationExistsAsync(organizationId))
+        //    {
+        //        return new ServiceResponse<PaymentInfoResponseDto>
+        //        {
+        //            Success = false,
+        //            Message = $"Organization with ID {organizationId} not found."
+        //        };
+        //    }
+        //    var payment = await _repository.GetPaymentInfoByOrganizationIdAsync(organizationId);
+        //    if (payment == null)
+        //    {
+        //        return new ServiceResponse<PaymentInfoResponseDto>
+        //        {
+        //            Success = false,
+        //            Message = "No payment info found for this organization."
+        //        };
+        //    }
+        //    var paymentDto = _mapper.MapToPaymentInfoResponseDto(payment);
+        //    return new ServiceResponse<PaymentInfoResponseDto>
+        //    {
+        //        Success = true,
+        //        Data = paymentDto,
+        //        Message = $"Payment info for organization retrived successfully"
+        //    };
+        //}
 
         public async Task<ServiceResponse<IEnumerable<OrganizationResponseDto>>> GetRecentlyRegisteredOrganizations(int days = 7)
         {
@@ -676,24 +676,24 @@ namespace TheCharityBLL.Services.Implementation
             };
         }
 
-        public async Task<ServiceResponse<bool>> RestorePaymentInfo(int paymentInfoId)
-        {
-            if (await _repository.GetPaymentInfoByIdAsync(paymentInfoId) == null)
-            {
-                return new ServiceResponse<bool>
-                {
-                    Success = false,
-                    Message = $"Payment Info with ID {paymentInfoId} not found."
-                };
-            }
+        //public async Task<ServiceResponse<bool>> RestorePaymentInfo(int paymentInfoId)
+        //{
+        //    if (await _repository.GetPaymentInfoByIdAsync(paymentInfoId) == null)
+        //    {
+        //        return new ServiceResponse<bool>
+        //        {
+        //            Success = false,
+        //            Message = $"Payment Info with ID {paymentInfoId} not found."
+        //        };
+        //    }
 
-            await _repository.RestorePaymentInfoAsync(paymentInfoId);
-            return new ServiceResponse<bool>
-            {
-                Success = true,
-                Message = "Payment info restored successfully."
-            };
-        }
+        //    await _repository.RestorePaymentInfoAsync(paymentInfoId);
+        //    return new ServiceResponse<bool>
+        //    {
+        //        Success = true,
+        //        Message = "Payment info restored successfully."
+        //    };
+        //}
 
         public async Task<ServiceResponse<IEnumerable<OrganizationResponseDto>>> SearchOrganizations(string searchTerm)
         {
@@ -797,40 +797,40 @@ namespace TheCharityBLL.Services.Implementation
             };
         }
 
-        public async Task<ServiceResponse<PaymentInfoResponseDto>> UpdatePaymentInfo(int id,UpdatePaymentInfoDto paymentInfo)
-        {
-            var existingPayment = await _repository.GetPaymentInfoByIdAsync(id);
-            if (existingPayment == null)
-            {
-                return new ServiceResponse<PaymentInfoResponseDto>
-                {
-                    Success = false,
-                    Message = $"Payment Info with ID {id} not found.",
-                };
-            }
-            if (!string.IsNullOrEmpty(paymentInfo.ApiKey))
-                existingPayment.EditApiKey(paymentInfo.ApiKey);
+        //public async Task<ServiceResponse<PaymentInfoResponseDto>> UpdatePaymentInfo(int id,UpdatePaymentInfoDto paymentInfo)
+        //{
+        //    var existingPayment = await _repository.GetPaymentInfoByIdAsync(id);
+        //    if (existingPayment == null)
+        //    {
+        //        return new ServiceResponse<PaymentInfoResponseDto>
+        //        {
+        //            Success = false,
+        //            Message = $"Payment Info with ID {id} not found.",
+        //        };
+        //    }
+        //    if (!string.IsNullOrEmpty(paymentInfo.ApiKey))
+        //        existingPayment.EditApiKey(paymentInfo.ApiKey);
 
-            if (!string.IsNullOrEmpty(paymentInfo.IntegrationId))
-                existingPayment.EditIntegrationId(paymentInfo.IntegrationId);
+        //    if (!string.IsNullOrEmpty(paymentInfo.IntegrationId))
+        //        existingPayment.EditIntegrationId(paymentInfo.IntegrationId);
 
-            if (!string.IsNullOrEmpty(paymentInfo.IframeId))
-                existingPayment.EditIframeId(paymentInfo.IframeId);
+        //    if (!string.IsNullOrEmpty(paymentInfo.IframeId))
+        //        existingPayment.EditIframeId(paymentInfo.IframeId);
 
-            if (!string.IsNullOrEmpty(paymentInfo.HmacKey))
-                existingPayment.EditHmacKey(paymentInfo.HmacKey);
+        //    if (!string.IsNullOrEmpty(paymentInfo.HmacKey))
+        //        existingPayment.EditHmacKey(paymentInfo.HmacKey);
 
-            var updatedPayment = await _repository.UpdatePaymentInfoAsync(existingPayment);
+        //    var updatedPayment = await _repository.UpdatePaymentInfoAsync(existingPayment);
 
-            var paymentDto = _mapper.MapToPaymentInfoResponseDto(updatedPayment);
+        //    var paymentDto = _mapper.MapToPaymentInfoResponseDto(updatedPayment);
 
-            return new ServiceResponse<PaymentInfoResponseDto>
-            {
-                Success = true,
-                Data = paymentDto,
-                Message = "Payment Info updated successfully."
-            };
+        //    return new ServiceResponse<PaymentInfoResponseDto>
+        //    {
+        //        Success = true,
+        //        Data = paymentDto,
+        //        Message = "Payment Info updated successfully."
+        //    };
 
-        }
+        //}
     }
 }
