@@ -7,17 +7,17 @@ using TheCharityDAL.Enums;
 
 namespace TheCharityBLL.DTOs.DonatedItemDTOs
 {
-    public class DonatedItemDetailsResponseDto
+    public class DonatedItemDetailsDto
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
         public string? Description { get; set; }
         public ItemCategory ItemCategory { get; set; }
         public bool IsAvailable { get; set; }
         public int OrganizationId { get; set; }
-        public OrganizationResponseDto Organization { get; set; }
+        public OrganizationResponseDto? Organization { get; set; }
         public string DonorId { get; set; } = null!;
-        public DonorResponceDto Donor { get; set; }
+        public DonorResponceDto? Donor { get; set; }
         public List<ItemImageResponseDto>? Images { get; set; }
         public List<AttachmentResponseDto>? ItemAttachments { get; set; }
         public List<AttachmentResponseDto>? RecipientAttachments { get; set; }

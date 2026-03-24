@@ -8,17 +8,14 @@ using TheCharityDAL.Enums;
 
 namespace TheCharityBLL.DTOs.OrganizationContactMethodDTOs
 {
-    public class CreateOrganizationContactMethodDto
+    public class UpdateOrgContactMethodDto
     {
-        [Required(ErrorMessage = "Value is required.")]
+
         [MaxLength(200, ErrorMessage = "Value cannot exceed 200 characters.")]
-        public string Value { get; set; }
+        public string? Value { get; set; }
 
-        [Required(ErrorMessage = "Contact type is required.")]
         [EnumDataType(typeof(ContactType), ErrorMessage = "Invalid contact type.")]
-        public ContactType Type { get; set; }
+        public ContactType? Type { get; set; }
 
-        [Required(ErrorMessage = "CompanyId is required.")]
-        public int CompanyId { get; set; }
     }
 }
