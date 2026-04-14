@@ -1,89 +1,101 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { AuthService } from '/home/mohamed/Documents/TheCharity/Website/FrontEnd/src/app/Services/Authentication';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../Services/Authentication';
 
 @Component({
   selector: 'app-sign-up',
+  standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './sign-up.html',
   styleUrl: './sign-up.css',
 })
 export class SignUp {
-  email = '';
-  username = '';
-  password = '';
-  rememberMe = false;
-  showPassword = false;
-  isLoading = false;
 
-  emailError = '';
-  usernameError = '';
-  passwordError = '';
-  apiError = '';
+  email           = '';
+  username        = '';
+  fullName        = '';
+  password        = '';
+  confirmPassword = '';
+  rememberMe      = false;
+  showPassword    = false;
+  showConfirm     = false;
+  isLoading       = false;
+
+  emailError           = '';
+  usernameError        = '';
+  passwordError        = '';
+  confirmPasswordError = '';
+  apiError             = '';
+  successMessage       = '';
 
   constructor(
     private authService: AuthService,
     private router: Router
-  ) { }
+  ) {}
 
-  // Validation
   validateEmail(): void {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     this.emailError = !this.email
       ? 'Email is required.'
       : !emailRegex.test(this.email)
-        ? 'Please enter a valid email address.'
-        : '';
+      ? 'Please enter a valid email address.'
+      : '';
   }
 
   validateUsername(): void {
-    if(this.username = '') {
-      'username requiered'
-    }
+    this.usernameError = !this.username
+      ? 'Username is required.'
+      : this.username.length < 3
+      ? 'Username must be at least 3 characters.'
+      : '';
+  }
+
+  validateConfirmPassword(): void {
+    this.confirmPasswordError = !this.confirmPassword
+      ? 'Please confirm your password.'
+      : this.confirmPassword !== this.password
+      ? 'Passwords do not match.'
+      : '';
   }
 
   private validateAll(): boolean {
     this.validateEmail();
+    this.validateUsername();
     this.passwordError = !this.password
       ? 'Password is required.'
       : this.password.length < 6
-        ? 'Password must be at least 6 characters.'
-        : '';
-    return !this.emailError && !this.passwordError;
+      ? 'Password must be at least 6 characters.'
+      : '';
+    this.validateConfirmPassword();
+    return !this.emailError && !this.usernameError && !this.passwordError && !this.confirmPasswordError;
   }
 
-  // Email / password submit
   async onSubmit(): Promise<void> {
     this.apiError = '';
+    this.successMessage = '';
     if (!this.validateAll()) return;
 
     this.isLoading = true;
     try {
-      const token = await this.authService.signIn(this.email, this.password);
-      if (this.rememberMe) {
-        localStorage.setItem('auth_token', token);
-      } else {
-        sessionStorage.setItem('auth_token', token);
-      }
-      this.router.navigate(['/dashboard']);
+      const response = await this.authService.register({
+        userName: this.username,
+        fullName: this.fullName || this.username,
+        email: this.email,
+        password: this.password,
+        confirmPassword: this.confirmPassword,
+      });
+
+      this.successMessage = response.message ?? 'Registration successful! Please check your email to confirm your account.';
+      setTimeout(() => this.router.navigate(['/sign-in']), 3000);
     } catch (err: any) {
-      this.apiError =
-        err?.error?.message ||
-        err?.message ||
-        'Sign-in failed. Please check your credentials and try again.';
+      const errors = err?.error?.errors;
+      this.apiError = errors
+        ? Object.values(errors).flat().join(' ')
+        : err?.error?.message || 'Registration failed. Please try again.';
     } finally {
       this.isLoading = false;
     }
   }
-
-  // Google OAuth
-  loginWithGoogle(): void {
-    const returnUrl = encodeURIComponent(window.location.href);
-    window.location.href =
-      `/api/ExternalLogin/external-login?provider=Google&returnUrl=${returnUrl}`;
-  }
-
 }

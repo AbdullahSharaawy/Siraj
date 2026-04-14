@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { OrgUserChioce } from './org-user-choice';
+import { UserNavbar } from './user-navbar';
 
-describe('OrgUserChioce', () => {
-  let component: OrgUserChioce;
-  let fixture: ComponentFixture<OrgUserChioce>;
+describe('UserNavbar', () => {
+  let component: UserNavbar;
+  let fixture: ComponentFixture<UserNavbar>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [OrgUserChioce],
+      imports: [UserNavbar],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(OrgUserChioce);
+    fixture = TestBed.createComponent(UserNavbar);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

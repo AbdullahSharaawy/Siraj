@@ -6,55 +6,59 @@
                 Already have an account?
                 <a class="eyebrow_link" [routerLink]="'/sign-in'">Sign-in</a>
             </p>
-            <h1 class="welcome_headline">Welcome back</h1>
-            <p class="signup_sub">SignUp to get started</p>
+            <h1 class="welcome_headline">Create account</h1>
+            <p class="signup_sub">Sign up to get started</p>
         </div>
 
         <form class="signup_form" (ngSubmit)="onSubmit()" #signupForm="ngForm">
 
+            <!-- Email -->
             <div class="field" [class.field-error]="emailError">
                 <label class="field_label" for="email">Email address</label>
                 <div class="field_wrap">
-                    <input
-                        id="email"
-                        type="email"
-                        class="field_input"
+                    <input id="email" type="email" class="field_input"
                         placeholder="you@example.com"
-                        [(ngModel)]="email"
-                        name="email"
-                        required
+                        [(ngModel)]="email" name="email" required
                         (blur)="validateEmail()" />
                 </div>
                 <span class="field_error" *ngIf="emailError">{{ emailError
                     }}</span>
             </div>
 
+            <!-- Username -->
             <div class="field" [class.field-error]="usernameError">
-                <label class="field_label" for="name">Username</label>
+                <label class="field_label" for="username">Username</label>
                 <div class="field_wrap">
-                    <input
-                        id="username"
-                        class="field_input"
+                    <input id="username" class="field_input"
                         placeholder="Mohamed"
-                        [(ngModel)]="username"
-                        name="username"
-                        required />
+                        [(ngModel)]="username" name="username" required
+                        (blur)="validateUsername()" />
                 </div>
-                <span class="field_error" *ngIf="passwordError">{{ passwordError
+                <span class="field_error" *ngIf="usernameError">{{ usernameError
                     }}</span>
             </div>
 
+            <!-- Full Name -->
+            <div class="field">
+                <label class="field_label" for="fullName">
+                    Full name <span
+                        style="opacity:.5; font-weight:400">(optional)</span>
+                </label>
+                <div class="field_wrap">
+                    <input id="fullName" class="field_input"
+                        placeholder="Mohamed Ali"
+                        [(ngModel)]="fullName" name="fullName" />
+                </div>
+            </div>
+
+            <!-- Password -->
             <div class="field" [class.field-error]="passwordError">
                 <label class="field_label" for="password">Password</label>
                 <div class="field_wrap">
-                    <input
-                        id="password"
+                    <input id="password"
                         [type]="showPassword ? 'text' : 'password'"
-                        class="field_input"
-                        placeholder="••••••••"
-                        [(ngModel)]="password"
-                        name="password"
-                        required />
+                        class="field_input" placeholder="••••••••"
+                        [(ngModel)]="password" name="password" required />
                     <button type="button" class="field_toggle"
                         (click)="showPassword = !showPassword">
                         {{ showPassword ? 'Hide' : 'Show' }}
@@ -64,6 +68,27 @@
                     }}</span>
             </div>
 
+            <!-- Confirm Password -->
+            <div class="field" [class.field-error]="confirmPasswordError">
+                <label class="field_label" for="confirmPassword">Confirm
+                    password</label>
+                <div class="field_wrap">
+                    <input id="confirmPassword"
+                        [type]="showConfirm ? 'text' : 'password'"
+                        class="field_input" placeholder="••••••••"
+                        [(ngModel)]="confirmPassword" name="confirmPassword"
+                        required
+                        (blur)="validateConfirmPassword()" />
+                    <button type="button" class="field_toggle"
+                        (click)="showConfirm = !showConfirm">
+                        {{ showConfirm ? 'Hide' : 'Show' }}
+                    </button>
+                </div>
+                <span class="field_error" *ngIf="confirmPasswordError">{{
+                    confirmPasswordError }}</span>
+            </div>
+
+            <!-- Remember me -->
             <div class="signup_meta">
                 <label class="checkbox">
                     <input type="checkbox" [(ngModel)]="rememberMe"
@@ -71,21 +96,21 @@
                     <span class="checkbox_mark"></span>
                     Remember me
                 </label>
-                <a href="/forgot-password" class="signup_forgot">Forgot
-                    password?</a>
             </div>
 
-            <div class="signup_alert" *ngIf="apiError">
-                {{ apiError }}
-            </div>
+            <!-- API error -->
+            <div class="signup_alert" *ngIf="apiError">{{ apiError }}</div>
+
+            <!-- Success -->
+            <div class="signup_success" *ngIf="successMessage">{{ successMessage
+                }}</div>
 
             <button type="submit" class="cta cta--primary signup_submit"
                 [disabled]="isLoading">
-                <span *ngIf="!isLoading">Sign up</span>
+                <span *ngIf="!isLoading">Create account</span>
                 <span *ngIf="isLoading" class="spinner"></span>
             </button>
 
         </form>
-
     </div>
 </section>
