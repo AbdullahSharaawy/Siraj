@@ -12,8 +12,8 @@ namespace TheCharityBLL.DTOs.ItemImageDTOs
     {
         [Required(ErrorMessage = "Path is required.")]
         [MaxLength(1000, ErrorMessage = "Path cannot exceed 1000 characters.")]
-        public string Path { get; set; }
-        public IFormFile ImageUrl {  get; set; }
+        public string Path { get; set; } = null!;
+        public IFormFile ImageUrl { get; set; } = null!;
         [Required(ErrorMessage = "DonatedItem id is required.")]
         public int DonatedItemId { get; set; }
     }

@@ -1,1 +1,73 @@
-<p>sign-in works!</p>
+<section class="SignIn">
+  <div class="signin_card">
+
+    <div class="signin_header">
+      <p class="eyebrow">
+        Don't have an account?
+        <a class="eyebrow_link" [routerLink]="'/sign-up'">Sign-Up</a>
+      </p>
+      <h1 class="welcome_headline">Welcome back</h1>
+      <p class="signin_sub">Sign in to continue your journey</p>
+    </div>
+
+    <form class="signin_form" (ngSubmit)="onSubmit()" #signInForm="ngForm">
+
+      <div class="field" [class.field-error]="emailError">
+        <label class="field_label" for="email">Email address</label>
+        <div class="field_wrap">
+          <input
+            id="email"
+            type="email"
+            class="field_input"
+            placeholder="you@example.com"
+            [(ngModel)]="email"
+            name="email"
+            required
+            (blur)="validateEmail()" />
+        </div>
+        <span class="field_error" *ngIf="emailError">{{ emailError }}</span>
+      </div>
+
+      <div class="field" [class.field-error]="passwordError">
+        <label class="field_label" for="password">Password</label>
+        <div class="field_wrap">
+          <input
+            id="password"
+            [type]="showPassword ? 'text' : 'password'"
+            class="field_input"
+            placeholder="••••••••"
+            [(ngModel)]="password"
+            name="password"
+            required />
+          <button type="button" class="field_toggle"
+            (click)="showPassword = !showPassword">
+            {{ showPassword ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+        <span class="field_error" *ngIf="passwordError">{{ passwordError
+          }}</span>
+      </div>
+
+      <div class="signin_meta">
+        <label class="checkbox">
+          <input type="checkbox" [(ngModel)]="rememberMe" name="rememberMe" />
+          <span class="checkbox_mark"></span>
+          Remember me
+        </label>
+        <a href="/forgot-password" class="signin_forgot">Forgot password?</a>
+      </div>
+
+      <div class="signin_alert" *ngIf="apiError">
+        {{ apiError }}
+      </div>
+
+      <button type="submit" class="cta cta--primary signin_submit"
+        [disabled]="isLoading">
+        <span *ngIf="!isLoading">Sign in</span>
+        <span *ngIf="isLoading" class="spinner"></span>
+      </button>
+
+    </form>
+
+  </div>
+</section>

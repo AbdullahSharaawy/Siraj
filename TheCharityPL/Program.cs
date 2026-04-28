@@ -29,6 +29,18 @@ namespace TheCharityPL
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            // IDK but i got an error and i couldnt figuer out why so i asked claud and it said add this - Mohamed Rashid
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAngular", policy =>
+                {
+                    policy.WithOrigins("http://localhost:4200")
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
+                });
+            });
+
             var app = builder.Build();
 
             app.MapHealthChecks("/health");
@@ -45,6 +57,7 @@ namespace TheCharityPL
 
             app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseCors("AllowAngular");
             app.UseAuthentication();
             app.UseAuthorization();
 
