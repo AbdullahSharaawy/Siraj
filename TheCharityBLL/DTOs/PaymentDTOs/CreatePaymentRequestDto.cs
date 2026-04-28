@@ -15,5 +15,8 @@ namespace TheCharityBLL.DTOs.PaymentDTOs
 
         [Required(ErrorMessage = "CampaignId is required.")]
         public int CampaignId { get; set; }
+
+        [Required(ErrorMessage ="OrganizationId is required.")]
+        public int OrganizationId { get; set; }
     }
 }

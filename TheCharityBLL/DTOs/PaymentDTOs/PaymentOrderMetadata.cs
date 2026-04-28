@@ -12,6 +12,9 @@ namespace TheCharityBLL.DTOs.PaymentDTOs
         [JsonPropertyName("user_id")]
         public string UserId { get; set; } = null!;
 
+        [JsonPropertyName("organization_id")]
+        public int OrganizationId { get; set; }
+
         [JsonPropertyName("campaign_id")]
         public int CampaignId { get; set; }
     }
