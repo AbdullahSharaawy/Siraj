@@ -1,13 +1,13 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
-import { AuthService } from '/home/mohamed/Documents/TheCharity/Website/FrontEnd/src/app/Services/Authentication';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../Services/Authentication';
 
 @Component({
   selector: 'app-sign-in',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './sign-in.html',
   styleUrl: './sign-in.css',
 })
@@ -28,7 +28,6 @@ export class SignIn {
     private router: Router
   ) {}
 
-  // ── Validation ──────────────────────────────────────────────
   validateEmail(): void {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     this.emailError = !this.email
@@ -48,19 +47,15 @@ export class SignIn {
     return !this.emailError && !this.passwordError;
   }
 
-  // ── Email / password submit ──────────────────────────────────
   async onSubmit(): Promise<void> {
     this.apiError = '';
     if (!this.validateAll()) return;
 
     this.isLoading = true;
     try {
-      const token = await this.authService.signIn(this.email, this.password);
-      if (this.rememberMe) {
-        localStorage.setItem('auth_token', token);
-      } else {
-        sessionStorage.setItem('auth_token', token);
-      }
+      // Backend Login endpoint accepts userName OR email — we pass whatever the user typed
+      const token = await this.authService.signIn(this.email, this.password, this.rememberMe);
+      this.authService.saveToken(token, this.rememberMe);
       this.router.navigate(['/dashboard']);
     } catch (err: any) {
       this.apiError =
@@ -70,12 +65,5 @@ export class SignIn {
     } finally {
       this.isLoading = false;
     }
-  }
-
-  // ── Google OAuth ─────────────────────────────────────────────
-  loginWithGoogle(): void {
-    const returnUrl = encodeURIComponent(window.location.href);
-    window.location.href =
-      `/api/ExternalLogin/external-login?provider=Google&returnUrl=${returnUrl}`;
   }
 }

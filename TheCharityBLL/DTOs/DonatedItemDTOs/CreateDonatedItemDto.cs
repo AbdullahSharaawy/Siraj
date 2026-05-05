@@ -19,16 +19,19 @@ namespace TheCharityBLL.DTOs.DonatedItemDTOs
 
         [Required(ErrorMessage = "Name is required.")]
         [MaxLength(200, ErrorMessage = "Name cannot exceed 200 characters.")]
-        public string Name { get; set; }
-
+        public string Name { get; set; } = null!;
+        
         [MaxLength(2000, ErrorMessage = "Description cannot exceed 2000 characters.")]
         public string? Description { get; set; }
+
         [Required(ErrorMessage = "Item category is required.")]
         [EnumDataType(typeof(ItemCategory), ErrorMessage = "Invalid item category.")]
-        public ItemCategory? ItemCategory { get; set; }
+        public ItemCategory ItemCategory { get; set; }
 
         /////
+        [MaxLength(5,ErrorMessage ="Can not upload more than 5 images")]
         public List<IFormFile>? ImageFiles { get; set; }
+        [MaxLength(5, ErrorMessage = "Can not upload more than 5 attachment")]
         public List<IFormFile>? AttachmentFiles { get; set; }
 
     }

@@ -1,6 +1,9 @@
 ﻿
 using Riok.Mapperly.Abstractions;
+using System.Collections;
+using TheCharityBLL.DTOs.OrganizationContactMethodDTOs;
 using TheCharityBLL.DTOs.OrganizationDTOs;
+using TheCharityBLL.DTOs.PaymentInfoDTOs;
 using TheCharityBLL.Services.Repository;
 using TheCharityDAL.Entities;
 
@@ -10,9 +13,18 @@ namespace TheCharityBLL.Mapper
     public partial class OrganizationMaper
     {
         public partial Organization MapToOrganization(CreateOrganizationDto createOrganizationDto);
-        public partial OrganizationDetailsResponseDto MapToOrganizationDetailsResponseDto(Organization organization);
         public partial OrganizationResponseDto MapToOrganizationResponseDto(Organization organization);
-        public partial IEnumerable<OrganizationResponseDropDownListDto> MapToOrganizationResponseDropDownListDtos(IEnumerable<Organization> organizations);
+        public partial OrganizationDetailsDto MapToOrganizationDetailsDto(Organization organization);
+        public partial IEnumerable<OrganizationDropDownListDto> MapToOrganizationDropDownListDtos(IEnumerable<Organization> organizations);
         public partial IEnumerable<OrganizationResponseDto> MapToOrganizationResponseDtos(IEnumerable<Organization> organizations);
+        ////
+        public partial OrganizationContactMethod MapToOrganizationContactMethod(CreateOrgContactMethodDto contactMethod);
+        public partial OrgContactMethodResponseDto MapToOrganizationContactMethodResponseDto(OrganizationContactMethod contactMethod);
+        public partial IEnumerable<OrgContactMethodResponseDto> MapToOrganizationContactMethodResponseDtos(IEnumerable<OrganizationContactMethod> contactMethods);
+
+        ///
+        public partial PaymentInfo MapToPaymentInfo(CreatePaymentInfoDto paymentInfo);
+        public partial PaymentInfoResponseDto MapToPaymentInfoResponseDto(PaymentInfo paymentInfo);
+        public partial IEnumerable<PaymentInfoResponseDto> MapToPaymentInfoResponseDto(IEnumerable<PaymentInfo> paymentInfo);
     }
 }

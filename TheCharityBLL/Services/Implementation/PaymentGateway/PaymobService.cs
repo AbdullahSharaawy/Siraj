@@ -12,17 +12,14 @@ namespace TheCharityBLL.Services.Implementation.PaymentGateway
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<PaymobService> _logger;
-        private readonly string _apiKey;
-        private readonly string _integrationId;
-        private readonly string _iframeId;
+     
+        private readonly IPaymentInfoService _paymentInfoService;
 
-        public PaymobService(IConfiguration config, ILogger<PaymobService> logger)
+        public PaymobService( ILogger<PaymobService> logger, IPaymentInfoService paymentInfoService)
         {
             _httpClient = new HttpClient();
             _logger = logger;
-            _apiKey = config["Paymob:ApiKey"] ?? throw new ArgumentNullException("Paymob:ApiKey is missing in config");
-            _integrationId = config["Paymob:IntegrationId"] ?? throw new ArgumentNullException("Paymob:IntegrationId is missing in config");
-            _iframeId = config["Paymob:IframeId"] ?? throw new ArgumentNullException("Paymob:IframeId is missing in config");
+            _paymentInfoService = paymentInfoService;
         }
 
         public async Task<string> CreatePayment(decimal amount, string currency = "EGP")
@@ -33,7 +30,9 @@ namespace TheCharityBLL.Services.Implementation.PaymentGateway
         public async Task<string> CreatePayment(decimal amount, PaymentOrderMetadata? metadata, BillingData? billingData, string currency = "EGP")
         {
             // ── Step 1: Authentication ──────────────────────────────────────
-            var authBody = JsonSerializer.Serialize(new { api_key = _apiKey });
+            var _PaymentKeys = await _paymentInfoService.GetPaymentInfoByOrganizationIdAsync(metadata.OrganizationId);
+
+            var authBody = JsonSerializer.Serialize(new { api_key = _PaymentKeys.ApiKey });
 
             var authResponse = await _httpClient.PostAsync(
                 "https://accept.paymob.com/api/auth/tokens",
@@ -98,7 +97,7 @@ namespace TheCharityBLL.Services.Implementation.PaymentGateway
                 expiration = 3600,
                 order_id = orderId,
                 currency,
-                integration_id = int.Parse(_integrationId),
+                integration_id = int.Parse(_PaymentKeys.IntegrationId),
 
                 billing_data = resolvedBilling,
                 extra = new Dictionary<string, string>
@@ -127,7 +126,7 @@ namespace TheCharityBLL.Services.Implementation.PaymentGateway
             var paymentKey = paymentTokenEl.GetString()!;
 
             // ── Step 4: Return iFrame URL ───────────────────────────────────
-            return $"https://accept.paymob.com/api/acceptance/iframes/{_iframeId}?payment_token={paymentKey}";
+            return $"https://accept.paymob.com/api/acceptance/iframes/{_PaymentKeys.IframeId}?payment_token={paymentKey}";
         }
         private static object ResolveBillingData(BillingData? billing)
         {

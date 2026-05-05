@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -6,23 +7,20 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using TheCharityBLL.Mapper;
 using TheCharityBLL.Services.Abstraction;
+using TheCharityBLL.Services.Abstraction.MoneyDonation;
+using TheCharityBLL.Services.Abstraction.Payment;
+using TheCharityBLL.Services.Implementation;
+using TheCharityBLL.Services.Implementation.MoneyDonation;
+using TheCharityBLL.Services.Implementation.PaymentGateway;
+using TheCharityBLL.Services.Repository;
+using TheCharityBLL.Settings;
 using TheCharityDAL.Database;
 using TheCharityDAL.Entities;
 using TheCharityDAL.Repositories.Abstraction;
 using TheCharityDAL.Repositories.Implementation;
-using TheCharityBLL.Services.Repository;
-using TheCharityBLL.Mapper;
-using TheCharityBLL.Settings;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using TheCharityBLL.Services.Abstraction.DonatedItems;
-using TheCharityBLL.Services.Abstraction.Organization;
-using TheCharityBLL.Services.Abstraction.Payment;
-using TheCharityBLL.Services.Abstraction.MoneyDonation;
-using TheCharityBLL.Services.Implementation.DonatedItems;
-using TheCharityBLL.Services.Implementation.PaymentGateway;
-using TheCharityBLL.Services.Implementation.MoneyDonation;
-using TheCharityBLL.Services.Implementation.OrganizationService;
+
 namespace TheCharityBLL.Helpers
 {
     public static class ServiceExtensions
@@ -79,13 +77,7 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IPaymobService,PaymobService>();
             services.AddScoped<IOrganizationService, OrganizationService>();
-            services.AddScoped<IOrganizationQueryService, OrganizationQueryService>();
-            services.AddScoped<IOrganizationContactService, OrganizationContactService>();
             services.AddScoped<IDonatedItemService, DonatedItemService>();
-            services.AddScoped<IDonatedItemQueryService, DonatedItemQueryService>();
-            services.AddScoped<IDonatedItemAnalyticsService, DonatedItemAnalyticsService>();
-            services.AddScoped<IDonatedItemAttachmentService, DonatedItemAttachmentService>();
-            services.AddScoped<IDonatedItemImageService, DonatedItemImageService>();
             services.AddScoped<IPaymentInfoService, PaymentInfoService>();
             services.AddScoped<IDonationService, DonationService>();
             // mapper Injection

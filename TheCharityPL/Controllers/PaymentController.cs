@@ -67,7 +67,8 @@ namespace TheCharityPL.Controllers
             var metadata = new PaymentOrderMetadata
             {
                 UserId = userId,
-                CampaignId = request.CampaignId
+                CampaignId = request.CampaignId,
+                OrganizationId = request.OrganizationId
             };
 
             var iframeUrl = await _paymobService.CreatePayment(request.Amount, metadata, billing);

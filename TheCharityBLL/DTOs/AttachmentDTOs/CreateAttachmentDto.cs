@@ -19,8 +19,8 @@ namespace TheCharityBLL.DTOs.AttachmentDTOs
 
         [Required(ErrorMessage = "Path is required.")]
         [MaxLength(1000, ErrorMessage = "Path cannot exceed 1000 characters.")]
-        public string Path { get; set; }
-        public IFormFile FileUrl { get; set; }
+        public string? Path { get; set; }
+        public IFormFile FileUrl { get; set; } = null!;
 
         [Range(1, long.MaxValue, ErrorMessage = "FileSize must be a positive value.")]
         public long? FileSize { get; set; }
