@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-using TheCharityBLL.DTOs.AttachmentDTOs;
-using TheCharityBLL.DTOs.UserDTOs;
+﻿using TheCharityBLL.DTOs.UserDTOs;
 using TheCharityDAL.Entities;
 using AutoMapper;
 
@@ -16,8 +8,6 @@ namespace TheCharityBLL.Mapper
     {
         public AutoMapperProfile()
         {
-           
-
             // User mappings
             CreateMap<User, UserDTO>()
                 .ReverseMap();
@@ -57,25 +47,6 @@ namespace TheCharityBLL.Mapper
           .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
           .ForMember(dest => dest.StorageOwned, opt => opt.MapFrom(src => src.StorageOwned))
           .ForMember(dest => dest.LastStorageUpdate, opt => opt.MapFrom(src => src.LastStorageUpdate));
-
-
-
-
-        }
-
-        private static string? FormatFileSize(long? fileSize)
-        {
-            if (!fileSize.HasValue) return null;
-
-            string[] sizes = { "B", "KB", "MB", "GB", "TB" };
-            double len = fileSize.Value;
-            int order = 0;
-            while (len >= 1024 && order < sizes.Length - 1)
-            {
-                order++;
-                len /= 1024;
-            }
-            return $"{len:0.##} {sizes[order]}";
         }
     }
 }

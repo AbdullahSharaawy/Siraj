@@ -1,7 +1,5 @@
-﻿
-using Riok.Mapperly.Abstractions;
+﻿using Riok.Mapperly.Abstractions;
 using TheCharityBLL.DTOs.OrganizationDTOs;
-using TheCharityBLL.Services.Repository;
 using TheCharityDAL.Entities;
 
 namespace TheCharityBLL.Mapper

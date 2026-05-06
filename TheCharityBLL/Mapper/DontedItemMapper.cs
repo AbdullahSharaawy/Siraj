@@ -1,5 +1,4 @@
-﻿
-using Riok.Mapperly.Abstractions;
+﻿using Riok.Mapperly.Abstractions;
 using TheCharityBLL.DTOs.DonatedItemDTOs;
 using TheCharityDAL.Entities;
 
@@ -35,8 +34,6 @@ namespace TheCharityBLL.Mapper
 
         public partial DonatedItemDetailsResponseDto MapToDonatedItemDetailsResponseDto(DonatedItem donated);
         public partial IEnumerable<DonatedItemDetailsResponseDto> MapToDonatedItemResponseDetailsDtos(IEnumerable<DonatedItem> donatedItems);
-
         public partial IEnumerable<DonatedItemResponseDto> MapToDonatedItemResponseDtos(IEnumerable<DonatedItem> donatedItems);
-       
     }
 }

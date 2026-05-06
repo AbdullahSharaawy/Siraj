@@ -1,5 +1,4 @@
-﻿
-using Riok.Mapperly.Abstractions;
+﻿using Riok.Mapperly.Abstractions;
 using TheCharityBLL.DTOs.AttachmentDTOs;
 using TheCharityDAL.Entities;
 

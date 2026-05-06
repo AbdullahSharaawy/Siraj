@@ -1,9 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
 using TheCharityBLL.Helpers;
-using TheCharityBLL.Services.Abstraction;
-using TheCharityBLL.Services.Repository;
-using TheCharityDAL.Repositories.Abstraction;
-using TheCharityDAL.Repositories.Implementation;
 using TheCharityPL.Middlewares;
 
 namespace TheCharityPL
