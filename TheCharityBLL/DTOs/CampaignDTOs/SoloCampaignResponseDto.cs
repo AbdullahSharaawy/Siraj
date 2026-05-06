@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TheCharityBLL.DTOs.CampaignDTOs
+﻿namespace TheCharityBLL.DTOs.CampaignDTOs
 {
-    internal class SoloCampaignResponseDto
+    public class SoloCampaignResponseDto : CampaignResponseDto
     {
+        public int? OrganizationId { get; set; }
+        public string? OrganizationName { get; set; }
     }
 }
