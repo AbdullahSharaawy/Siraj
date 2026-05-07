@@ -65,19 +65,19 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<IDonationRepository, DonationRepository>();
             services.AddScoped<IOrganizationRepository, OrganizationRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
-
             // Services Injection
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped<IPaymobService, PaymobService>();
-            services.AddScoped<IOrganizationService, OrganizationService>();
-            services.AddScoped<IOrganizationQueryService, OrganizationQueryService>();
-            services.AddScoped<IOrganizationContactService, OrganizationContactService>();
+            services.AddScoped<ICampaignService, CampaignService>();
             services.AddScoped<IDonatedItemService, DonatedItemService>();
             services.AddScoped<IDonatedItemQueryService, DonatedItemQueryService>();
             services.AddScoped<IDonatedItemAnalyticsService, DonatedItemAnalyticsService>();
             services.AddScoped<IDonatedItemAttachmentService, DonatedItemAttachmentService>();
             services.AddScoped<IDonatedItemImageService, DonatedItemImageService>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IOrganizationService, OrganizationService>();
+            services.AddScoped<IOrganizationQueryService, OrganizationQueryService>();
+            services.AddScoped<IOrganizationContactService, OrganizationContactService>();
+            services.AddScoped<IPaymobService, PaymobService>();
+            services.AddScoped<IUserService, UserService>();
             // mapper Injection
             services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 
