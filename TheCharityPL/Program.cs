@@ -1,4 +1,5 @@
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 using TheCharityBLL.Helpers;
 using TheCharityPL.Middlewares;
 
@@ -31,10 +32,21 @@ namespace TheCharityPL
                     Version = "v1"
                 });
 
-                // Enable XML comments
-                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                c.IncludeXmlComments(xmlPath);
+                // Load XML from TheCharityPL (controllers)
+                var plXmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var plXmlPath = Path.Combine(AppContext.BaseDirectory, plXmlFile);
+                if (File.Exists(plXmlPath))
+                {
+                    c.IncludeXmlComments(plXmlPath);
+                }
+
+                // Load XML from TheCharityBLL (DTOs)
+                var bllXmlFile = "TheCharityBLL.xml";
+                var bllXmlPath = Path.Combine(AppContext.BaseDirectory, bllXmlFile);
+                if (File.Exists(bllXmlPath))
+                {
+                    c.IncludeXmlComments(bllXmlPath);
+                }
             });
 
             var app = builder.Build();
