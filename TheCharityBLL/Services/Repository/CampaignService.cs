@@ -280,9 +280,6 @@ namespace TheCharityBLL.Services.Repository
             existingCampaign.EditTarget(updateDto.Target);
             existingCampaign.EditType(updateDto.Type);
 
-            // Note: OrganizationId cannot be changed after creation (no EditOrganization method)
-            // If needed, you would need to add that method to SoloCampaign entity
-
             await _campaignRepository.UpdateSoloCampaignAsync(existingCampaign);
 
             return new ServiceResponse<bool>
