@@ -1,3 +1,4 @@
+using Microsoft.OpenApi.Models;
 using TheCharityBLL.Helpers;
 using TheCharityPL.Middlewares;
 
@@ -22,7 +23,19 @@ namespace TheCharityPL
             }); ;
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "The Charity API",
+                    Version = "v1"
+                });
+
+                // Enable XML comments
+                var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                c.IncludeXmlComments(xmlPath);
+            });
 
             var app = builder.Build();
 
