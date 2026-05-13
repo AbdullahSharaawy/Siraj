@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.CampaignDTOs;
 using TheCharityBLL.Services.Abstraction;
+using TheCharityBLL.ViewModels;
 using TheCharityDAL.Enums;
 
 namespace TheCharityPL.Controllers
