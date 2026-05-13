@@ -20,7 +20,7 @@ namespace TheCharityPL.Controllers
         private IUserService _userService;
         public ExternalLoginController(IUserService userService)
         {
-            _userService = userService;
+            _userService = userService; 
         }
         [HttpGet("external-login")]
         public IActionResult ExternalLogin(string provider, string returnUrl)

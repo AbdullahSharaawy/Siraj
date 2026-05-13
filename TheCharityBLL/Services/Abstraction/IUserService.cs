@@ -44,7 +44,6 @@ namespace TheCharityBLL.Services.Abstraction
         Task<IdentityResult> AddToRoleAsync(string userId, string role);
         Task<IdentityResult> RemoveFromRoleAsync(string userId, string role);
 
-        // Storage
-        Task<long> GetUserMaxStorageAsync(string userId);
+       
     }
 }

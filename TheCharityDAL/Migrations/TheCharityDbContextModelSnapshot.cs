@@ -387,6 +387,9 @@ namespace TheCharityDAL.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsMain")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Path")
                         .HasColumnType("nvarchar(max)");
 
@@ -546,9 +549,6 @@ namespace TheCharityDAL.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<DateTime?>("LastStorageUpdate")
-                        .HasColumnType("datetime2");
-
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -578,9 +578,6 @@ namespace TheCharityDAL.Migrations
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<long>("StorageOwned")
-                        .HasColumnType("bigint");
-
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
 
@@ -602,42 +599,6 @@ namespace TheCharityDAL.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("TheCharityDAL.Entities.UserContactMethod", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime?>("DeletedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime?>("RegistrationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("Type")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedOn")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Value")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("UserContactMethods", (string)null);
                 });
 
             modelBuilder.Entity("TheCharityDAL.Entities.SharedCampaign", b =>
@@ -808,15 +769,6 @@ namespace TheCharityDAL.Migrations
                     b.Navigation("organization");
                 });
 
-            modelBuilder.Entity("TheCharityDAL.Entities.UserContactMethod", b =>
-                {
-                    b.HasOne("TheCharityDAL.Entities.User", "User")
-                        .WithMany("ContactMethods")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("TheCharityDAL.Entities.SoloCampaign", b =>
                 {
                     b.HasOne("TheCharityDAL.Entities.Organization", "Organization")
@@ -843,11 +795,6 @@ namespace TheCharityDAL.Migrations
                     b.Navigation("ContactMethods");
 
                     b.Navigation("SoloCampaigns");
-                });
-
-            modelBuilder.Entity("TheCharityDAL.Entities.User", b =>
-                {
-                    b.Navigation("ContactMethods");
                 });
 #pragma warning restore 612, 618
         }

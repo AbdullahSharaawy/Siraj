@@ -1,0 +1,80 @@
+<section class="hs">
+
+  <!-- Section label -->
+  <div class="hs_label">
+    <span class="hs_label-line"></span>
+    How GiveRoot works
+    <span class="hs_label-line"></span>
+  </div>
+
+  <!-- Slide area -->
+  <div class="hs_stage">
+    <div
+      class="hs_slide"
+      [class.is-active]="currentIndex === i"
+      [class.is-exit]="getPrev() === i"
+      *ngFor="let slide of slides; let i = index"
+    >
+      <!-- Icon block -->
+      <div class="hs_icon-block" [ngClass]="slide.bgClass">
+        <div class="hs_icon-wrap">
+          <i class="hs_icon" [ngClass]="slide.icon.split(' ')"></i>
+        </div>
+        <div class="hs_icon-number">0{{ i + 1 }}</div>
+      </div>
+
+      <!-- Text block -->
+      <div class="hs_text">
+        <span class="hs_tag" [style.color]="slide.accentColor">{{ slide.tag }}</span>
+        <h2 class="hs_title">{{ slide.title }}</h2>
+        <p class="hs_desc">{{ slide.description }}</p>
+
+        <ul class="hs_points">
+          <li *ngFor="let pt of slide.points">
+            <span class="hs_check" [style.background]="slide.accentColor + '22'" [style.color]="slide.accentColor">✓</span>
+            {{ pt }}
+          </li>
+        </ul>
+
+        <a class="hs_cta" href="#" [style.color]="slide.accentColor">
+          {{ slide.cta }}
+          <span class="hs_cta-arrow">→</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom controls -->
+  <div class="hs_footer">
+    <button class="hs_arrow" (click)="prev()" aria-label="Previous">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+
+    <div class="hs_dots">
+      <button
+        class="hs_dot"
+        [class.hs_dot--on]="currentIndex === i"
+        *ngFor="let slide of slides; let i = index"
+        (click)="goTo(i)"
+      ></button>
+    </div>
+
+    <button class="hs_arrow" (click)="next()" aria-label="Next">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+
+  <!-- Step indicators row -->
+  <div class="hs_steps">
+    <div
+      class="hs_step"
+      [class.hs_step--on]="currentIndex === i"
+      *ngFor="let slide of slides; let i = index"
+      (click)="goTo(i)"
+    >
+      <span class="step-num">0{{ i + 1 }}</span>
+      <span class="step-tag">{{ slide.tag }}</span>
+    </div>
+  </div>
+
+</section>

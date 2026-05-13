@@ -89,5 +89,7 @@ namespace TheCharityBLL.DTOs.PaymentDTOs
 
         [JsonPropertyName("terminal_version")]
         public object? TerminalVersion { get; set; }
+
+       
     }
 }

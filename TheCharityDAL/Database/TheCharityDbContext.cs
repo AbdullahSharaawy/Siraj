@@ -21,7 +21,7 @@ namespace TheCharityDAL.Database
         public DbSet<PaymentInfo> PaymentsInfo { get; set; }
         public DbSet<SharedCampaign> SharedCampaigns { get; set; }
         public DbSet<SoloCampaign> SoloCampaigns { get; set; }
-        public DbSet<UserContactMethod> UserContactMethods { get; set; }
+       
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

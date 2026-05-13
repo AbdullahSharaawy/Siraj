@@ -12,17 +12,17 @@ namespace TheCharityDAL.Entities
         public DateTime? RegistrationDate { get; private set; } = DateTime.Now;
         public DateTime? UpdatedOn { get; private set; }
         public string? Address { get; private set; }
-        public virtual ICollection<UserContactMethod> ContactMethods { get; private set; } = new List<UserContactMethod>();
-        public long StorageOwned { get; private set; } = 2000 * 1024 * 1024; // in bytes
-        public DateTime? LastStorageUpdate { get; private set; }
-
+      
         public User() { }
-        public User(string? userName,string? FullName, string? email, string? imgPath)
+        public User(string? userName,string? FullName, string? email, string? imgPath,string? Phone,string? Address )
         {
-            this.UserName = userName;// بقلك ايه انا ناقله من كريستين كدا
+            this.UserName = userName;
             this.Email = email;
             this.ImgPath = imgPath;
             this.FullName = FullName;
+            this.PhoneNumber = Phone;
+            this.Address = Address;
+           
         }
         public void EditUsername(string? userName)
         {

@@ -188,15 +188,7 @@ namespace TheCharityDAL.Repositories.Implementation
             }
             return await _userManager.ConfirmEmailAsync(user, token);
         }
-        public async Task<long> GetUserMaxStorageAsync(string userId)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                return 0;
-            }
-            return user.StorageOwned;
-        }
+       
         ////////////new addations
         public async Task AccessFailedAsync(User user)
            => await _userManager.AccessFailedAsync(user);

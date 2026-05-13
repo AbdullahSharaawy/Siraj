@@ -17,6 +17,6 @@ namespace TheCharityBLL.DTOs.DonationDTOs
         public string UserId { get; set; } = null!;
 
         [Required(ErrorMessage = "CampaignId is required.")]
-        public int CampaignId { get; set; }
+        public int? CampaignId { get; set; }
     }
 }

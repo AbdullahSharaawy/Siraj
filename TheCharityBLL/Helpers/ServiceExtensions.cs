@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -6,15 +7,20 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using TheCharityBLL.Mapper;
 using TheCharityBLL.Services.Abstraction;
+using TheCharityBLL.Services.Abstraction.MoneyDonation;
+using TheCharityBLL.Services.Abstraction.Payment;
+using TheCharityBLL.Services.Implementation;
+using TheCharityBLL.Services.Implementation.MoneyDonation;
+using TheCharityBLL.Services.Implementation.PaymentGateway;
+using TheCharityBLL.Services.Repository;
+using TheCharityBLL.Settings;
 using TheCharityDAL.Database;
 using TheCharityDAL.Entities;
 using TheCharityDAL.Repositories.Abstraction;
 using TheCharityDAL.Repositories.Implementation;
-using TheCharityBLL.Services.Repository;
-using TheCharityBLL.Mapper;
-using TheCharityBLL.Settings;
-using Microsoft.AspNetCore.Authentication.Cookies;
+
 namespace TheCharityBLL.Helpers
 {
     public static class ServiceExtensions
@@ -67,19 +73,19 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<IUserRepository, UserRepository>();
             // Services Injection
             services.AddScoped<ICampaignService, CampaignService>();
-            services.AddScoped<IDonatedItemService, DonatedItemService>();
-            services.AddScoped<IDonatedItemQueryService, DonatedItemQueryService>();
-            services.AddScoped<IDonatedItemAnalyticsService, DonatedItemAnalyticsService>();
-            services.AddScoped<IDonatedItemAttachmentService, DonatedItemAttachmentService>();
-            services.AddScoped<IDonatedItemImageService, DonatedItemImageService>();
-            services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped<IOrganizationService, OrganizationService>();
-            services.AddScoped<IOrganizationQueryService, OrganizationQueryService>();
-            services.AddScoped<IOrganizationContactService, OrganizationContactService>();
-            services.AddScoped<IPaymobService, PaymobService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IPaymobService,PaymobService>();
+            services.AddScoped<IOrganizationService, OrganizationService>();
+            services.AddScoped<IDonatedItemService, DonatedItemService>();
+            services.AddScoped<IPaymentInfoService, PaymentInfoService>();
+            services.AddScoped<IDonationService, DonationService>();
             // mapper Injection
-            services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
+            services.AddAutoMapper(cfg => {
+                cfg.AddProfile<UserMapperProfile>();
+                cfg.AddProfile<PaymentInfoMappingProfile>();
+            });
+            services.AddScoped<DonationMapper>();
 
         }
         public static void ThirdPartyAuthentication(this IServiceCollection services, IConfiguration Configuration)

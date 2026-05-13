@@ -1,0 +1,27 @@
+:host {
+  /* Primary palette */
+  --pr-color:       #FFD400;
+  --pr-light-color: #FFC300;
+  --sc-color:       #FF8C00;
+  --sc-light-color: #FF5F00;
+
+  /* Neutrals */
+  --charcoal:        #1e1e1e;
+  --warm-white:      #fdf4e8;
+  --off-white:       #fdf4e8;
+  --warm-gray:       #7a6a5a;
+  --background-color:#fdf4e8;
+  --border-color:    #e8ddd0;
+
+  /* Typography */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'Lato', 'Trebuchet MS', sans-serif;
+
+  /* Navbar */
+  --nb-height:  72px;
+  --nb-h-sm:    60px;
+  --nb-border:  #2e2e2e;
+  --nb-muted:   #7a6a5a;
+  --nb-sub:     #8a7a6a;
+  --nb-surface: #262626;
+}

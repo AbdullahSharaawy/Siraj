@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Text.Json;
 using TheCharityBLL.DTOs;
+using TheCharityBLL.ViewModels;
 
 namespace TheCharityPL.Middlewares
 {

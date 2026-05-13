@@ -1,0 +1,5 @@
+.main-page {
+  padding-top: var(--nb-height);
+  background: var(--background-color);
+  min-height: 100vh;
+}

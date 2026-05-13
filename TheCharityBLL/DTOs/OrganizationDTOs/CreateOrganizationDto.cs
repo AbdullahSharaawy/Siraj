@@ -11,11 +11,10 @@ namespace TheCharityBLL.DTOs.OrganizationDTOs
     {
         [Required(ErrorMessage = "Name is required.")]
         [MaxLength(200, ErrorMessage = "Name cannot exceed 200 characters.")]
-        public string Name { get; set; }
+        public string Name { get; set; } = null!;
 
         [MaxLength(500, ErrorMessage = "Address cannot exceed 500 characters.")]
-        public string Address { get; set; }
+        public string? Address { get; set; }
 
-        public int? PaymentId { get; set; }
     }
 }

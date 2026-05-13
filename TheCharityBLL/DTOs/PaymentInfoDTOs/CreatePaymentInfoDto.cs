@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -23,6 +24,9 @@ namespace TheCharityBLL.DTOs.PaymentInfoDTOs
 
         [Required(ErrorMessage = "HmacKey is required.")]
         [MaxLength(300, ErrorMessage = "HmacKey cannot exceed 300 characters.")]
-        public string HmacKey { get; set; } = null!;
+        public string HmacKey { get; set; } 
+
+        [Required(ErrorMessage ="The Organization is Required")]
+        public int OrganizationId { get; set; }
     }
 }

@@ -42,7 +42,6 @@ namespace TheCharityDAL.Repositories.Abstraction
         Task AccessFailedAsync(User user);
         Task ResetAccessFailedCountAsync(User user);
 
-        // Storage
-        Task<long> GetUserMaxStorageAsync(string userId);
+      
     }
 }

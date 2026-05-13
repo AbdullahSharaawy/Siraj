@@ -1,0 +1,59 @@
+<header class="nb">
+
+  <!-- noise texture overlay (matches .hs::before) -->
+  <div class="nb_noise" aria-hidden="true"></div>
+
+  <div class="nb_inner">
+
+    <!-- Logo -->
+    <a class="nb_logo" href="/" aria-label="Home">
+      <img src="/assets/images/addimagehere.png" alt="Sadaka Logo" height="40" />
+      <span class="nb_logo-text">
+        <span class="nb_logo-word">Sadaka</span>
+      </span>
+    </a>
+
+    <!-- Desktop nav -->
+    <nav class="nb_nav" aria-label="Primary navigation">
+      <ul class="nb_list" role="list">
+        @for (link of links; track link.label) {
+          <li
+            class="nb_item"
+            [class.nb_item--has-children]="link.children"
+            (mouseenter)="link.children ? openDropdown(link.label) : null"
+            (mouseleave)="closeDropdown()"
+          >
+            <a
+              class="nb_link"
+              [routerLink]="link.href"
+              routerLinkActive="nb_link--active"
+            >
+              {{ link.label }}
+              @if (link.children) {
+                <svg class="nb_chevron" viewBox="0 0 12 8" fill="none" aria-hidden="true">
+                  <path d="M1 1.5l5 5 5-5" stroke="currentColor" stroke-width="1.5"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              }
+            </a>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <!--  Actions  -->
+    <div class="nb_actions">
+      <!-- CTA -->
+       <!--Add link here-->
+      <a class="nb_cta" [routerLink]="'/sign-in'">
+        Get Started?
+        <svg class="nb_cta-arrow" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor"
+                stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    
+    </div>
+  </div><!-- /inner -->
+
+</header>

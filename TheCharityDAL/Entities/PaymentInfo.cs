@@ -22,35 +22,36 @@ namespace TheCharityDAL.Entities
             IframeId = iframeId;
             HmacKey = hmacKey;
         }
-        public void EditApiKey(string clientId)
+        public void EditApiKey(string apiKey)
         {
-            if (!clientId.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(apiKey))
+
             {
-                this.ApiKey = clientId;
+                this.ApiKey = apiKey;
                 this.UpdatedOn = DateTime.Now;
             }
         }
-        public void EditIntegrationId(string secretKey)
+        public void EditIntegrationId(string integrationId)
         {
-            if (!secretKey.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(integrationId))
             {
-                this.IntegrationId = secretKey;
+                this.IntegrationId = integrationId;
                 this.UpdatedOn = DateTime.Now;
             }
         }
-        public void EditIframeId(string secretKey)
+        public void EditIframeId(string iframeId)
         {
-            if (!secretKey.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(iframeId))
             {
-                this.IframeId = secretKey;
+                this.IframeId = iframeId;
                 this.UpdatedOn = DateTime.Now;
             }
         }
-        public void EditHmacKey(string secretKey)
+        public void EditHmacKey(string hamcKey)
         {
-            if (!secretKey.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(hamcKey))
             {
-                this.HmacKey = secretKey;
+                this.HmacKey = hamcKey;
                 this.UpdatedOn = DateTime.Now;
             }
         }

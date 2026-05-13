@@ -10,7 +10,6 @@ namespace TheCharityBLL.DTOs.DonatedItemDTOs
 {
     public class UpdateDonatedItemDto
     {
-        public int Id { get; set; }
 
         [MaxLength(200, ErrorMessage = "Name cannot exceed 200 characters.")]
         public string? Name { get; set; }

@@ -83,7 +83,12 @@ namespace TheCharityDAL.Repositories.Implementation
                 .Where(o => o.Name == name && (o.IsDeleted == false))
                 .FirstOrDefaultAsync();
         }
-
+        public async Task<Organization?> GetOrganizationByPaymentInfoIdAsync(int PaymentInfoId)
+        {
+            return await _context.Organizations
+               .Where(o => o.PaymentId == PaymentInfoId  && (o.IsDeleted == false))
+               .FirstOrDefaultAsync();
+        }
         public async Task<IEnumerable<Organization>> SearchOrganizationsAsync(string searchTerm)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
@@ -421,5 +426,7 @@ namespace TheCharityDAL.Repositories.Implementation
             }
             return result;
         }
+
+       
     }
 }

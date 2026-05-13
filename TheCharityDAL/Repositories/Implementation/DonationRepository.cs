@@ -17,15 +17,17 @@ namespace TheCharityDAL.Repositories.Implementation
         // ===== Donation CRUD Operations =====
         public async Task<IEnumerable<Donation>> GetAllDonationsAsync(bool includeDeleted = false)
         {
-            var query = _context.Donations.AsQueryable();
-
-            if (!includeDeleted)
-                query = query.Where(d => d.IsDeleted == false);
-
-            return await query
+            var donations = await _context.Donations
                 .Include(d => d.User)
                 .Include(d => d.Campaign)
                 .ToListAsync();
+
+            if (!includeDeleted)
+            {
+                donations = donations.Where(d => !d.IsDeleted).ToList();
+            }
+
+            return donations;
         }
 
         public async Task<Donation?> GetDonationByIdAsync(int id)
@@ -382,6 +384,7 @@ namespace TheCharityDAL.Repositories.Implementation
             var userExists = await _context.Users.AnyAsync(u => u.Id == donation.UserId);
             if (!userExists) return false;
 
+           
             var campaignExists = await _context.Campaigns
                 .AnyAsync(c => c.Id == donation.CampaignId);
             if (!campaignExists) return false;
@@ -392,7 +395,7 @@ namespace TheCharityDAL.Repositories.Implementation
 
             return true;
         }
-
+      
         // ===== Eager Loading =====
         public async Task<Donation?> GetDonationWithDetailsAsync(int id)
         {
