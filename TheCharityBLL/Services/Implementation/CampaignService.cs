@@ -2,6 +2,7 @@
 using TheCharityBLL.DTOs.CampaignDTOs;
 using TheCharityBLL.Mapper;
 using TheCharityBLL.Services.Abstraction;
+using TheCharityBLL.ViewModels;
 using TheCharityDAL.Entities;
 using TheCharityDAL.Enums;
 using TheCharityDAL.Repositories.Abstraction;
