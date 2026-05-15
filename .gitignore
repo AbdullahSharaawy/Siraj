@@ -366,3 +366,6 @@ FodyWeavers.xsd
 # Entity Framework
 **/Migrations/
 
+# ASP.NET Core appsettings
+appsettings.Development.json
+appsettings.Production.json
