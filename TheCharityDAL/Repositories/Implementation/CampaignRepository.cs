@@ -60,6 +60,7 @@ namespace TheCharityDAL.Repositories.Implementation
         public async Task RestoreCampaignAsync(int id)
         {
             var campaign = await _context.Campaigns
+                .IgnoreQueryFilters()
                 .Where(c => c.Id == id)
                 .FirstOrDefaultAsync();
 
@@ -166,6 +167,7 @@ namespace TheCharityDAL.Repositories.Implementation
         public async Task<IEnumerable<Campaign>> GetDeletedCampaignsAsync()
         {
             return await _context.Campaigns
+                .IgnoreQueryFilters()
                 .Where(c => c.IsDeleted == true)
                 .ToListAsync();
         }
