@@ -1,9 +1,6 @@
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
 using TheCharityBLL.Helpers;
-using TheCharityBLL.Services.Abstraction;
-using TheCharityBLL.Services.Repository;
-using TheCharityDAL.Repositories.Abstraction;
-using TheCharityDAL.Repositories.Implementation;
 using TheCharityPL.Middlewares;
 
 namespace TheCharityPL
@@ -27,7 +24,30 @@ namespace TheCharityPL
             }); ;
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "The Charity API",
+                    Version = "v1"
+                });
+
+                // Load XML from TheCharityPL (controllers)
+                var plXmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var plXmlPath = Path.Combine(AppContext.BaseDirectory, plXmlFile);
+                if (File.Exists(plXmlPath))
+                {
+                    c.IncludeXmlComments(plXmlPath);
+                }
+
+                // Load XML from TheCharityBLL (DTOs)
+                var bllXmlFile = "TheCharityBLL.xml";
+                var bllXmlPath = Path.Combine(AppContext.BaseDirectory, bllXmlFile);
+                if (File.Exists(bllXmlPath))
+                {
+                    c.IncludeXmlComments(bllXmlPath);
+                }
+            });
 
             // IDK but i got an error and i couldnt figuer out why so i asked claud and it said add this - Mohamed Rashid
             builder.Services.AddCors(options =>

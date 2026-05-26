@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TheCharityBLL.DTOs.CampaignDTOs
+﻿namespace TheCharityBLL.DTOs.CampaignDTOs
 {
     public class UpdateSoloCampaignDto : UpdateCampaignDto
     {
+        /// <example>5</example>
         public int? OrganizationId { get; set; }
     }
 }

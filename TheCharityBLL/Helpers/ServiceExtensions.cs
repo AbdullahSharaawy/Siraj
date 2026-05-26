@@ -40,8 +40,8 @@ namespace TheCharityBLL.Helpers
             .AddEntityFrameworkStores<TheCharityDbContext>()
             .AddDefaultTokenProviders();
 
-          
-           
+
+
         }
         public static void FoxArtEmailConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
@@ -71,8 +71,8 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<IDonationRepository, DonationRepository>();
             services.AddScoped<IOrganizationRepository, OrganizationRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
-
             // Services Injection
+            services.AddScoped<ICampaignService, CampaignService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IPaymobService,PaymobService>();
@@ -95,33 +95,33 @@ namespace TheCharityBLL.Helpers
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
- .AddJwtBearer(options =>
- {
-     options.TokenValidationParameters = new TokenValidationParameters
-     {
-         ValidateIssuer = true,
-         ValidateAudience = true,
-         ValidateLifetime = true,
-         ValidateIssuerSigningKey = true,
-         ValidIssuer = Configuration["Jwt:Issuer"],
-         ValidAudience = Configuration["Jwt:Audience"],
-         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-             Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured")))
-     };
- })
- .AddCookie("ExternalCookie") // dedicated scheme for OAuth handshake only
- .AddGoogle(options =>
- {
-     options.SignInScheme = "ExternalCookie"; // scoped here only
-     options.ClientId = Configuration["Authentication:Google:ClientID"];
-     options.ClientSecret = Configuration["Authentication:Google:SecretKey"];
- })
- .AddFacebook(options =>
- {
-     options.SignInScheme = "ExternalCookie"; // scoped here only
-     options.AppId = Configuration["Authentication:Facebook:ClientID"];
-     options.AppSecret = Configuration["Authentication:Facebook:SecretKey"];
- });
+        .AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = Configuration["Jwt:Issuer"],
+                ValidAudience = Configuration["Jwt:Audience"],
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                    Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured")))
+            };
+        })
+        .AddCookie("ExternalCookie"); // dedicated scheme for OAuth handshake only
+        //.AddGoogle(options =>
+        //{
+        //    options.SignInScheme = "ExternalCookie"; // scoped here only
+        //    options.ClientId = Configuration["Authentication:Google:ClientID"];
+        //    options.ClientSecret = Configuration["Authentication:Google:SecretKey"];
+        //})
+        //.AddFacebook(options =>
+        //{
+        //    options.SignInScheme = "ExternalCookie"; // scoped here only
+        //    options.AppId = Configuration["Authentication:Facebook:ClientID"];
+        //    options.AppSecret = Configuration["Authentication:Facebook:SecretKey"];
+        //});
         }
     }
-}
+}       

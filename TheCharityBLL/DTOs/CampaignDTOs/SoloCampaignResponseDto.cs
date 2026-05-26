@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TheCharityBLL.DTOs.OrganizationDTOs;
-
-namespace TheCharityBLL.DTOs.CampaignDTOs
+﻿namespace TheCharityBLL.DTOs.CampaignDTOs
 {
     public class SoloCampaignResponseDto : CampaignResponseDto
     {
-        public OrganizationResponseDto? Organization { get; set; }
+        /// <example>5</example>
+        public int? OrganizationId { get; set; }
+        /// <example>Helping Hands NGO</example>
+        public string? OrganizationName { get; set; }
     }
 }

@@ -1,5 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using TheCharityDAL.Enums;
+﻿using TheCharityDAL.Enums;
 
 namespace TheCharityDAL.Entities
 {
@@ -30,7 +29,7 @@ namespace TheCharityDAL.Entities
         protected Campaign() { }
         public void EditTitle(string? title)
         {
-            if (!title.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(title))
             {
                 this.Title = title;
                 this.UpdatedOn = DateTime.Now;
@@ -38,7 +37,7 @@ namespace TheCharityDAL.Entities
         }
         public void EditDescription(string? description)
         {
-            if (!description.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(description))
             {
                 this.Description = description;
                 this.UpdatedOn = DateTime.Now;
@@ -46,7 +45,7 @@ namespace TheCharityDAL.Entities
         }
         public void EditImage(string? imgPath)
         {
-            if (!imgPath.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(imgPath))
             {
                 this.ImgPath = imgPath;
                 this.UpdatedOn = DateTime.Now;
