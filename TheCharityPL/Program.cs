@@ -65,11 +65,18 @@ namespace TheCharityPL
             });
 
             // Configure Hangfire
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new Exception("DefaultConnection connection string is missing");
+            }
+
             builder.Services.AddHangfire(config => config
                 .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
                 .UseSimpleAssemblyNameTypeSerializer()
                 .UseRecommendedSerializerSettings()
-                .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection")));
+                .UseSqlServerStorage(connectionString));
 
             builder.Services.AddHangfireServer(options =>
             {
