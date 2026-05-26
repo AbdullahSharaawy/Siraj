@@ -1,6 +1,5 @@
 ﻿using Hangfire;
 using Microsoft.Extensions.Logging;
-using TheCharityBLL.Jobs.Base;
 using TheCharityBLL.Jobs.Registry.Abstraction;
 using TheCharityBLL.Jobs.Scheduled;
 using TheCharityBLL.Services.Abstraction;
