@@ -1,4 +1,4 @@
-﻿namespace TheCharityBLL.Jobs.Abstraction
+﻿namespace TheCharityBLL.Jobs.Result.Abstraction
 {
     public interface IJobResult
     {

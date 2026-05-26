@@ -1,6 +1,6 @@
-﻿using TheCharityBLL.Jobs.JobResult.Abstraction;
+﻿using TheCharityBLL.Jobs.Result.Abstraction;
 
-namespace TheCharityBLL.Jobs.JobResult.Implementation
+namespace TheCharityBLL.Jobs.Result.Implementation
 {
     public class JobResult : IJobResult
     {

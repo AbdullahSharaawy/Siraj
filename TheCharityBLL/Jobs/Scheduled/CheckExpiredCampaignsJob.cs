@@ -2,10 +2,10 @@
 using Microsoft.Extensions.Logging;
 using TheCharityBLL.Jobs.Base;
 using TheCharityBLL.Jobs.Context;
-using TheCharityBLL.Jobs.JobResult.Abstraction;
 using TheCharityDAL.Enums;
 using TheCharityDAL.Repositories.Abstraction;
-using TheCharityBLL.Jobs.JobResult.Implementation;
+using TheCharityBLL.Jobs.Result.Abstraction;
+using TheCharityBLL.Jobs.Result.Implementation;
 
 namespace TheCharityBLL.Jobs.Scheduled
 {

@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using TheCharityBLL.Jobs.Base;
 
 namespace TheCharityBLL.Jobs.Registry.Abstraction
 {
-    internal interface IJobRegistry
+    public interface IJobRegistry
     {
+        void RegisterAllRecurringJobs();
+        void RegisterRecurringJob<T>(string jobId, string cronExpression) where T : BaseJob;
     }
 }
