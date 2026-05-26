@@ -9,8 +9,8 @@ namespace TheCharityBLL.Services.Abstraction
         string EnqueueJob<T>(object? parameters = null) where T : BaseJob;
         // Delayed execution
         string ScheduleJob<T>(DateTimeOffset executeAt, object? parameters = null) where T : BaseJob;
-        // Recurring jobs
-        void AddOrUpdateRecurringJob<T>(string recurringJobId, string cronExpression, object? parameters = null) where T : BaseJob;
+        // Recurring jobs - uses JobExecutor pattern
+        void AddOrUpdateRecurringJob<T>(string recurringJobId, string cronExpression) where T : BaseJob;
         void RemoveRecurringJob(string recurringJobId);
         // Cancellation
         bool CancelJob(string jobId);

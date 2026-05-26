@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Hangfire;
+using Microsoft.Extensions.Logging;
 using TheCharityBLL.Jobs.Base;
 using TheCharityBLL.Jobs.Registry.Abstraction;
+using TheCharityBLL.Jobs.Scheduled;
 using TheCharityBLL.Services.Abstraction;
 
 namespace TheCharityBLL.Jobs.Registry.Implementation
@@ -20,17 +22,14 @@ namespace TheCharityBLL.Jobs.Registry.Implementation
         {
             _logger.LogInformation("Registering all recurring jobs...");
 
-            // Future jobs will be added here
-            // Example: 
-            // RegisterRecurringJob<CheckExpiredCampaignsJob>("check-expired-campaigns", Cron.Daily(2));
+            // Register CheckExpiredCampaignsJob to run every hour
+            // Add more recurring jobs here as you create them
+            _jobScheduler.AddOrUpdateRecurringJob<CheckExpiredCampaignsJob>(
+                "check-completed-campaigns",
+                Cron.Hourly()
+            );
 
-            _logger.LogInformation("All recurring jobs registered");
-        }
-
-        public void RegisterRecurringJob<T>(string jobId, string cronExpression) where T : BaseJob
-        {
-            _jobScheduler.AddOrUpdateRecurringJob<T>(jobId, cronExpression);
-            _logger.LogInformation("Registered recurring job: {JobId}", jobId);
+            _logger.LogInformation("All recurring jobs registered successfully");
         }
     }
 }

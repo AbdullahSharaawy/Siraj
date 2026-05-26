@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using TheCharityBLL.Jobs.Base;
 using TheCharityBLL.Jobs.Context;
 using TheCharityBLL.Jobs.Result.Implementation;
+using TheCharityBLL.Jobs.Services;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityDAL.Enums;
 
@@ -13,39 +14,59 @@ namespace TheCharityBLL.Services.Implementation
     {
         private readonly IBackgroundJobClient _backgroundJobClient;
         private readonly IRecurringJobManager _recurringJobManager;
+        private readonly JobExecutor _jobExecutor;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<HangfireJobSchedulerService> _logger;
 
         public HangfireJobSchedulerService(
             IBackgroundJobClient backgroundJobClient,
             IRecurringJobManager recurringJobManager,
+            JobExecutor jobExecutor,
             IServiceProvider serviceProvider,
             ILogger<HangfireJobSchedulerService> logger)
         {
             _backgroundJobClient = backgroundJobClient;
             _recurringJobManager = recurringJobManager;
+            _jobExecutor = jobExecutor;
             _serviceProvider = serviceProvider;
             _logger = logger;
         }
 
+        // Generic method for enqueuing jobs (works fine)
         public string EnqueueJob<T>(object? parameters = null) where T : BaseJob
         {
-            var jobId = _backgroundJobClient.Enqueue(() => ExecuteJobAsync<T>(parameters, CancellationToken.None));
+            var jobTypeName = typeof(T).AssemblyQualifiedName;
+            var serializedParams = SerializeParameters(parameters);
+
+            var jobId = _backgroundJobClient.Enqueue(() => _jobExecutor.ExecuteJob(jobTypeName!, serializedParams));
             _logger.LogInformation("Enqueued job {JobType} with ID: {JobId}", typeof(T).Name, jobId);
             return jobId;
         }
 
+        // Generic method for scheduling jobs (works fine)
         public string ScheduleJob<T>(DateTimeOffset executeAt, object? parameters = null) where T : BaseJob
         {
-            var jobId = _backgroundJobClient.Schedule(() => ExecuteJobAsync<T>(parameters, CancellationToken.None), executeAt);
+            var jobTypeName = typeof(T).AssemblyQualifiedName;
+            var serializedParams = SerializeParameters(parameters);
+
+            var jobId = _backgroundJobClient.Schedule(() => _jobExecutor.ExecuteJob(jobTypeName!, serializedParams), executeAt);
             _logger.LogInformation("Scheduled job {JobType} at {ExecuteAt} with ID: {JobId}", typeof(T).Name, executeAt, jobId);
             return jobId;
         }
 
-        public void AddOrUpdateRecurringJob<T>(string recurringJobId, string cronExpression, object? parameters = null) where T : BaseJob
+        // Recurring jobs - uses JobExecutor pattern
+        public void AddOrUpdateRecurringJob<T>(string recurringJobId, string cronExpression) where T : BaseJob
         {
-            _recurringJobManager.AddOrUpdate(recurringJobId, () => ExecuteJobAsync<T>(parameters, CancellationToken.None), cronExpression);
-            _logger.LogInformation("Added recurring job {JobType} with ID: {RecurringJobId}, cron: {Cron}", typeof(T).Name, recurringJobId, cronExpression);
+            var jobTypeName = typeof(T).AssemblyQualifiedName;
+
+            _recurringJobManager.AddOrUpdate(
+                recurringJobId,
+                () => _jobExecutor.ExecuteJob(jobTypeName!, null),
+                cronExpression
+            );
+
+            _logger.LogInformation("Added recurring job {JobType} with ID: {RecurringJobId}, cron: {Cron}",
+                typeof(T).Name, recurringJobId, cronExpression);
         }
 
         public void RemoveRecurringJob(string recurringJobId)
@@ -92,63 +113,30 @@ namespace TheCharityBLL.Services.Implementation
 
         public string ScheduleContinuationJob<T>(string parentJobId, object? parameters = null) where T : BaseJob
         {
-            var jobId = _backgroundJobClient.ContinueJobWith(parentJobId, () => ExecuteJobAsync<T>(parameters, CancellationToken.None));
-            _logger.LogInformation("Added continuation job {JobType} after parent {ParentJobId} with ID: {JobId}", typeof(T).Name, parentJobId, jobId);
+            var jobTypeName = typeof(T).AssemblyQualifiedName;
+            var serializedParams = SerializeParameters(parameters);
+
+            var jobId = _backgroundJobClient.ContinueJobWith(parentJobId,
+                () => _jobExecutor.ExecuteJob(jobTypeName!, serializedParams));
+
+            _logger.LogInformation("Added continuation job {JobType} after parent {ParentJobId} with ID: {JobId}",
+                typeof(T).Name, parentJobId, jobId);
             return jobId;
         }
 
-        // This is the method that Hangfire calls
-        public async Task ExecuteJobAsync<T>(object? parameters, CancellationToken cancellationToken) where T : BaseJob
+        // Helper method to serialize parameters
+        private string? SerializeParameters(object? parameters)
         {
-            using var scope = _serviceProvider.CreateScope();
-
-            var job = scope.ServiceProvider.GetRequiredService<T>();
-            var context = new JobContext
-            {
-                JobName = job.JobName,
-                ScheduledAt = DateTime.UtcNow
-            };
-
-            // Add parameters to context if provided
-            if (parameters != null)
-            {
-                var props = parameters.GetType().GetProperties();
-                foreach (var prop in props)
-                {
-                    context.SetMetadata(prop.Name, prop.GetValue(parameters) ?? "null");
-                }
-            }
-
-            _logger.LogInformation("Starting job: {JobName}", job.JobName);
-
-            // Check if job can execute
-            if (!await job.CanExecuteAsync(context))
-            {
-                _logger.LogWarning("Job {JobName} cannot execute - validation failed", job.JobName);
-                return;
-            }
+            if (parameters == null) return null;
 
             try
             {
-                var result = await job.ExecuteAsync(context);
-
-                if (result.IsSuccess)
-                {
-                    await job.OnSuccessAsync(context, result);
-                    _logger.LogInformation("Job {JobName} completed successfully: {Message}", job.JobName, result.Message);
-                }
-                else
-                {
-                    await job.OnFailureAsync(context, result, result.Error ?? new Exception(result.Message));
-                    _logger.LogWarning("Job {JobName} failed: {Message}", job.JobName, result.Message);
-                }
+                return System.Text.Json.JsonSerializer.Serialize(parameters);
             }
             catch (Exception ex)
             {
-                var failureResult = JobResult.Failure(ex.Message, ex);
-                await job.OnFailureAsync(context, failureResult, ex);
-                _logger.LogError(ex, "Job {JobName} threw unhandled exception", job.JobName);
-                throw;
+                _logger.LogWarning(ex, "Failed to serialize job parameters");
+                return null;
             }
         }
     }

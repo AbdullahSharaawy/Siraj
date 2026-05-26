@@ -9,6 +9,7 @@ using System.Text;
 using TheCharityBLL.Jobs.Registry.Abstraction;
 using TheCharityBLL.Jobs.Registry.Implementation;
 using TheCharityBLL.Jobs.Scheduled;
+using TheCharityBLL.Jobs.Services;
 using TheCharityBLL.Mapper;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityBLL.Services.Abstraction.MoneyDonation;
@@ -130,6 +131,9 @@ namespace TheCharityBLL.Helpers
             // Register services
             services.AddScoped<IJobSchedulerService, HangfireJobSchedulerService>();
             services.AddScoped<IJobRegistry, JobRegistry>();
+
+            // Register JobExecutor
+            services.AddSingleton<JobExecutor>();
         }
     }
 }       
