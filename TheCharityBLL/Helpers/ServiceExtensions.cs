@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -7,6 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using TheCharityBLL.Jobs.Registry.Abstraction;
+using TheCharityBLL.Jobs.Registry.Implementation;
+using TheCharityBLL.Jobs.Scheduled;
 using TheCharityBLL.Mapper;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityBLL.Services.Abstraction.MoneyDonation;
@@ -39,9 +41,6 @@ namespace TheCharityBLL.Helpers
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<TheCharityDbContext>()
             .AddDefaultTokenProviders();
-
-
-
         }
         public static void FoxArtEmailConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
@@ -122,6 +121,16 @@ namespace TheCharityBLL.Helpers
         //    options.AppId = Configuration["Authentication:Facebook:ClientID"];
         //    options.AppSecret = Configuration["Authentication:Facebook:SecretKey"];
         //});
+        }
+        public static void AddHangfireServices(this IServiceCollection services)
+        {
+            // Register all jobs as scoped (Hangfire will create scope)
+            // Add more jobs here as you create them
+            services.AddScoped<CheckExpiredCampaignsJob>();
+
+            // Register services
+            services.AddScoped<IJobSchedulerService, HangfireJobSchedulerService>();
+            services.AddSingleton<IJobRegistry, JobRegistry>();
         }
     }
 }       
