@@ -124,7 +124,6 @@ namespace TheCharityBLL.Helpers
         }
         public static void AddHangfireServices(this IServiceCollection services)
         {
-            // Register all jobs as scoped (Hangfire will create scope)
             // Add more jobs here as you create them
             services.AddSingleton<CheckExpiredCampaignsJob>();
 
