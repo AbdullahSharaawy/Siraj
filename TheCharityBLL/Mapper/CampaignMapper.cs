@@ -139,6 +139,7 @@ namespace TheCharityBLL.Mapper
                 title: dto.Title,
                 description: dto.Description,
                 imgPath: dto.ImgPath,
+                deadline: dto.Deadline ?? DateTime.Now.AddMonths(1),
                 target: (int?)(dto.Target ?? 100),
                 achieved: 0,
                 status: CampaignStatus.Active,
