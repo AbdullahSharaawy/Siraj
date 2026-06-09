@@ -29,7 +29,7 @@ namespace TheCharityBLL.Services.Abstraction
         Task<ServiceResponse<IEnumerable<SharedCampaignResponseDto>>> GetSharedCampaignsByOrganizationIdAsync(int organizationId);
         Task<ServiceResponse<IEnumerable<SharedCampaignResponseDto>>> GetSharedCampaignsByStatusAsync(CampaignStatus status);
 
-        // Shared Campaign Organization Management
+        // ===== Shared Campaign Organization Management =====
         Task<ServiceResponse<bool>> AddOrganizationToSharedCampaignAsync(int sharedCampaignId, int organizationId);
         Task<ServiceResponse<bool>> RemoveOrganizationFromSharedCampaignAsync(int sharedCampaignId, int organizationId);
         Task<ServiceResponse<int>> GetOrganizationCountForSharedCampaignAsync(int sharedCampaignId);
