@@ -69,6 +69,13 @@ namespace TheCharityBLL.Services.Abstraction
         Task<ServiceResponse<IEnumerable<CampaignResponseDto>>> GetRecentCampaignsAsync(int days = 30);
         Task<ServiceResponse<IEnumerable<CampaignResponseDto>>> GetUrgentCampaignsAsync(double minPercentage = 75);
 
+        // ===== Deadline Operations =====
+        Task<ServiceResponse<IEnumerable<CampaignResponseDto>>> GetCampaignsByDeadlineAsync(DateTime deadlineDate, bool includeDeleted = false);
+        Task<ServiceResponse<IEnumerable<CampaignResponseDto>>> GetExpiredCampaignsAsync();
+        Task<ServiceResponse<IEnumerable<CampaignResponseDto>>> GetCampaignsExpiringSoonAsync(int daysThreshold = 7);
+        Task<ServiceResponse<bool>> ExtendCampaignDeadlineAsync(int campaignId, DateTime newDeadline);
+        Task<ServiceResponse<bool>> AutoExpireCampaignsAsync();
+
         // ===== Bulk Operations =====
         Task<ServiceResponse<int>> BulkUpdateCampaignStatusAsync(CampaignStatus oldStatus, CampaignStatus newStatus);
         Task<ServiceResponse<int>> SoftDeleteExpiredCampaignsAsync(int daysAfterCompletion = 30);
