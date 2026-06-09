@@ -535,7 +535,7 @@ namespace TheCharityDAL.Repositories.Implementation
 
             var campaigns = await _context.Campaigns
                 .Where(c => (c.Status == CampaignStatus.Completed &&
-                           c.UpdatedOn < cutoffDate &&
+                           c.CompletionDate < cutoffDate &&
                            c.IsDeleted == false
                 )).ToListAsync();
 
