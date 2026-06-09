@@ -26,5 +26,9 @@ namespace TheCharityBLL.DTOs.CampaignDTOs
         public DateTime? RegistrationDate { get; set; }
         /// <example>2024-02-15T14:30:00</example>
         public DateTime? UpdatedOn { get; set; }
+        /// <example>2024-04-30T23:59:59</example>
+        public DateTime? Deadline { get; set; }
+        /// <example>15</example>
+        public int? DaysRemaining { get; set; }
     }
 }

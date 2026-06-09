@@ -73,6 +73,11 @@ namespace TheCharityDAL.Repositories.Abstraction
         Task<IEnumerable<Campaign>> GetTopCampaignsByDonationsAsync(int limit = 10);
         Task<IEnumerable<Campaign>> GetRecentCampaignsAsync(int days = 30);
         Task<IEnumerable<Campaign>> GetUrgentCampaignsAsync(double minPercentage = 75);
+        // ===== Deadline Operations =====
+        Task<IEnumerable<Campaign>> GetCampaignsByDeadlineAsync(DateTime deadlineDate, bool includeDeleted = false);
+        Task<IEnumerable<Campaign>> GetExpiredCampaignsAsync();
+        Task<IEnumerable<Campaign>> GetCampaignsExpiringSoonAsync(int daysThreshold = 7);
+        Task<Campaign?> ExtendCampaignDeadlineAsync(int campaignId, DateTime newDeadline);
 
         // ===== Bulk Operations =====
         Task<int> BulkUpdateCampaignStatusAsync(CampaignStatus oldStatus, CampaignStatus newStatus);

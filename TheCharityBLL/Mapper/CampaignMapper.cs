@@ -26,7 +26,11 @@ namespace TheCharityBLL.Mapper
                 Type = campaign.Type,
                 IsDeleted = campaign.IsDeleted,
                 RegistrationDate = campaign.RegistrationDate,
-                UpdatedOn = campaign.UpdatedOn
+                UpdatedOn = campaign.UpdatedOn,
+                Deadline = campaign.Deadline,
+                DaysRemaining = campaign.Deadline.HasValue
+                    ? (int)Math.Ceiling((campaign.Deadline.Value - DateTime.Now).TotalDays)
+                    : null
             };
         }
 
@@ -118,6 +122,7 @@ namespace TheCharityBLL.Mapper
                 title: dto.Title,
                 description: dto.Description,
                 imgPath: dto.ImgPath,
+                deadline: dto.Deadline ?? DateTime.Now.AddMonths(1),
                 target: (int?)(dto.Target ?? 100),
                 achieved: 0,
                 status: CampaignStatus.Active,
@@ -134,6 +139,7 @@ namespace TheCharityBLL.Mapper
                 title: dto.Title,
                 description: dto.Description,
                 imgPath: dto.ImgPath,
+                deadline: dto.Deadline ?? DateTime.Now.AddMonths(1),
                 target: (int?)(dto.Target ?? 100),
                 achieved: 0,
                 status: CampaignStatus.Active,
