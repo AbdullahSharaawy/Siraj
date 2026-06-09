@@ -95,6 +95,57 @@ namespace TheCharityPL.Controllers
         }
 
         // ==============================
+        // Campaign Deadline Operations
+        // ==============================
+
+        /// <summary>
+        /// Get campaigns expiring soon
+        /// </summary>
+        /// <param name="daysThreshold">Number of days threshold (default 7)</param>
+        [HttpGet("expiring-soon")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetExpiringSoon([FromQuery] int daysThreshold = 7)
+        {
+            var result = await _campaignService.GetCampaignsExpiringSoonAsync(daysThreshold);
+            return HandleResponse(result);
+        }
+
+        /// <summary>
+        /// Get expired campaigns
+        /// </summary>
+        [HttpGet("expired")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetExpired()
+        {
+            var result = await _campaignService.GetExpiredCampaignsAsync();
+            return HandleResponse(result);
+        }
+
+        /// <summary>
+        /// Extend campaign deadline
+        /// </summary>
+        /// <param name="id">Campaign ID</param>
+        /// <param name="newDeadline">New deadline date</param>
+        [HttpPatch("{id:int}/extend-deadline")]
+        [Authorize(Roles = "SuperAdmin,OrganizationAdmin")]
+        public async Task<IActionResult> ExtendDeadline(int id, [FromQuery] DateTime newDeadline)
+        {
+            var result = await _campaignService.ExtendCampaignDeadlineAsync(id, newDeadline);
+            return HandleResponse(result, notFoundOnFailure: true);
+        }
+
+        /// <summary>
+        /// Auto-expire campaigns (admin endpoint)
+        /// </summary>
+        [HttpPost("auto-expire")]
+        [Authorize(Roles = "SuperAdmin")]
+        public async Task<IActionResult> AutoExpireCampaigns()
+        {
+            var result = await _campaignService.AutoExpireCampaignsAsync();
+            return HandleResponse(result);
+        }
+
+        // ==============================
         // Solo Campaign Operations
         // ==============================
 
