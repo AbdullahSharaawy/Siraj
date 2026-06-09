@@ -217,7 +217,7 @@ namespace TheCharityDAL.Migrations
 
                     b.HasIndex("DonatedItemId1");
 
-                    b.ToTable("Attachments", (string)null);
+                    b.ToTable("Attachments");
                 });
 
             modelBuilder.Entity("TheCharityDAL.Entities.Campaign", b =>
@@ -328,7 +328,7 @@ namespace TheCharityDAL.Migrations
 
                     b.HasIndex("OrganizationId");
 
-                    b.ToTable("DonatedItems", (string)null);
+                    b.ToTable("DonatedItems");
                 });
 
             modelBuilder.Entity("TheCharityDAL.Entities.Donation", b =>
@@ -367,7 +367,7 @@ namespace TheCharityDAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Donations", (string)null);
+                    b.ToTable("Donations");
                 });
 
             modelBuilder.Entity("TheCharityDAL.Entities.ItemImage", b =>
@@ -403,7 +403,7 @@ namespace TheCharityDAL.Migrations
 
                     b.HasIndex("DonatedItemId");
 
-                    b.ToTable("ItemImages", (string)null);
+                    b.ToTable("ItemImages");
                 });
 
             modelBuilder.Entity("TheCharityDAL.Entities.Organization", b =>
@@ -439,7 +439,7 @@ namespace TheCharityDAL.Migrations
 
                     b.HasIndex("PaymentId");
 
-                    b.ToTable("Organizations", (string)null);
+                    b.ToTable("Organizations");
                 });
 
             modelBuilder.Entity("TheCharityDAL.Entities.OrganizationContactMethod", b =>
@@ -475,7 +475,7 @@ namespace TheCharityDAL.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.ToTable("OrganizationContactMethods", (string)null);
+                    b.ToTable("OrganizationContactMethods");
                 });
 
             modelBuilder.Entity("TheCharityDAL.Entities.PaymentInfo", b =>
@@ -512,7 +512,51 @@ namespace TheCharityDAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PaymentsInfo", (string)null);
+                    b.ToTable("PaymentsInfo");
+                });
+
+            modelBuilder.Entity("TheCharityDAL.Entities.ScheduledJob", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HangfireJobId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("JobType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ScheduledFor")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ScheduledJobs");
                 });
 
             modelBuilder.Entity("TheCharityDAL.Entities.User", b =>

@@ -1,6 +1,8 @@
+using Hangfire;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using TheCharityBLL.Helpers;
+using TheCharityBLL.Jobs.Registry.Abstraction;
 using TheCharityPL.Middlewares;
 
 namespace TheCharityPL
@@ -16,6 +18,7 @@ namespace TheCharityPL
             builder.Services.TheCharityIdentity(builder.Configuration);
             builder.Services.FoxArtEmailConfiguration(builder.Configuration);
             builder.Services.ThirdPartyAuthentication(builder.Configuration);
+            builder.Services.AddHangfireServices();
             // Add services to the container.
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
@@ -61,7 +64,42 @@ namespace TheCharityPL
                 });
             });
 
+            // Configure Hangfire
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new Exception("DefaultConnection connection string is missing");
+            }
+
+            builder.Services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(connectionString));
+
+            builder.Services.AddHangfireServer(options =>
+            {
+                options.WorkerCount = 2;
+                options.Queues = new[] { "voting", "maintenance", "default" };
+                options.ServerName = $"TheCharity-API-{Environment.MachineName}";
+            });
+
             var app = builder.Build();
+
+            // Configure Hangfire dashboard (secured - Super Admin only)
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+                DashboardTitle = "The Charity Platform - Background Jobs",
+                StatsPollingInterval = 5000
+            });
+
+            // Register recurring jobs at startup
+            using (var scope = app.Services.CreateScope())
+            {
+                var jobRegistry = scope.ServiceProvider.GetRequiredService<IJobRegistry>();
+                jobRegistry.RegisterAllRecurringJobs();
+            }
 
             app.MapHealthChecks("/health");
 
