@@ -15,8 +15,6 @@ namespace TheCharityBLL.DTOs.CampaignDTOs
         /// <example>2024-03-01T00:00:00</example>
         public DateTime? StartDate { get; set; }
         /// <example>2024-05-01T00:00:00</example>
-        public DateTime? EndDate { get; set; }
-        /// <example>2024-03-01T00:00:00</example>
         public DateTime? Deadline { get; set; }
     }
 }
