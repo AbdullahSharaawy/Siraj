@@ -14,10 +14,11 @@ namespace TheCharityDAL.Entities
         public CampaignType? Type { get; private set; }
         public virtual int? OrganizationId { get; protected set; }
         public bool IsDeleted { get; private set; } = false;
-        public DateTime? DeletedOn { get; private set; }
+        public DateTime? DeletedOn { get; private set; } = null;
         public DateTime? RegistrationDate { get; private set; } = DateTime.Now;
-        public DateTime? UpdatedOn { get; private set; }
+        public DateTime? UpdatedOn { get; private set; } = null;
         public DateTime? Deadline { get; private set; } = DateTime.Now.AddMonths(1);
+        public DateTime? CompletionDate { get; private set; } = null;
         public Campaign(string? title, string? description, string? imgPath, int? target, int? achieved, CampaignStatus? status, CampaignType? type, DateTime deadline)
         {
             this.Title = title;
@@ -76,6 +77,9 @@ namespace TheCharityDAL.Entities
             {
                 this.Status = status;
                 this.UpdatedOn = DateTime.Now;
+                if (status == CampaignStatus.Completed)
+                    this.CompletionDate = DateTime.Now;
+                else this.CompletionDate = null;
             }
         }
         public void EditType(CampaignType? type)
