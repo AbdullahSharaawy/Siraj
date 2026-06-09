@@ -26,7 +26,11 @@ namespace TheCharityBLL.Mapper
                 Type = campaign.Type,
                 IsDeleted = campaign.IsDeleted,
                 RegistrationDate = campaign.RegistrationDate,
-                UpdatedOn = campaign.UpdatedOn
+                UpdatedOn = campaign.UpdatedOn,
+                Deadline = campaign.Deadline,
+                DaysRemaining = campaign.Deadline.HasValue
+                    ? (int)Math.Ceiling((campaign.Deadline.Value - DateTime.Now).TotalDays)
+                    : null
             };
         }
 
