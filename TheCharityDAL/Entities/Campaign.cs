@@ -17,7 +17,9 @@ namespace TheCharityDAL.Entities
         public DateTime? DeletedOn { get; private set; }
         public DateTime? RegistrationDate { get; private set; } = DateTime.Now;
         public DateTime? UpdatedOn { get; private set; }
-        public Campaign(string? title, string? description, string? imgPath, int? target, int? achieved, CampaignStatus? status, CampaignType? type) {
+        public DateTime? Deadline { get; private set; } = DateTime.Now.AddMonths(1);
+        public Campaign(string? title, string? description, string? imgPath, int? target, int? achieved, CampaignStatus? status, CampaignType? type, DateTime deadline)
+        {
             this.Title = title;
             this.Description = description;
             this.ImgPath = imgPath;
@@ -25,6 +27,7 @@ namespace TheCharityDAL.Entities
             this.Achieved = achieved;
             this.Status = status;
             this.Type = type;
+            this.Deadline = deadline;
         }
         protected Campaign() { }
         public void EditTitle(string? title)
@@ -81,6 +84,15 @@ namespace TheCharityDAL.Entities
             {
                 this.Type = type;
                 this.UpdatedOn = DateTime.Now;
+            }
+        }
+        public void ExtendDeadline(DateTime newCompletionDate)
+        {
+            if (newCompletionDate > DateTime.Now)
+            {
+                this.Deadline = newCompletionDate;
+                this.UpdatedOn = DateTime.Now;
+                this.UpdateStatus(CampaignStatus.Active);
             }
         }
         public void Delete()
