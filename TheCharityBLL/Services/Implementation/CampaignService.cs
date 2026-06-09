@@ -1001,7 +1001,7 @@ namespace TheCharityBLL.Services.Repository
             try
             {
                 var campaigns = await _campaignRepository.GetCampaignsByDeadlineAsync(deadlineDate, includeDeleted);
-                var responseDtos = _campaignMapper.MapToResponseDtos(campaigns);
+                var responseDtos = _mapper.MapToResponseDtos(campaigns);
 
                 return new ServiceResponse<IEnumerable<CampaignResponseDto>>
                 {
@@ -1025,7 +1025,7 @@ namespace TheCharityBLL.Services.Repository
             try
             {
                 var campaigns = await _campaignRepository.GetExpiredCampaignsAsync();
-                var responseDtos = _campaignMapper.MapToResponseDtos(campaigns);
+                var responseDtos = _mapper.MapToResponseDtos(campaigns);
 
                 return new ServiceResponse<IEnumerable<CampaignResponseDto>>
                 {
@@ -1051,7 +1051,7 @@ namespace TheCharityBLL.Services.Repository
                 if (daysThreshold <= 0) daysThreshold = 7;
 
                 var campaigns = await _campaignRepository.GetCampaignsExpiringSoonAsync(daysThreshold);
-                var responseDtos = _campaignMapper.MapToResponseDtos(campaigns);
+                var responseDtos = _mapper.MapToResponseDtos(campaigns);
 
                 // Calculate days remaining for each campaign
                 foreach (var dto in responseDtos)
