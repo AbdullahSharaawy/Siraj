@@ -994,6 +994,173 @@ namespace TheCharityBLL.Services.Repository
             };
         }
 
+        // ===== Deadline Operations =====
+
+        public async Task<ServiceResponse<IEnumerable<CampaignResponseDto>>> GetCampaignsByDeadlineAsync(DateTime deadlineDate, bool includeDeleted = false)
+        {
+            try
+            {
+                var campaigns = await _campaignRepository.GetCampaignsByDeadlineAsync(deadlineDate, includeDeleted);
+                var responseDtos = _campaignMapper.MapToResponseDtos(campaigns);
+
+                return new ServiceResponse<IEnumerable<CampaignResponseDto>>
+                {
+                    Success = true,
+                    Message = $"Campaigns with deadline <= {deadlineDate:yyyy-MM-dd} retrieved successfully.",
+                    Data = responseDtos
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<IEnumerable<CampaignResponseDto>>
+                {
+                    Success = false,
+                    Message = $"Failed to retrieve campaigns: {ex.Message}"
+                };
+            }
+        }
+
+        public async Task<ServiceResponse<IEnumerable<CampaignResponseDto>>> GetExpiredCampaignsAsync()
+        {
+            try
+            {
+                var campaigns = await _campaignRepository.GetExpiredCampaignsAsync();
+                var responseDtos = _campaignMapper.MapToResponseDtos(campaigns);
+
+                return new ServiceResponse<IEnumerable<CampaignResponseDto>>
+                {
+                    Success = true,
+                    Message = "Expired campaigns retrieved successfully.",
+                    Data = responseDtos
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<IEnumerable<CampaignResponseDto>>
+                {
+                    Success = false,
+                    Message = $"Failed to retrieve expired campaigns: {ex.Message}"
+                };
+            }
+        }
+
+        public async Task<ServiceResponse<IEnumerable<CampaignResponseDto>>> GetCampaignsExpiringSoonAsync(int daysThreshold = 7)
+        {
+            try
+            {
+                if (daysThreshold <= 0) daysThreshold = 7;
+
+                var campaigns = await _campaignRepository.GetCampaignsExpiringSoonAsync(daysThreshold);
+                var responseDtos = _campaignMapper.MapToResponseDtos(campaigns);
+
+                // Calculate days remaining for each campaign
+                foreach (var dto in responseDtos)
+                {
+                    // You might want to add a DaysRemaining property to CampaignResponseDto
+                }
+
+                return new ServiceResponse<IEnumerable<CampaignResponseDto>>
+                {
+                    Success = true,
+                    Message = $"Campaigns expiring within {daysThreshold} days retrieved successfully.",
+                    Data = responseDtos
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<IEnumerable<CampaignResponseDto>>
+                {
+                    Success = false,
+                    Message = $"Failed to retrieve expiring campaigns: {ex.Message}"
+                };
+            }
+        }
+
+        public async Task<ServiceResponse<bool>> ExtendCampaignDeadlineAsync(int campaignId, DateTime newDeadline)
+        {
+            try
+            {
+                var campaign = await _campaignRepository.GetCampaignByIdAsync(campaignId);
+                if (campaign == null)
+                {
+                    return new ServiceResponse<bool>
+                    {
+                        Success = false,
+                        Message = $"Campaign with ID {campaignId} not found."
+                    };
+                }
+
+                if (newDeadline <= DateTime.Now)
+                {
+                    return new ServiceResponse<bool>
+                    {
+                        Success = false,
+                        Message = "New deadline must be in the future."
+                    };
+                }
+
+                if (campaign.Status == CampaignStatus.Completed)
+                {
+                    return new ServiceResponse<bool>
+                    {
+                        Success = false,
+                        Message = "Cannot extend deadline for a completed campaign."
+                    };
+                }
+
+                var updatedCampaign = await _campaignRepository.ExtendCampaignDeadlineAsync(campaignId, newDeadline);
+
+                return new ServiceResponse<bool>
+                {
+                    Success = true,
+                    Message = $"Campaign deadline extended to {newDeadline:yyyy-MM-dd} successfully.",
+                    Data = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = $"Failed to extend deadline: {ex.Message}"
+                };
+            }
+        }
+
+        public async Task<ServiceResponse<bool>> AutoExpireCampaignsAsync()
+        {
+            try
+            {
+                var expiredCampaigns = await _campaignRepository.GetExpiredCampaignsAsync();
+                int expiredCount = 0;
+
+                foreach (var campaign in expiredCampaigns)
+                {
+                    if (campaign.Status == CampaignStatus.Active)
+                    {
+                        campaign.UpdateStatus(CampaignStatus.Expired);
+                        await _campaignRepository.UpdateCampaignAsync(campaign);
+                        expiredCount++;
+                    }
+                }
+
+                return new ServiceResponse<bool>
+                {
+                    Success = true,
+                    Message = $"{expiredCount} campaigns have been marked as expired.",
+                    Data = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = $"Failed to auto-expire campaigns: {ex.Message}"
+                };
+            }
+        }
+
         // ===== Bulk Operations =====
 
         public async Task<ServiceResponse<int>> BulkUpdateCampaignStatusAsync(CampaignStatus oldStatus, CampaignStatus newStatus)
