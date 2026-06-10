@@ -1,5 +1,4 @@
-﻿using TheCharityBLL.DTOs;
-using TheCharityBLL.DTOs.CampaignDTOs;
+﻿using TheCharityBLL.DTOs.CampaignDTOs;
 using TheCharityBLL.Mapper;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityBLL.ViewModels;
