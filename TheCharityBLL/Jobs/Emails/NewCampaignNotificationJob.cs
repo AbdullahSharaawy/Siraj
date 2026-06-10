@@ -4,7 +4,6 @@ using TheCharityBLL.Jobs.Result.Abstraction;
 using TheCharityBLL.Jobs.Result.Implementation;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityDAL.Enums;
-using TheCharityDAL.Repositories.Abstraction;
 
 namespace TheCharityBLL.Jobs.Emails
 {
@@ -12,17 +11,17 @@ namespace TheCharityBLL.Jobs.Emails
     {
         private readonly ICampaignService _campaignService;
         private readonly IEmailService _emailService;
-        private readonly IOrganizationRepository _organizationRepository;
+        private readonly IOrganizationService _organizationService;
 
         public NewCampaignNotificationJob(
             ICampaignService campaignService,
             IEmailService emailService,
-            IUserRepository userRepository,
-            IOrganizationRepository organizationRepository)
+            IOrganizationService organizationService,
+            IUserService userService)
         {
             _campaignService = campaignService;
             _emailService = emailService;
-            _organizationRepository = organizationRepository;
+            _organizationService = organizationService;
         }
 
         public override string JobName => "Send new campaign notification";
@@ -30,23 +29,29 @@ namespace TheCharityBLL.Jobs.Emails
         public override async Task<IJobResult> ExecuteAsync(JobContext context)
         {
             var campaignId = context.GetMetadata<int>("CampaignId");
+
             var campaign = await _campaignService.GetCampaignByIdAsync(campaignId);
+            if (!campaign.Success)
+                return JobResult.Failure($"Campaign {campaignId} not found");
 
-            if (!campaign.Success) return JobResult.Failure($"Campaign {campaignId} not found");
-            if (campaign.Data == null) return JobResult.Failure($"Campaign {campaignId} data is null");
+            var organization = await _organizationService.GetOrganizationById(campaign.Data.OrganizationId);
+            if (!organization.Success)
+                return JobResult.Failure($"Organization {campaign.Data.OrganizationId} not found");
 
-            var organization = await _organizationRepository.GetOrganizationByIdAsync(campaign.Data.OrganizationId);
+            // Get organization email from contact methods
+            var contactMethods = await _organizationService.GetOrganizationContactMethods(campaign.Data.OrganizationId);
+            var emailContact = contactMethods.Data?.FirstOrDefault(cm => cm.Type == ContactType.Email);
 
-            var emailResult = organization?.ContactMethods.FirstOrDefault(cm => cm.Type == ContactType.Email);
-            if (emailResult == null || String.IsNullOrEmpty(emailResult.Value)) return JobResult.Failure($"Organization {campaign.Data.OrganizationId} has no email contact method");
+            if (emailContact == null || string.IsNullOrEmpty(emailContact.Value))
+                return JobResult.Failure($"No email found for organization {campaign.Data.OrganizationId}");
 
             await _emailService.SendNotificationAsync(
-                emailResult.Value,
-                $"New Campaign: {campaign.Data.Title}",
-                $"A new campaign has been created with target ${campaign.Data.Target}."
+                emailContact.Value,
+                $"New Campaign Created: {campaign.Data.Title}",
+                $"A new campaign '{campaign.Data.Title}' has been created with target ${campaign.Data.Target}. Deadline: {campaign.Data.Deadline:yyyy-MM-dd}"
             );
 
-            return JobResult.Success($"notification Sent");
+            return JobResult.Success($"Sent new campaign notification to organization {campaign.Data.OrganizationId}");
         }
     }
 }
