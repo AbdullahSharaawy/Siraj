@@ -247,6 +247,11 @@ namespace TheCharityBLL.Services.Repository
             var campaign = _mapper.MapToSoloEntity(createDto);
             var created = await _campaignRepository.AddSoloCampaignAsync(campaign);
 
+            await _eventDispatcher.DispatchAsync(new CampaignCreatedEvent
+            {
+                Campaign = created
+            });
+
             return new ServiceResponse<int>
             {
                 Success = true,
