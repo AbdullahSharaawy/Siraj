@@ -1,5 +1,6 @@
 ﻿using TheCharityBLL.Events.Abstraction;
 using TheCharityBLL.Events.CampaignEvents;
+using TheCharityBLL.Jobs.Emails;
 using TheCharityBLL.Services.Abstraction;
 
 namespace TheCharityBLL.Events.EventHandlers.CampaignEventHandlers
@@ -32,13 +33,6 @@ namespace TheCharityBLL.Events.EventHandlers.CampaignEventHandlers
             else if (percentage >= 75 && percentage < 100)
             {
                 _jobScheduler.EnqueueJob<SendMilestoneEmailJob>(new { CampaignId = campaign.Id, Milestone = 75 });
-
-                // Check if urgent (less than 7 days left)
-                var daysLeft = (campaign.Deadline - DateTime.UtcNow).Days;
-                if (daysLeft < 7 && daysLeft > 0)
-                {
-                    _jobScheduler.EnqueueJob<UrgentCampaignAlertJob>(new { CampaignId = campaign.Id });
-                }
             }
             else if (percentage >= 100)
             {

@@ -1,5 +1,6 @@
 ﻿using TheCharityBLL.Events.Abstraction;
 using TheCharityBLL.Events.CampaignEvents;
+using TheCharityBLL.Jobs.Emails;
 using TheCharityBLL.Services.Abstraction;
 
 namespace TheCharityBLL.Events.EventHandlers.CampaignEventHandlers
