@@ -1,4 +1,6 @@
 ﻿using TheCharityBLL.DTOs.CampaignDTOs;
+using TheCharityBLL.Events.Abstraction;
+using TheCharityBLL.Events.CampaignEvents;
 using TheCharityBLL.Mapper;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityBLL.ViewModels;
@@ -13,16 +15,20 @@ namespace TheCharityBLL.Services.Repository
         private readonly ICampaignRepository _campaignRepository;
         private readonly IDonationRepository _donationRepository;
         private readonly IOrganizationRepository _organizationRepository;
+        private readonly IEventDispatcher _eventDispatcher;
         private readonly CampaignMapper _mapper;
 
         public CampaignService(
             ICampaignRepository campaignRepository,
             IDonationRepository donationRepository,
-            IOrganizationRepository organizationRepository)
+            IOrganizationRepository organizationRepository,
+            IEventDispatcher eventDispatcher
+            )
         {
             _campaignRepository = campaignRepository;
             _donationRepository = donationRepository;
             _organizationRepository = organizationRepository;
+            _eventDispatcher = eventDispatcher;
             _mapper = new CampaignMapper();
         }
 
@@ -628,6 +634,12 @@ namespace TheCharityBLL.Services.Repository
                 campaign.UpdateStatus(CampaignStatus.Completed);
                 await _campaignRepository.UpdateCampaignAsync(campaign);
             }
+
+            await _eventDispatcher.DispatchAsync(new CampaignDonationReceivedEvent
+            {
+                Campaign = campaign,
+                Amount = amount
+            });
 
             return new ServiceResponse<bool>
             {
