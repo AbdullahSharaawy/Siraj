@@ -46,7 +46,7 @@ namespace TheCharityBLL.Jobs.Emails
                 $"A new campaign has been created with target ${campaign.Data.Target}."
             );
 
-            return JobResult.Success($"notifications Sent");
+            return JobResult.Success($"notification Sent");
         }
     }
 }
