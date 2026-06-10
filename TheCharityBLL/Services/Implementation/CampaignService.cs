@@ -1126,6 +1126,12 @@ namespace TheCharityBLL.Services.Repository
 
                 var updatedCampaign = await _campaignRepository.ExtendCampaignDeadlineAsync(campaignId, newDeadline);
 
+                await _eventDispatcher.DispatchAsync(new CampaignDeadlineExtendedEvent
+                {
+                    Campaign = campaign,
+                    NewDeadline = newDeadline
+                });
+
                 return new ServiceResponse<bool>
                 {
                     Success = true,
