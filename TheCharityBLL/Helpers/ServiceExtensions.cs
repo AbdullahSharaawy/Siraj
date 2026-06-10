@@ -6,6 +6,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using TheCharityBLL.Events.Abstraction;
+using TheCharityBLL.Events.CampaignEvents;
+using TheCharityBLL.Events.EventHandlers.CampaignEventHandlers;
+using TheCharityBLL.Events.Implementation;
 using TheCharityBLL.Jobs.Emails;
 using TheCharityBLL.Jobs.Registry.Abstraction;
 using TheCharityBLL.Jobs.Registry.Implementation;
@@ -88,6 +92,11 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<CampaignDeadlineReminderJob>();
             services.AddScoped<AutoExpireCampaignsJob>();
             services.AddScoped<WeeklyCampaignDigestJob>();
+            // Event Handlers
+            services.AddScoped<IEventHandler<CampaignDonationReceivedEvent>, CampaignDonationEventHandler>();
+            services.AddScoped<IEventHandler<CampaignCreatedEvent>, CampaignCreatedEventHandler>();
+            services.AddScoped<IEventHandler<CampaignDeadlineExtendedEvent>, CampaignDeadlineExtendedEventHandler>();
+            services.AddScoped<IEventDispatcher, EventDispatcher>();
             // mapper Injection
             services.AddAutoMapper(cfg => {
                 cfg.AddProfile<UserMapperProfile>();
