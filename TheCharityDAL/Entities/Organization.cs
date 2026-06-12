@@ -11,7 +11,6 @@ namespace TheCharityDAL.Entities
         public string? Address { get; private set; }
         public int? PaymentId { get; private set; }
 
-
         [ForeignKey(nameof(PaymentId))]
         public PaymentInfo? PaymentInfo { get; private set; }
         public virtual ICollection<SoloCampaign> SoloCampaigns { get; set; } = new List<SoloCampaign>();
