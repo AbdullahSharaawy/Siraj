@@ -143,7 +143,7 @@ namespace TheCharityBLL.Helpers
         public static void AddHangfireServices(this IServiceCollection services)
         {
             // Add more jobs here as you create them
-            services.AddScoped<CheckExpiredCampaignsJob>();
+            services.AddScoped<AutoCompleteCampaignsJob>();
 
             // Register services
             services.AddScoped<IJobSchedulerService, HangfireJobSchedulerService>();

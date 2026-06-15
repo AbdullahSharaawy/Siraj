@@ -10,14 +10,14 @@ using TheCharityBLL.Jobs.Result.Implementation;
 namespace TheCharityBLL.Jobs.Scheduled
 {
     [Queue("maintenance")]
-    public class CheckExpiredCampaignsJob : BaseJob
+    public class AutoCompleteCampaignsJob : BaseJob
     {
         private readonly ICampaignRepository _campaignRepository;
-        private readonly ILogger<CheckExpiredCampaignsJob> _logger;
+        private readonly ILogger<AutoCompleteCampaignsJob> _logger;
 
-        public CheckExpiredCampaignsJob(
+        public AutoCompleteCampaignsJob(
             ICampaignRepository campaignRepository,
-            ILogger<CheckExpiredCampaignsJob> logger)
+            ILogger<AutoCompleteCampaignsJob> logger)
         {
             _campaignRepository = campaignRepository;
             _logger = logger;

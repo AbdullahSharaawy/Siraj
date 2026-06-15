@@ -23,8 +23,8 @@ namespace TheCharityBLL.Jobs.Registry.Implementation
             _logger.LogInformation("Registering all recurring jobs...");
 
             // Register CheckExpiredCampaignsJob to run every hour
-            _jobScheduler.AddOrUpdateRecurringJob<CheckExpiredCampaignsJob>(
-                "check-completed-campaigns",
+            _jobScheduler.AddOrUpdateRecurringJob<AutoCompleteCampaignsJob>(
+                "auto-complete-campaigns",
                 Cron.Hourly()
             );
 
