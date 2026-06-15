@@ -639,14 +639,7 @@ namespace TheCharityBLL.Services.Repository
                 campaign.UpdateStatus(CampaignStatus.Completed);
                 await _campaignRepository.UpdateCampaignAsync(campaign);
             }
-
-            // This should be moved to donation
-            await _eventDispatcher.DispatchAsync(new CampaignDonationReceivedEvent
-            {
-                Campaign = campaign,
-                Amount = amount
-            });
-
+   
             return new ServiceResponse<bool>
             {
                 Success = true,

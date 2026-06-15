@@ -1,10 +1,8 @@
-﻿using TheCharityDAL.Entities;
-
-namespace TheCharityBLL.Events.CampaignEvents
+﻿namespace TheCharityBLL.Events.CampaignEvents
 {
     public class CampaignDonationReceivedEvent
     {
-        public Campaign Campaign { get; set; } = null!;
+        public int CampaignId { get; set; }
         public double Amount { get; set; }
     }
 }

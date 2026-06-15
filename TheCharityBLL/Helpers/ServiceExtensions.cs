@@ -9,6 +9,7 @@ using System.Text;
 using TheCharityBLL.Events.Abstraction;
 using TheCharityBLL.Events.CampaignEvents;
 using TheCharityBLL.Events.EventHandlers.CampaignEventHandlers;
+using TheCharityBLL.Events.EventHandlers.DonationEventHandlers;
 using TheCharityBLL.Events.Implementation;
 using TheCharityBLL.Jobs.Emails;
 using TheCharityBLL.Jobs.Registry.Abstraction;
