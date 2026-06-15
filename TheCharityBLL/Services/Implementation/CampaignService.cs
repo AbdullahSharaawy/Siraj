@@ -636,8 +636,7 @@ namespace TheCharityBLL.Services.Repository
             // Check if target is reached
             if (campaign.Target.HasValue && campaign.Achieved >= campaign.Target)
             {
-                campaign.UpdateStatus(CampaignStatus.Completed);
-                await _campaignRepository.UpdateCampaignAsync(campaign);
+                await UpdateCampaignStatusAsync(campaignId, CampaignStatus.Completed);
             }
    
             return new ServiceResponse<bool>
@@ -659,6 +658,13 @@ namespace TheCharityBLL.Services.Repository
                     Message = $"Campaign with ID {campaignId} not found."
                 };
             }
+
+            await _eventDispatcher.DispatchAsync(new CampaignStatusChangedEvent
+            {
+                Campaign = campaign,
+                OldStatus = campaign.Status.Value,
+                NewStatus = status
+            });
 
             campaign.UpdateStatus(status);
             await _campaignRepository.UpdateCampaignAsync(campaign);
