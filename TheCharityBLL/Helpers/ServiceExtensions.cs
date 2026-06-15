@@ -48,7 +48,7 @@ namespace TheCharityBLL.Helpers
             .AddEntityFrameworkStores<TheCharityDbContext>()
             .AddDefaultTokenProviders();
         }
-        public static void FoxArtEmailConfiguration(this IServiceCollection services, IConfiguration configuration)
+        public static void TheCharityConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
         }

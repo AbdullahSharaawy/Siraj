@@ -16,7 +16,7 @@ namespace TheCharityPL
             builder.Services.TheCharityEnhancedConnectionString(builder.Configuration);
             builder.Services.TheCharityDependencyInjection();
             builder.Services.TheCharityIdentity(builder.Configuration);
-            builder.Services.FoxArtEmailConfiguration(builder.Configuration);
+            builder.Services.TheCharityConfiguration(builder.Configuration);
             builder.Services.ThirdPartyAuthentication(builder.Configuration);
             builder.Services.AddHangfireServices();
             // Add services to the container.
