@@ -96,6 +96,7 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<IEventHandler<CampaignDonationReceivedEvent>, CampaignDonationEventHandler>();
             services.AddScoped<IEventHandler<CampaignCreatedEvent>, CampaignCreatedEventHandler>();
             services.AddScoped<IEventHandler<CampaignDeadlineExtendedEvent>, CampaignDeadlineExtendedEventHandler>();
+            services.AddScoped<IEventHandler<CampaignExpiredEvent>, CampaignExpiredEventHandler>();
             services.AddScoped<IEventDispatcher, EventDispatcher>();
             // mapper Injection
             services.AddAutoMapper(cfg => {
