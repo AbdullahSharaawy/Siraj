@@ -21,7 +21,7 @@ namespace TheCharityBLL.Events.EventHandlers.CampaignEventHandlers
             // Calculate percentage
             var percentage = (campaign.Achieved / campaign.Target) * 100;
 
-            // Check milestones (ALL logic here, NOT in service)
+            // Check milestones
             if (percentage >= 25 && percentage < 50)
             {
                 _jobScheduler.EnqueueJob<SendMilestoneEmailJob>(new { CampaignId = campaign.Id, Milestone = 25 });
