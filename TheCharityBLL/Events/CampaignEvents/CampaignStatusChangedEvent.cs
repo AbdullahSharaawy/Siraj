@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using TheCharityDAL.Entities;
+using TheCharityDAL.Enums;
 
 namespace TheCharityBLL.Events.CampaignEvents
 {
-    internal class CampaignStatusChangedEvent
+    public class CampaignStatusChangedEvent
     {
+        public Campaign Campaign { get; set; } = null!;
+        public CampaignStatus OldStatus { get; set; }
+        public CampaignStatus NewStatus { get; set; }
     }
 }

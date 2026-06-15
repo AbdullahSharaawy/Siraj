@@ -23,7 +23,7 @@ namespace TheCharityBLL.Events.EventHandlers.DonationEventHandlers
             var campaign = await _campaignRepository.GetCampaignByIdAsync(campaignId);
 
             // Calculate percentage
-            var percentage = campaign?.Achieved / campaign?.Target * 100;
+            var percentage = (campaign?.Achieved ?? 0) / (campaign?.Target ?? 1) * 100;
 
             // Check milestones
             if (percentage >= 25 && percentage < 50)
