@@ -640,6 +640,7 @@ namespace TheCharityBLL.Services.Repository
                 await _campaignRepository.UpdateCampaignAsync(campaign);
             }
 
+            // This should be moved to donation
             await _eventDispatcher.DispatchAsync(new CampaignDonationReceivedEvent
             {
                 Campaign = campaign,
