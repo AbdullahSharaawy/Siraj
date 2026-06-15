@@ -95,9 +95,13 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<WeeklyCampaignDigestJob>();
             // Event Handlers
             services.AddScoped<IEventHandler<CampaignDonationReceivedEvent>, CampaignDonationEventHandler>();
+            services.AddScoped<IEventHandler<CampaignDonationReceivedEvent>, IncrementCampaignMoneyEventHandler>();
             services.AddScoped<IEventHandler<CampaignCreatedEvent>, CampaignCreatedEventHandler>();
+            services.AddScoped<IEventHandler<CampaignCompletedEvent>, CampaignCompletedEventHandler>();
+            services.AddScoped<IEventHandler<CampaignDismissedEvent>, CampaignDismissedEventHandler>();
             services.AddScoped<IEventHandler<CampaignDeadlineExtendedEvent>, CampaignDeadlineExtendedEventHandler>();
             services.AddScoped<IEventHandler<CampaignExpiredEvent>, CampaignExpiredEventHandler>();
+            services.AddScoped<IEventHandler<CampaignPostponedEvent>, CampaignPostponedEventHandler>();
             services.AddScoped<IEventDispatcher, EventDispatcher>();
             // mapper Injection
             services.AddAutoMapper(cfg => {
