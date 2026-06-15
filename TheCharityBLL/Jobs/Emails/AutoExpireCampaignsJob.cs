@@ -1,69 +1,58 @@
-﻿using TheCharityBLL.Jobs.Base;
+﻿using TheCharityBLL.Events.Abstraction;
+using TheCharityBLL.Events.CampaignEvents;
+using TheCharityBLL.Jobs.Base;
 using TheCharityBLL.Jobs.Context;
 using TheCharityBLL.Jobs.Result.Abstraction;
 using TheCharityBLL.Jobs.Result.Implementation;
-using TheCharityBLL.Services.Abstraction;
 using TheCharityDAL.Enums;
+using TheCharityDAL.Repositories.Abstraction;
 
 namespace TheCharityBLL.Jobs.Emails
 {
     public class AutoExpireCampaignsJob : BaseJob
     {
-        private readonly ICampaignService _campaignService;
-        private readonly IEmailService _emailService;
-        private readonly IOrganizationService _organizationService;
+        private readonly ICampaignRepository _campaignRepository;
+        private readonly IEventDispatcher _eventDispatcher;
 
         public AutoExpireCampaignsJob(
-            ICampaignService campaignService,
-            IEmailService emailService,
-            IOrganizationService organizationService)
+            ICampaignRepository campaignRepository,
+            IEventDispatcher eventDispatcher)
         {
-            _campaignService = campaignService;
-            _emailService = emailService;
-            _organizationService = organizationService;
+            _campaignRepository = campaignRepository;
+            _eventDispatcher = eventDispatcher;
         }
 
         public override string JobName => "Auto-expire overdue campaigns";
 
         public override async Task<IJobResult> ExecuteAsync(JobContext context)
         {
-            var expiredCampaigns = await _campaignService.GetExpiredCampaignsAsync();
+            // Use repository directly to get entities
+            var expiredCampaigns = await _campaignRepository.GetExpiredCampaignsAsync();
 
-            if (!expiredCampaigns.Success || expiredCampaigns.Data == null)
-                return JobResult.Failure("Failed to get expired campaigns");
+            if (expiredCampaigns == null || !expiredCampaigns.Any())
+                return JobResult.Success("No expired campaigns found");
 
             var expiredCount = 0;
 
-            foreach (var campaign in expiredCampaigns.Data)
+            foreach (var campaign in expiredCampaigns)
             {
                 // Only expire active campaigns
                 if (campaign.Status == CampaignStatus.Active)
                 {
-                    await _campaignService.UpdateCampaignStatusAsync(campaign.Id, CampaignStatus.Expired);
+                    // Update status using repository
+                    await _campaignRepository.UpdateCampaignStatusAsync(campaign.Id, CampaignStatus.Expired);
 
-                    var organization = await _organizationService.GetOrganizationById(campaign.OrganizationId);
-                    if (organization.Success)
+                    // Fire event with the actual Campaign entity
+                    await _eventDispatcher.DispatchAsync(new CampaignExpiredEvent
                     {
-                        // Get organization email
-                        var contactMethods = await _organizationService.GetOrganizationContactMethods(campaign.OrganizationId);
-                        var emailContact = contactMethods.Data?.FirstOrDefault(cm => cm.Type == ContactType.Email);
+                        Campaign = campaign
+                    });
 
-                        if (emailContact != null && !string.IsNullOrEmpty(emailContact.Value))
-                        {
-                            await _emailService.SendNotificationAsync(
-                                emailContact.Value,
-                                $"Campaign Expired: {campaign.Title}",
-                                $"Your campaign '{campaign.Title}' has passed its deadline and has been marked as expired.\n" +
-                                $"You can extend the deadline or create a new campaign."
-                            );
-                        }
-                    }
                     expiredCount++;
                 }
             }
 
-            return JobResult.Success($"Expired {expiredCount} campaigns");
+            return JobResult.Success($"Expired {expiredCount} campaigns and fired events");
         }
     }
-
 }
