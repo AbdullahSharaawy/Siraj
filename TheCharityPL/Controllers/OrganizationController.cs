@@ -49,7 +49,7 @@ namespace TheCharityPL.Controllers
             if (!result.Success)
                 return BadRequest(result);
 
-            return CreatedAtAction(nameof(GetById), new { id = result.Data.Id }, result);
+            return CreatedAtAction(nameof(GetById), new { orgId = result.Data.Id }, result);
         }
 
         [HttpPut("{orgId:int}")]
