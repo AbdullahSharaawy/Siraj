@@ -25,7 +25,7 @@ namespace TheCharityBLL.Services.Implementation
         }
         public async Task<ServiceResponse<OrgContactMethodResponseDto>> CreateContactMethod(CreateOrgContactMethodDto contactMethod)
         {
-            if (await _repository.OrganizationExistsAsync(contactMethod.CompanyId))
+            if (!await _repository.OrganizationExistsAsync(contactMethod.CompanyId))
             {
                 return new ServiceResponse<OrgContactMethodResponseDto>
                 {
