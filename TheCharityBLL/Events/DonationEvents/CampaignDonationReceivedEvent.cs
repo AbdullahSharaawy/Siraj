@@ -1,4 +1,4 @@
-﻿namespace TheCharityBLL.Events.CampaignEvents
+﻿namespace TheCharityBLL.Events.DonationEvents
 {
     public class CampaignDonationReceivedEvent
     {
