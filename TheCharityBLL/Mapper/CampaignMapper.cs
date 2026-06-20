@@ -93,10 +93,12 @@ namespace TheCharityBLL.Mapper
                 IsDeleted = campaign.IsDeleted,
                 RegistrationDate = campaign.RegistrationDate,
                 UpdatedOn = campaign.UpdatedOn,
-                Deadline = campaign.Deadline, // Might as well add this too
+                Deadline = campaign.Deadline,
                 DaysRemaining = campaign.Deadline.HasValue
                     ? (int)Math.Ceiling((campaign.Deadline.Value - DateTime.Now).TotalDays)
                     : null,
+                CreatorOrganizationId = campaign.CreatorOrganizationId,
+                CreatorOrganizationName = campaign.CreatorOrganization?.Name ?? string.Empty,
                 Organizations = campaign.Organizations?.Select(o => new OrganizationBasicDto
                 {
                     Id = o.Id,
