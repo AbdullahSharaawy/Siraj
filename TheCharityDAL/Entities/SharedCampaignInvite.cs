@@ -33,8 +33,6 @@ namespace TheCharityDAL.Entities
             ExpiresAt = expiresAt;
         }
 
-        private SharedCampaignInvite() { } // For EF Core
-
         public void Accept()
         {
             Status = InviteStatus.Accepted;
