@@ -149,7 +149,8 @@ namespace TheCharityBLL.Mapper
                 target: (int?)(dto.Target ?? 100),
                 achieved: 0,
                 status: CampaignStatus.Active,
-                type: CampaignType.type6
+                type: CampaignType.type6,
+                 creatorOrganizationId: dto.CreatorOrganizationId
             );
         }
     }
