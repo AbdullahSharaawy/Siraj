@@ -257,9 +257,6 @@ namespace TheCharityDAL.Migrations
                     b.Property<int?>("OrganizationId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("OrganizationId2")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("RegistrationDate")
                         .HasColumnType("datetime2");
 
@@ -279,8 +276,6 @@ namespace TheCharityDAL.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId2");
 
                     b.ToTable("Campaigns", (string)null);
 
@@ -423,6 +418,9 @@ namespace TheCharityDAL.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("AdminUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<DateTime?>("DeletedOn")
                         .HasColumnType("datetime2");
 
@@ -442,6 +440,8 @@ namespace TheCharityDAL.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AdminUserId");
 
                     b.HasIndex("PaymentId");
 
@@ -482,6 +482,45 @@ namespace TheCharityDAL.Migrations
                     b.HasIndex("CompanyId");
 
                     b.ToTable("OrganizationContactMethods");
+                });
+
+            modelBuilder.Entity("TheCharityDAL.Entities.OrganizationRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("OrganizationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("RegistrationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("OrganizationRoles");
                 });
 
             modelBuilder.Entity("TheCharityDAL.Entities.PaymentInfo", b =>
@@ -563,6 +602,56 @@ namespace TheCharityDAL.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ScheduledJobs");
+                });
+
+            modelBuilder.Entity("TheCharityDAL.Entities.SharedCampaignInvite", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("InvitedByUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("OrganizationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("RegistrationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("RespondedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SharedCampaignId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvitedByUserId");
+
+                    b.HasIndex("OrganizationId");
+
+                    b.HasIndex("SharedCampaignId");
+
+                    b.ToTable("SharedCampaignInvites");
                 });
 
             modelBuilder.Entity("TheCharityDAL.Entities.User", b =>
@@ -654,6 +743,11 @@ namespace TheCharityDAL.Migrations
             modelBuilder.Entity("TheCharityDAL.Entities.SharedCampaign", b =>
                 {
                     b.HasBaseType("TheCharityDAL.Entities.Campaign");
+
+                    b.Property<int>("CreatorOrganizationId")
+                        .HasColumnType("int");
+
+                    b.HasIndex("CreatorOrganizationId");
 
                     b.HasDiscriminator().HasValue("Shared");
                 });
@@ -747,13 +841,6 @@ namespace TheCharityDAL.Migrations
                     b.Navigation("DonatedItem");
                 });
 
-            modelBuilder.Entity("TheCharityDAL.Entities.Campaign", b =>
-                {
-                    b.HasOne("TheCharityDAL.Entities.Organization", null)
-                        .WithMany("Campaigns")
-                        .HasForeignKey("OrganizationId2");
-                });
-
             modelBuilder.Entity("TheCharityDAL.Entities.DonatedItem", b =>
                 {
                     b.HasOne("TheCharityDAL.Entities.User", "Donor")
@@ -803,9 +890,16 @@ namespace TheCharityDAL.Migrations
 
             modelBuilder.Entity("TheCharityDAL.Entities.Organization", b =>
                 {
+                    b.HasOne("TheCharityDAL.Entities.User", "AdminUser")
+                        .WithMany()
+                        .HasForeignKey("AdminUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("TheCharityDAL.Entities.PaymentInfo", "PaymentInfo")
                         .WithMany()
                         .HasForeignKey("PaymentId");
+
+                    b.Navigation("AdminUser");
 
                     b.Navigation("PaymentInfo");
                 });
@@ -817,6 +911,63 @@ namespace TheCharityDAL.Migrations
                         .HasForeignKey("CompanyId");
 
                     b.Navigation("organization");
+                });
+
+            modelBuilder.Entity("TheCharityDAL.Entities.OrganizationRole", b =>
+                {
+                    b.HasOne("TheCharityDAL.Entities.Organization", "Organization")
+                        .WithMany("OrganizationRoles")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TheCharityDAL.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Organization");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TheCharityDAL.Entities.SharedCampaignInvite", b =>
+                {
+                    b.HasOne("TheCharityDAL.Entities.User", "InvitedByUser")
+                        .WithMany()
+                        .HasForeignKey("InvitedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TheCharityDAL.Entities.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("TheCharityDAL.Entities.SharedCampaign", "SharedCampaign")
+                        .WithMany()
+                        .HasForeignKey("SharedCampaignId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("InvitedByUser");
+
+                    b.Navigation("Organization");
+
+                    b.Navigation("SharedCampaign");
+                });
+
+            modelBuilder.Entity("TheCharityDAL.Entities.SharedCampaign", b =>
+                {
+                    b.HasOne("TheCharityDAL.Entities.Organization", "CreatorOrganization")
+                        .WithMany()
+                        .HasForeignKey("CreatorOrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CreatorOrganization");
                 });
 
             modelBuilder.Entity("TheCharityDAL.Entities.SoloCampaign", b =>
@@ -840,9 +991,9 @@ namespace TheCharityDAL.Migrations
 
             modelBuilder.Entity("TheCharityDAL.Entities.Organization", b =>
                 {
-                    b.Navigation("Campaigns");
-
                     b.Navigation("ContactMethods");
+
+                    b.Navigation("OrganizationRoles");
 
                     b.Navigation("SoloCampaigns");
                 });

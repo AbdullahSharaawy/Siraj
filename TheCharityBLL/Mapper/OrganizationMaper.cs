@@ -1,10 +1,7 @@
-﻿
-using Riok.Mapperly.Abstractions;
-using System.Collections;
+﻿using Riok.Mapperly.Abstractions;
 using TheCharityBLL.DTOs.OrganizationContactMethodDTOs;
 using TheCharityBLL.DTOs.OrganizationDTOs;
 using TheCharityBLL.DTOs.PaymentInfoDTOs;
-using TheCharityBLL.Services.Repository;
 using TheCharityDAL.Entities;
 
 namespace TheCharityBLL.Mapper
