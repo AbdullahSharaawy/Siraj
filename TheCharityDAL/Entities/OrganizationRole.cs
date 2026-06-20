@@ -26,8 +26,6 @@ namespace TheCharityDAL.Entities
             Role = role;
         }
 
-        private OrganizationRole() { } // For EF Core
-
         public void Delete()
         {
             IsDeleted = true;
