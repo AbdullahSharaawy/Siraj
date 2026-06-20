@@ -20,6 +20,8 @@ namespace TheCharityDAL.Database
         public DbSet<SharedCampaign> SharedCampaigns { get; set; }
         public DbSet<SoloCampaign> SoloCampaigns { get; set; }
         public DbSet<ScheduledJob> ScheduledJobs { get; set; }
+        public DbSet<OrganizationRole> OrganizationRoles { get; set; }
+        public DbSet<SharedCampaignInvite> SharedCampaignInvites { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
