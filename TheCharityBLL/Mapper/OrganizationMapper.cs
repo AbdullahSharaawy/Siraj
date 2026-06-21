@@ -7,7 +7,7 @@ using TheCharityDAL.Entities;
 namespace TheCharityBLL.Mapper
 {
     [Mapper]
-    public partial class OrganizationMaper
+    public partial class OrganizationMapper
     {
         public partial Organization MapToOrganization(CreateOrganizationDto createOrganizationDto);
         public partial OrganizationResponseDto MapToOrganizationResponseDto(Organization organization);

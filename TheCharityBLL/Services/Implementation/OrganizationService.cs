@@ -17,11 +17,11 @@ namespace TheCharityBLL.Services.Implementation
     public class OrganizationService : IOrganizationService
     {
         private readonly IOrganizationRepository _repository;
-        private readonly OrganizationMaper _mapper;
+        private readonly OrganizationMapper _mapper;
         public OrganizationService(IOrganizationRepository repository)
         {
             _repository = repository;
-            _mapper = new OrganizationMaper();
+            _mapper = new OrganizationMapper();
         }
         public async Task<ServiceResponse<OrgContactMethodResponseDto>> CreateContactMethod(CreateOrgContactMethodDto contactMethod)
         {
