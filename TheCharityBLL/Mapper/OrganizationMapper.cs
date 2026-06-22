@@ -11,7 +11,6 @@ namespace TheCharityBLL.Mapper
     {
         public partial Organization MapToOrganization(CreateOrganizationDto createOrganizationDto);
         public partial IEnumerable<OrganizationDropDownListDto> MapToOrganizationDropDownListDtos(IEnumerable<Organization> organizations);
-        public partial IEnumerable<OrganizationResponseDto> MapToOrganizationResponseDtos(IEnumerable<Organization> organizations);
         public partial OrganizationContactMethod MapToOrganizationContactMethod(CreateOrgContactMethodDto contactMethod);
         public partial OrgContactMethodResponseDto MapToOrganizationContactMethodResponseDto(OrganizationContactMethod contactMethod);
         public partial IEnumerable<OrgContactMethodResponseDto> MapToOrganizationContactMethodResponseDtos(IEnumerable<OrganizationContactMethod> contactMethods);
@@ -95,6 +94,14 @@ namespace TheCharityBLL.Mapper
             };
 
             return dto;
+        }
+
+        public IEnumerable<OrganizationResponseDto> MapToOrganizationResponseDtos(IEnumerable<Organization> organizations)
+        {
+            if (organizations == null)
+                return new List<OrganizationResponseDto>();
+
+            return organizations.Select(org => MapToOrganizationResponseDto(org)).ToList();
         }
     }
 }
