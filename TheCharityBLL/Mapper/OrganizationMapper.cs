@@ -10,7 +10,6 @@ namespace TheCharityBLL.Mapper
     public partial class OrganizationMapper
     {
         public partial Organization MapToOrganization(CreateOrganizationDto createOrganizationDto);
-        public partial OrganizationResponseDto MapToOrganizationResponseDto(Organization organization);
         public partial OrganizationDetailsDto MapToOrganizationDetailsDto(Organization organization);
         public partial IEnumerable<OrganizationDropDownListDto> MapToOrganizationDropDownListDtos(IEnumerable<Organization> organizations);
         public partial IEnumerable<OrganizationResponseDto> MapToOrganizationResponseDtos(IEnumerable<Organization> organizations);
@@ -20,5 +19,40 @@ namespace TheCharityBLL.Mapper
         public partial PaymentInfo MapToPaymentInfo(CreatePaymentInfoDto paymentInfo);
         public partial PaymentInfoResponseDto MapToPaymentInfoResponseDto(PaymentInfo paymentInfo);
         public partial IEnumerable<PaymentInfoResponseDto> MapToPaymentInfoResponseDto(IEnumerable<PaymentInfo> paymentInfo);
+        public OrganizationResponseDto MapToOrganizationResponseDto(Organization organization)
+        {
+            if (organization == null) return null!;
+
+            // Manually map ALL properties
+            var dto = new OrganizationResponseDto
+            {
+                Id = organization.Id,
+                Name = organization.Name,
+                Address = organization.Address,
+                PaymentId = organization.PaymentId,
+                IsDeleted = organization.IsDeleted,
+                RegistrationDate = organization.RegistrationDate.Value,
+                UpdatedOn = organization.UpdatedOn,
+
+                // ===== Map Admin properties =====
+                AdminUserId = organization.AdminUserId,
+                AdminUserName = organization.AdminUser?.UserName ?? organization.AdminUser?.Email ?? string.Empty,
+                AdminUserFullName = organization.AdminUser?.FullName ?? string.Empty,
+                AdminUserEmail = organization.AdminUser?.Email ?? string.Empty,
+                // ===== END =====
+
+                // Map ContactMethods
+                ContactMethods = organization.ContactMethods?
+                    .Where(cm => !cm.IsDeleted)
+                    .Select(cm => new OrgContactMethodResponseDto
+                    {
+                        Id = cm.Id,
+                        Value = cm.Value,
+                        Type = cm.Type.Value
+                    }).ToList() ?? new List<OrgContactMethodResponseDto>()
+            };
+
+            return dto;
+        }
     }
 }
