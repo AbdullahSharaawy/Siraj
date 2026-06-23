@@ -257,9 +257,6 @@ namespace TheCharityDAL.Migrations
                     b.Property<int?>("OrganizationId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("OrganizationId2")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("RegistrationDate")
                         .HasColumnType("datetime2");
 
@@ -279,8 +276,6 @@ namespace TheCharityDAL.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("OrganizationId2");
 
                     b.ToTable("Campaigns", (string)null);
 
@@ -747,13 +742,6 @@ namespace TheCharityDAL.Migrations
                     b.Navigation("DonatedItem");
                 });
 
-            modelBuilder.Entity("TheCharityDAL.Entities.Campaign", b =>
-                {
-                    b.HasOne("TheCharityDAL.Entities.Organization", null)
-                        .WithMany("Campaigns")
-                        .HasForeignKey("OrganizationId2");
-                });
-
             modelBuilder.Entity("TheCharityDAL.Entities.DonatedItem", b =>
                 {
                     b.HasOne("TheCharityDAL.Entities.User", "Donor")
@@ -840,8 +828,6 @@ namespace TheCharityDAL.Migrations
 
             modelBuilder.Entity("TheCharityDAL.Entities.Organization", b =>
                 {
-                    b.Navigation("Campaigns");
-
                     b.Navigation("ContactMethods");
 
                     b.Navigation("SoloCampaigns");

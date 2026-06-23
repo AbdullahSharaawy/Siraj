@@ -1,0 +1,66 @@
+<header class="nb">
+  <div class="nb_inner">
+
+    <!-- Desktop nav -->
+    <nav class="nb_nav" aria-label="Primary navigation">
+      <ul class="nb_list" role="list">
+        @for (link of links; track link.label) {
+        <li
+          class="nb_item"
+          [class.nb_item--has-children]="link.children"
+          (mouseenter)="link.children ? openDropdown(link.label) : null"
+          (mouseleave)="closeDropdown()">
+          <a
+            class="nb_link"
+            [routerLink]="link.href"
+            routerLinkActive="nb_link--active">
+            {{ link.label }}
+            @if (link.children) {
+            <svg class="nb_chevron" viewBox="0 0 12 8" fill="none"
+              aria-hidden="true">
+              <path d="M1 1.5l5 5 5-5" stroke="currentColor" stroke-width="1.5"
+                stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            }
+          </a>
+        </li>
+        }
+      </ul>
+    </nav>
+
+    <!-- Actions -->
+    <div class="nb_actions">
+      <!-- Notification bell -->
+      <button class="nb_icon-btn" aria-label="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg>
+        <span class="nb_badge">3</span>
+      </button>
+
+      <!-- Profile avatar -->
+      <button class="nb_icon-btn nb_avatar-btn" aria-label="Profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+          <circle cx="12" cy="7" r="4" />
+        </svg>
+      </button>
+
+      <!-- CTA -->
+      <a class="nb_cta cta cta--primary" routerLink="/donate">
+        Donate Now
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" width="14"
+          height="14">
+          <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor"
+            stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+    </div>
+
+  </div>
+</header>
