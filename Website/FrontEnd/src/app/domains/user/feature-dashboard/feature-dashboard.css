@@ -1,0 +1,137 @@
+.db {
+    padding: 1.5rem 0;
+}
+
+.db-header {
+    margin-bottom: 1.5rem;
+}
+
+.db-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 4vw, 2rem);
+    font-weight: 700;
+    color: var(--charcoal);
+}
+
+.db-sub {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    color: var(--warm-gray);
+    margin-top: 4px;
+}
+
+.db-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.db-stat {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.db-stat__label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--warm-gray);
+}
+
+.db-stat__value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--charcoal);
+}
+
+.db-stat__sub {
+    font-size: 0.75rem;
+    color: var(--warm-gray);
+}
+
+.db-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 12px;
+    margin-bottom: 1.5rem;
+}
+
+.db-card {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1.2rem 1.4rem;
+}
+
+.db-card__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.db-card__title {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--charcoal);
+}
+
+.db-card__link {
+    font-size: 0.82rem;
+    color: var(--sc-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.db-card__link:hover {
+    opacity: 0.75;
+}
+
+.db-empty {
+    font-size: 0.875rem;
+    color: var(--warm-gray);
+    text-align: center;
+    padding: 1.5rem 0;
+}
+
+.db-section-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--warm-gray);
+    margin-bottom: 10px;
+}
+
+.db-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 12px;
+}
+
+.db-action {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    padding: 1rem;
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--charcoal);
+    text-decoration: none;
+    transition: border-color 0.18s, color 0.18s;
+}
+
+.db-action:hover {
+    border-color: var(--sc-color);
+    color: var(--sc-color);
+}

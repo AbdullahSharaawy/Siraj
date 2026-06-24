@@ -1,0 +1,11 @@
+/* Shell rules (.nb, .nb_inner, .nb_nav, .nb_list, .nb_item, .nb_link,
+   .nb_chevron, .nb_actions, .nb_icon-btn, .nb_badge, .nb_cta) are shared
+   with the public navbar and live in styles.css. This file previously
+   had no content at all — it was silently depending on that global
+   leakage, including for .nb_avatar-btn, which was referenced in the
+   template but never defined anywhere. Defining it here now. */
+
+.nb_avatar-btn {
+  /* currently identical to .nb_icon-btn; kept as its own hook in case
+     the avatar button needs a profile image background later */
+}

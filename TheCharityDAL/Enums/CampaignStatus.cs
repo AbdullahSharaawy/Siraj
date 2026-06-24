@@ -6,6 +6,7 @@
         Active,
         Completed,
         Dismissed,
-        Postponed
+        Postponed,
+        Expired
     }
 }

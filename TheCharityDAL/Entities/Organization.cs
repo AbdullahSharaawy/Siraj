@@ -11,11 +11,12 @@ namespace TheCharityDAL.Entities
         public string? Address { get; private set; }
         public int? PaymentId { get; private set; }
 
-
         [ForeignKey(nameof(PaymentId))]
         public PaymentInfo? PaymentInfo { get; private set; }
         public virtual ICollection<SoloCampaign> SoloCampaigns { get; set; } = new List<SoloCampaign>();
         public virtual ICollection<SharedCampaign> SharedCampaigns { get; set; } = new List<SharedCampaign>();
+
+        [NotMapped]
         public IEnumerable<Campaign> Campaigns =>
             SoloCampaigns.Cast<Campaign>().Concat(SharedCampaigns.Cast<Campaign>());
         public virtual ICollection<OrganizationContactMethod> ContactMethods { get; private set; } = new List<OrganizationContactMethod>();

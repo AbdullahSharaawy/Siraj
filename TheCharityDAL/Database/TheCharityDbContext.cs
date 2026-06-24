@@ -9,8 +9,6 @@ namespace TheCharityDAL.Database
         public TheCharityDbContext(DbContextOptions<TheCharityDbContext> options) : base(options)
         { }
         public TheCharityDbContext() { }
-
-        
         public DbSet<Attachment> Attachments { get; set; }
         public DbSet<Campaign> Campaigns { get; set; }
         public DbSet<DonatedItem> DonatedItems { get; set; }
@@ -21,7 +19,7 @@ namespace TheCharityDAL.Database
         public DbSet<PaymentInfo> PaymentsInfo { get; set; }
         public DbSet<SharedCampaign> SharedCampaigns { get; set; }
         public DbSet<SoloCampaign> SoloCampaigns { get; set; }
-       
+        public DbSet<ScheduledJob> ScheduledJobs { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

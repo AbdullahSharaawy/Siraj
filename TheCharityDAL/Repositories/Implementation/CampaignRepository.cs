@@ -60,6 +60,7 @@ namespace TheCharityDAL.Repositories.Implementation
         public async Task RestoreCampaignAsync(int id)
         {
             var campaign = await _context.Campaigns
+                .IgnoreQueryFilters()
                 .Where(c => c.Id == id)
                 .FirstOrDefaultAsync();
 
@@ -166,6 +167,7 @@ namespace TheCharityDAL.Repositories.Implementation
         public async Task<IEnumerable<Campaign>> GetDeletedCampaignsAsync()
         {
             return await _context.Campaigns
+                .IgnoreQueryFilters()
                 .Where(c => c.IsDeleted == true)
                 .ToListAsync();
         }
@@ -467,6 +469,49 @@ namespace TheCharityDAL.Repositories.Implementation
                 .ToList();
         }
 
+        // ===== Deadline Operations =====
+        public async Task<IEnumerable<Campaign>> GetCampaignsByDeadlineAsync(DateTime deadlineDate, bool includeDeleted = false)
+        {
+            var query = _context.Campaigns.Where(c => c.Deadline <= deadlineDate);
+
+            if (!includeDeleted)
+            {
+                query = query.Where(c => c.IsDeleted == false);
+            }
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<IEnumerable<Campaign>> GetExpiredCampaignsAsync()
+        {
+            return await _context.Campaigns
+                .Where(c => c.Deadline < DateTime.Now && c.IsDeleted == false)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Campaign>> GetCampaignsExpiringSoonAsync(int daysThreshold = 7)
+        {
+            var thresholdDate = DateTime.Now.AddDays(daysThreshold);
+
+            return await _context.Campaigns
+                .Where(c => c.Deadline <= thresholdDate
+                            && c.Deadline > DateTime.Now
+                            && c.IsDeleted == false
+                            && c.Status == CampaignStatus.Active)
+                .ToListAsync();
+        }
+
+        public async Task<Campaign?> ExtendCampaignDeadlineAsync(int campaignId, DateTime newDeadline)
+        {
+            var campaign = await GetCampaignByIdAsync(campaignId);
+            if (campaign != null && newDeadline > DateTime.Now)
+            {
+                campaign.ExtendDeadline(newDeadline);
+                await _context.SaveChangesAsync();
+            }
+            return campaign;
+        }
+
         // ===== Bulk Operations =====
         public async Task<int> BulkUpdateCampaignStatusAsync(CampaignStatus oldStatus, CampaignStatus newStatus)
         {
@@ -490,7 +535,7 @@ namespace TheCharityDAL.Repositories.Implementation
 
             var campaigns = await _context.Campaigns
                 .Where(c => (c.Status == CampaignStatus.Completed &&
-                           c.UpdatedOn < cutoffDate &&
+                           c.CompletionDate < cutoffDate &&
                            c.IsDeleted == false
                 )).ToListAsync();
 

@@ -1,9 +1,8 @@
-using Microsoft.Extensions.DependencyInjection;
+using Hangfire;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
 using TheCharityBLL.Helpers;
-using TheCharityBLL.Services.Abstraction;
-using TheCharityBLL.Services.Repository;
-using TheCharityDAL.Repositories.Abstraction;
-using TheCharityDAL.Repositories.Implementation;
+using TheCharityBLL.Jobs.Registry.Abstraction;
 using TheCharityPL.Middlewares;
 
 namespace TheCharityPL
@@ -19,6 +18,7 @@ namespace TheCharityPL
             builder.Services.TheCharityIdentity(builder.Configuration);
             builder.Services.FoxArtEmailConfiguration(builder.Configuration);
             builder.Services.ThirdPartyAuthentication(builder.Configuration);
+            builder.Services.AddHangfireServices();
             // Add services to the container.
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
@@ -27,7 +27,30 @@ namespace TheCharityPL
             }); ;
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(c =>
+            {
+                c.SwaggerDoc("v1", new OpenApiInfo
+                {
+                    Title = "The Charity API",
+                    Version = "v1"
+                });
+
+                // Load XML from TheCharityPL (controllers)
+                var plXmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var plXmlPath = Path.Combine(AppContext.BaseDirectory, plXmlFile);
+                if (File.Exists(plXmlPath))
+                {
+                    c.IncludeXmlComments(plXmlPath);
+                }
+
+                // Load XML from TheCharityBLL (DTOs)
+                var bllXmlFile = "TheCharityBLL.xml";
+                var bllXmlPath = Path.Combine(AppContext.BaseDirectory, bllXmlFile);
+                if (File.Exists(bllXmlPath))
+                {
+                    c.IncludeXmlComments(bllXmlPath);
+                }
+            });
 
             // IDK but i got an error and i couldnt figuer out why so i asked claud and it said add this - Mohamed Rashid
             builder.Services.AddCors(options =>
@@ -41,7 +64,42 @@ namespace TheCharityPL
                 });
             });
 
+            // Configure Hangfire
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new Exception("DefaultConnection connection string is missing");
+            }
+
+            builder.Services.AddHangfire(config => config
+                .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                .UseSimpleAssemblyNameTypeSerializer()
+                .UseRecommendedSerializerSettings()
+                .UseSqlServerStorage(connectionString));
+
+            builder.Services.AddHangfireServer(options =>
+            {
+                options.WorkerCount = 2;
+                options.Queues = new[] { "voting", "maintenance", "default" };
+                options.ServerName = $"TheCharity-API-{Environment.MachineName}";
+            });
+
             var app = builder.Build();
+
+            // Configure Hangfire dashboard (secured - Super Admin only)
+            app.UseHangfireDashboard("/hangfire", new DashboardOptions
+            {
+                DashboardTitle = "The Charity Platform - Background Jobs",
+                StatsPollingInterval = 5000
+            });
+
+            // Register recurring jobs at startup
+            using (var scope = app.Services.CreateScope())
+            {
+                var jobRegistry = scope.ServiceProvider.GetRequiredService<IJobRegistry>();
+                jobRegistry.RegisterAllRecurringJobs();
+            }
 
             app.MapHealthChecks("/health");
 

@@ -62,7 +62,18 @@ body {
   padding: 0 6vw;
 }
 
-/* -- NavBar -- */
+/* ====================================================================
+   -- NavBar shell --
+   These rules are SHARED between the public navbar
+   (domains/public/ui-nav-bar) and the authenticated user navbar
+   (domains/user/ui-user-navbar). Both components render this same
+   markup skeleton (.nb > .nb_inner > .nb_nav/.nb_actions), so the shell
+   lives here once instead of being duplicated per-component.
+
+   Component-specific bits (logo styling, CTA pill colors that differ
+   between the two navbars) live in each component's own .css file —
+   see the comment at the top of nav-bar.css.
+   ==================================================================== */
 .nb {
   position: fixed;
   top: 0;
@@ -86,46 +97,6 @@ body {
   display: flex;
   align-items: center;
   gap: 3rem;
-}
-
-/* Logo */
-.nb_logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  flex-shrink: 0;
-}
-
-.nb_logo-text {
-  font-family: var(--font-display);
-  font-size: 1.45rem;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-  line-height: 1;
-}
-
-.nb_logo-word  { color: var(--warm-white); }
-.nb_logo-accent { color: var(--pr-color); }
-
-.nb_logo-img {
-  height: 36px;
-  width: auto;
-  display: block;
-  object-fit: contain;
-  transition: opacity 0.2s;
-}
-
-.nb_logo:hover .nb_logo-img {
-  opacity: 0.85;
-}
-
-.nb_logo-text {
-  font-family: var(--font-display);
-  font-size: 1.35rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1;
 }
 
 .nb_nav { flex: 1; }
@@ -173,7 +144,6 @@ body {
 
 .nb_item:hover .nb_chevron { transform: rotate(180deg); }
 
-
 /* Actions */
 .nb_actions {
   display: flex;
@@ -181,11 +151,6 @@ body {
   gap: 0.6rem;
   margin-left: auto;
 }
-
-.nb_logo-word { color: var(--warm-white); }
-
-/* Desktop nav */
-
 
 .nb_icon-btn {
   width: 38px;
@@ -227,7 +192,10 @@ body {
   justify-content: center;
 }
 
-/* Nav CTA */
+/* Nav CTA — used by the USER navbar (app-user-navbar) via
+   class="nb_cta cta cta--primary". The public navbar's CTA uses a
+   different pill style and is scoped locally in nav-bar.css instead,
+   so it does NOT use these rules. */
 .nb_cta {
   font-family: var(--font-body);
   font-size: 0.85rem;
@@ -252,4 +220,3 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(255, 140, 0, 0.4);
 }
-

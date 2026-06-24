@@ -1,36 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TheCharityDAL.Enums;
+﻿using TheCharityDAL.Enums;
 
 namespace TheCharityBLL.DTOs.CampaignDTOs
 {
     public class UpdateCampaignDto
     {
-
-        [MaxLength(200, ErrorMessage = "Title cannot exceed 200 characters.")]
+        /// <example>1</example>
+        public int Id { get; set; }
+        /// <example>Updated Campaign Title</example>
         public string? Title { get; set; }
-
-        [MaxLength(2000, ErrorMessage = "Description cannot exceed 2000 characters.")]
+        /// <example>Updated description for the campaign</example>
         public string? Description { get; set; }
-
-        [MaxLength(1000, ErrorMessage = "Image path cannot exceed 1000 characters.")]
+        /// <example>/images/updated_campaign.jpg</example>
         public string? ImgPath { get; set; }
-
-        [Range(1, double.MaxValue, ErrorMessage = "Target must be greater than 0.")]
+        /// <example>150000</example>
         public double? Target { get; set; }
-
-        [Range(0, double.MaxValue, ErrorMessage = "Achieved cannot be negative.")]
-        public double? Achieved { get; set; }
-
-        [EnumDataType(typeof(CampaignStatus), ErrorMessage = "Invalid campaign status.")]
-        public CampaignStatus? Status { get; set; }
-
-        [EnumDataType(typeof(CampaignType), ErrorMessage = "Invalid campaign type.")]
+        /// <example>Solo</example>
         public CampaignType? Type { get; set; }
     }
-
 }

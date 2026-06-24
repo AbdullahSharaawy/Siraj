@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TheCharityBLL.DTOs.CampaignDTOs
+﻿namespace TheCharityBLL.DTOs.CampaignDTOs
 {
     public class CreateSoloCampaignDto : CreateCampaignDto
     {
-        [Required(ErrorMessage = "OrganizationId is required for a solo campaign.")]
+        /// <example>5</example>
         public int OrganizationId { get; set; }
+        /// <example>/images/solo_campaign.jpg</example>
+        public string? ImgPath { get; set; }
+        /// <example>50000</example>
+        public int? Target { get; set; }
     }
 }
