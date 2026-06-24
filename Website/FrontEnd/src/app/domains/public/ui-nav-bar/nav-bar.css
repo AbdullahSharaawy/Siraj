@@ -1,0 +1,63 @@
+/* Component-specific overrides only.
+   Shared shell rules (.nb, .nb_inner, .nb_nav, .nb_list, .nb_item, .nb_link,
+   .nb_chevron, .nb_actions, .nb_icon-btn, .nb_badge) live in styles.css —
+   do not redefine them here. */
+
+/* Logo (unique to the public navbar) */
+.nb_logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.nb_logo-img {
+  height: 36px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+  transition: opacity 0.2s;
+}
+
+.nb_logo:hover .nb_logo-img {
+  opacity: 0.85;
+}
+
+.nb_logo-text {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.nb_logo-word { color: var(--warm-white); }
+
+/* CTA button — public navbar uses a pill style distinct from the
+   user navbar's .nb_cta (which reuses .cta--primary instead). */
+.nb_cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.52rem 1.1rem;
+  border-radius: 999px;
+  background: var(--pr-color);
+  color: var(--warm-white);
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  transition: background 0.2s, gap 0.2s, opacity 0.2s;
+}
+
+.nb_cta:hover {
+  background: var(--pr-light-color);
+  gap: 10px;
+}
+
+.nb_cta--full { width: 100%; justify-content: center; }
+
+.nb_cta-arrow { width: 16px; height: 16px; transition: transform 0.2s; }
+.nb_cta:hover .nb_cta-arrow { transform: translateX(3px); }
