@@ -9,23 +9,17 @@ namespace TheCharityBLL.Services.Implementation
     public class AuthorizationService : IAuthorizationService
     {
         private readonly IUserRepository _userRepository;
-        private readonly IOrganizationRepository _organizationRepository;
         private readonly ICampaignRepository _campaignRepository;
         private readonly IDonatedItemsRepository _donatedItemsRepository;
-        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthorizationService(
             IUserRepository userRepository,
-            IOrganizationRepository organizationRepository,
             ICampaignRepository campaignRepository,
-            IDonatedItemsRepository donatedItemsRepository,
-            IHttpContextAccessor httpContextAccessor)
+            IDonatedItemsRepository donatedItemsRepository)
         {
             _userRepository = userRepository;
-            _organizationRepository = organizationRepository;
             _campaignRepository = campaignRepository;
             _donatedItemsRepository = donatedItemsRepository;
-            _httpContextAccessor = httpContextAccessor;
         }
 
         // ===== Helper Methods =====
