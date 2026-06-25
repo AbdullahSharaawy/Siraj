@@ -562,5 +562,48 @@ namespace TheCharityDAL.Repositories.Implementation
                 .Include(r => r.User)
                 .ToListAsync();
         }
+
+        public async Task<OrganizationRole> AddOrganizationRoleAsync(int organizationId, string userId, OrganizationRoleType role)
+        {
+            // Check if user already has a role in this organization
+            var existingRole = await _context.OrganizationRoles
+                .Where(r => r.OrganizationId == organizationId &&
+                           r.UserId == userId &&
+                           !r.IsDeleted)
+                .FirstOrDefaultAsync();
+
+            if (existingRole != null)
+            {
+                // Update existing role instead of creating new one
+                existingRole = new OrganizationRole(organizationId, userId, role);
+                _context.OrganizationRoles.Update(existingRole);
+            }
+            else
+            {
+                var organizationRole = new OrganizationRole(organizationId, userId, role);
+                _context.OrganizationRoles.Add(organizationRole);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return await _context.OrganizationRoles
+                .Where(r => r.OrganizationId == organizationId && r.UserId == userId)
+                .FirstOrDefaultAsync()!;
+        }
+
+        public async Task RemoveOrganizationRoleAsync(int organizationId, string userId)
+        {
+            var role = await _context.OrganizationRoles
+                .Where(r => r.OrganizationId == organizationId &&
+                           r.UserId == userId &&
+                           !r.IsDeleted)
+                .FirstOrDefaultAsync();
+
+            if (role != null)
+            {
+                role.Delete();
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

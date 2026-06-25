@@ -83,6 +83,10 @@ namespace TheCharityDAL.Repositories.Abstraction
         Task<OrganizationRole> AddSubAdminAsync(int organizationId, string userId);
         Task RemoveSubAdminAsync(int organizationId, string userId);
         Task<bool> IsUserSubAdminAsync(int organizationId, string userId);
+
+        // ===== Organization Role Utilities =====
         Task<IEnumerable<OrganizationRole>> GetOrganizationRolesAsync(int organizationId);
+        Task<OrganizationRole> AddOrganizationRoleAsync(int organizationId, string userId, OrganizationRoleType role);
+        Task RemoveOrganizationRoleAsync(int organizationId, string userId);
     }
 }
