@@ -219,7 +219,8 @@ namespace TheCharityDAL.Repositories.Implementation
             return await _userManager.FindByNameAsync(usernameOrEmail)
                    ?? await _userManager.FindByEmailAsync(usernameOrEmail);
         }
-        // 1. SuperAdmin Check (Identity Role)
+
+        // SuperAdmin Check (Identity Role)
         public async Task<bool> IsSuperAdminAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -228,7 +229,7 @@ namespace TheCharityDAL.Repositories.Implementation
             return await _userManager.IsInRoleAsync(user, "SuperAdmin");
         }
 
-        // 2. Organization Role Checks (OrganizationRole Entity)
+        // Organization Role Checks (OrganizationRole Entity)
         public async Task<bool> IsOrganizationAdminAsync(string userId, int organizationId)
         {
             return await _context.OrganizationRoles
@@ -264,7 +265,7 @@ namespace TheCharityDAL.Repositories.Implementation
             return role?.Role;
         }
 
-        // 3. Organization Management Queries
+        // Organization Management Queries
         public async Task<IEnumerable<Organization>> GetOrganizationsUserManagesAsync(string userId)
         {
             // User is admin of organizations
@@ -354,7 +355,7 @@ namespace TheCharityDAL.Repositories.Implementation
             return isAdmin || isSubAdmin;
         }
 
-        // 4. Organization Role CRUD
+        // Organization Role CRUD
         public async Task<OrganizationRole> AddOrganizationRoleAsync(int organizationId, string userId, OrganizationRoleType role)
         {
             // Check if user already has a role in this organization
