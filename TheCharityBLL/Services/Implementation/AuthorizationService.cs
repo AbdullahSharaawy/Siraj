@@ -257,9 +257,6 @@ namespace TheCharityBLL.Services.Implementation
             // SuperAdmin can manage ANY user
             if (await IsSuperAdminAsync(userId)) return true;
 
-            // Organization Admins can manage users in their organization (future)
-            // For now, only SuperAdmin can manage other users
-
             return false;
         }
 
