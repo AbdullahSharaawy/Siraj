@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using TheCharityDAL.Database;
 using TheCharityDAL.Entities;
+using TheCharityDAL.Enums;
 using TheCharityDAL.Repositories.Abstraction;
 
 namespace TheCharityDAL.Repositories.Implementation
@@ -9,14 +10,17 @@ namespace TheCharityDAL.Repositories.Implementation
     public class UserRepository : IUserRepository
     {
         private readonly UserManager<User> _userManager;
+        private readonly TheCharityDbContext _context;
 
         private readonly RoleManager<IdentityRole> _roleManager;
         public UserRepository(
              UserManager<User> userManager,
-             RoleManager<IdentityRole> roleManager)
+             RoleManager<IdentityRole> roleManager,
+             TheCharityDbContext context)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
+            _context = context;
         }
 
         public async Task<IdentityResult> CreateExternalUserAsync(string email)
@@ -214,6 +218,200 @@ namespace TheCharityDAL.Repositories.Implementation
         {
             return await _userManager.FindByNameAsync(usernameOrEmail)
                    ?? await _userManager.FindByEmailAsync(usernameOrEmail);
+        }
+        // 1. SuperAdmin Check (Identity Role)
+        public async Task<bool> IsSuperAdminAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return false;
+
+            return await _userManager.IsInRoleAsync(user, "SuperAdmin");
+        }
+
+        // 2. Organization Role Checks (OrganizationRole Entity)
+        public async Task<bool> IsOrganizationAdminAsync(string userId, int organizationId)
+        {
+            return await _context.OrganizationRoles
+                .AnyAsync(r => r.OrganizationId == organizationId &&
+                              r.UserId == userId &&
+                              r.Role == OrganizationRoleType.Admin &&
+                              !r.IsDeleted);
+        }
+
+        public async Task<bool> IsOrganizationSubAdminAsync(string userId, int organizationId)
+        {
+            return await _context.OrganizationRoles
+                .AnyAsync(r => r.OrganizationId == organizationId &&
+                              r.UserId == userId &&
+                              r.Role == OrganizationRoleType.SubAdmin &&
+                              !r.IsDeleted);
+        }
+
+        public async Task<bool> IsOrganizationAdminOrSubAdminAsync(string userId, int organizationId)
+        {
+            return await IsOrganizationAdminAsync(userId, organizationId) ||
+                   await IsOrganizationSubAdminAsync(userId, organizationId);
+        }
+
+        public async Task<OrganizationRoleType?> GetUserRoleInOrganizationAsync(string userId, int organizationId)
+        {
+            var role = await _context.OrganizationRoles
+                .Where(r => r.OrganizationId == organizationId &&
+                           r.UserId == userId &&
+                           !r.IsDeleted)
+                .FirstOrDefaultAsync();
+
+            return role?.Role;
+        }
+
+        // 3. Organization Management Queries
+        public async Task<IEnumerable<Organization>> GetOrganizationsUserManagesAsync(string userId)
+        {
+            // User is admin of organizations
+            var adminOrgs = await _context.Organizations
+                .Where(o => o.AdminUserId == userId && !o.IsDeleted)
+                .ToListAsync();
+
+            // User is sub-admin of organizations
+            var subAdminOrgIds = await _context.OrganizationRoles
+                .Where(r => r.UserId == userId &&
+                           r.Role == OrganizationRoleType.SubAdmin &&
+                           !r.IsDeleted)
+                .Select(r => r.OrganizationId)
+                .ToListAsync();
+
+            var subAdminOrgs = await _context.Organizations
+                .Where(o => subAdminOrgIds.Contains(o.Id) && !o.IsDeleted)
+                .ToListAsync();
+
+            return adminOrgs.Concat(subAdminOrgs).Distinct().ToList();
+        }
+
+        public async Task<IEnumerable<Organization>> GetOrganizationsUserIsSubAdminOfAsync(string userId)
+        {
+            var subAdminOrgIds = await _context.OrganizationRoles
+                .Where(r => r.UserId == userId &&
+                           r.Role == OrganizationRoleType.SubAdmin &&
+                           !r.IsDeleted)
+                .Select(r => r.OrganizationId)
+                .ToListAsync();
+
+            return await _context.Organizations
+                .Where(o => subAdminOrgIds.Contains(o.Id) && !o.IsDeleted)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Organization>> GetAllOrganizationsUserHasAccessToAsync(string userId)
+        {
+            var adminOrgs = await _context.Organizations
+                .Where(o => o.AdminUserId == userId && !o.IsDeleted)
+                .ToListAsync();
+
+            var subAdminOrgIds = await _context.OrganizationRoles
+                .Where(r => r.UserId == userId &&
+                           r.Role == OrganizationRoleType.SubAdmin &&
+                           !r.IsDeleted)
+                .Select(r => r.OrganizationId)
+                .ToListAsync();
+
+            var subAdminOrgs = await _context.Organizations
+                .Where(o => subAdminOrgIds.Contains(o.Id) && !o.IsDeleted)
+                .ToListAsync();
+
+            // Add organizations user has donated to (as member)
+            var donatedOrgIds = await _context.Donations
+                .Where(d => d.UserId == userId &&
+                           d.Campaign != null &&
+                           d.Campaign.OrganizationId.HasValue &&
+                           !d.IsDeleted)
+                .Select(d => d.Campaign.OrganizationId.Value)
+                .Distinct()
+                .ToListAsync();
+
+            var donatedOrgs = await _context.Organizations
+                .Where(o => donatedOrgIds.Contains(o.Id) && !o.IsDeleted)
+                .ToListAsync();
+
+            return adminOrgs.Concat(subAdminOrgs).Concat(donatedOrgs).Distinct().ToList();
+        }
+
+        public async Task<bool> UserHasAnyManagementRoleAsync(string userId)
+        {
+            // Check if user is SuperAdmin (Identity Role)
+            if (await IsSuperAdminAsync(userId))
+                return true;
+
+            // Check if user is OrganizationAdmin (OrganizationRole Entity)
+            var isAdmin = await _context.Organizations
+                .AnyAsync(o => o.AdminUserId == userId && !o.IsDeleted);
+
+            // Check if user is SubAdmin (OrganizationRole Entity)
+            var isSubAdmin = await _context.OrganizationRoles
+                .AnyAsync(r => r.UserId == userId &&
+                              r.Role == OrganizationRoleType.SubAdmin &&
+                              !r.IsDeleted);
+
+            return isAdmin || isSubAdmin;
+        }
+
+        // 4. Organization Role CRUD
+        public async Task<OrganizationRole> AddOrganizationRoleAsync(int organizationId, string userId, OrganizationRoleType role)
+        {
+            // Check if user already has a role in this organization
+            var existingRole = await _context.OrganizationRoles
+                .Where(r => r.OrganizationId == organizationId &&
+                           r.UserId == userId &&
+                           !r.IsDeleted)
+                .FirstOrDefaultAsync();
+
+            if (existingRole != null)
+            {
+                // Update existing role instead of creating new one
+                existingRole = new OrganizationRole(organizationId, userId, role);
+                _context.OrganizationRoles.Update(existingRole);
+            }
+            else
+            {
+                var organizationRole = new OrganizationRole(organizationId, userId, role);
+                _context.OrganizationRoles.Add(organizationRole);
+            }
+
+            await _context.SaveChangesAsync();
+
+            return await _context.OrganizationRoles
+                .Where(r => r.OrganizationId == organizationId && r.UserId == userId)
+                .FirstOrDefaultAsync()!;
+        }
+
+        public async Task RemoveOrganizationRoleAsync(int organizationId, string userId)
+        {
+            var role = await _context.OrganizationRoles
+                .Where(r => r.OrganizationId == organizationId &&
+                           r.UserId == userId &&
+                           !r.IsDeleted)
+                .FirstOrDefaultAsync();
+
+            if (role != null)
+            {
+                role.Delete();
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<IEnumerable<OrganizationRole>> GetOrganizationRolesAsync(int organizationId)
+        {
+            return await _context.OrganizationRoles
+                .Where(r => r.OrganizationId == organizationId && !r.IsDeleted)
+                .Include(r => r.User)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<OrganizationRole>> GetUserOrganizationRolesAsync(string userId)
+        {
+            return await _context.OrganizationRoles
+                .Where(r => r.UserId == userId && !r.IsDeleted)
+                .Include(r => r.Organization)
+                .ToListAsync();
         }
     }
 }
