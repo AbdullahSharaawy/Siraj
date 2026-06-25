@@ -13,12 +13,14 @@ namespace TheCharityBLL.Services.Implementation
     public class OrganizationService : IOrganizationService
     {
         private readonly IOrganizationRepository _repository;
+        private readonly IAuthorizationService _authorizationService;
         private readonly IUserService _userService;
         private readonly OrganizationMapper _mapper;
-        public OrganizationService(IOrganizationRepository repository, IUserService userService)
+        public OrganizationService(IOrganizationRepository repository, IAuthorizationService authorizationService, IUserService userService)
         {
             _repository = repository;
             _mapper = new OrganizationMapper();
+            _authorizationService = authorizationService;
             _userService = userService;
         }
         public async Task<ServiceResponse<OrgContactMethodResponseDto>> CreateContactMethod(CreateOrgContactMethodDto contactMethod)
@@ -858,7 +860,7 @@ namespace TheCharityBLL.Services.Implementation
                 }
 
                 // Check if user is already an admin
-                var isAdmin = await _userService.IsOrganizationAdminAsync(userId, organizationId);
+                var isAdmin = await _authorizationService.IsOrganizationAdminAsync(userId, organizationId);
                 if (isAdmin)
                 {
                     return new ServiceResponse<OrganizationRoleResponseDto>
