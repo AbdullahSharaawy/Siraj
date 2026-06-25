@@ -3,16 +3,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using TheCharityBLL.DTOs.UserDTOs;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityDAL.Entities;
+using TheCharityDAL.Enums;
 using TheCharityDAL.Repositories.Abstraction;
 
 namespace TheCharityBLL.Services.Repository
@@ -437,6 +434,56 @@ namespace TheCharityBLL.Services.Repository
             var user = _mapper.Map<User>(UserDTO);
 
             await _userRepository.AddLoginAsync(user, loginInfo);
+        }
+
+        public Task<bool> IsSuperAdminAsync(string userId)
+        {
+           return _userRepository.IsSuperAdminAsync(userId);
+        }
+
+        public Task<bool> IsOrganizationAdminAsync(string userId, int organizationId)
+        {
+            return _userRepository.IsOrganizationAdminAsync(userId, organizationId);
+        }
+
+        public Task<bool> IsOrganizationSubAdminAsync(string userId, int organizationId)
+        {
+            return _userRepository.IsOrganizationSubAdminAsync(userId, organizationId);
+        }
+
+        public Task<bool> IsOrganizationAdminOrSubAdminAsync(string userId, int organizationId)
+        {
+            return _userRepository.IsOrganizationAdminOrSubAdminAsync(userId, organizationId);
+        }
+
+        public Task<OrganizationRoleType?> GetUserRoleInOrganizationAsync(string userId, int organizationId)
+        {
+            return _userRepository.GetUserRoleInOrganizationAsync(userId, organizationId);
+        }
+
+        public Task<IEnumerable<Organization>> GetOrganizationsUserManagesAsync(string userId)
+        {
+            return _userRepository.GetOrganizationsUserManagesAsync(userId);
+        }
+
+        public Task<IEnumerable<Organization>> GetOrganizationsUserIsSubAdminOfAsync(string userId)
+        {
+            return _userRepository.GetOrganizationsUserIsSubAdminOfAsync(userId);
+        }
+
+        public Task<IEnumerable<Organization>> GetAllOrganizationsUserHasAccessToAsync(string userId)
+        {
+            return _userRepository.GetAllOrganizationsUserHasAccessToAsync(userId);
+        }
+
+        public Task<bool> UserHasAnyManagementRoleAsync(string userId)
+        {
+            return _userRepository.UserHasAnyManagementRoleAsync(userId);
+        }
+
+        public Task<IEnumerable<OrganizationRole>> GetUserOrganizationRolesAsync(string userId)
+        {
+            return _userRepository.GetUserOrganizationRolesAsync(userId);
         }
     }
 }

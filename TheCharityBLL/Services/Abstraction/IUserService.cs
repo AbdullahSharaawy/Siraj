@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TheCharityBLL.DTOs.UserDTOs;
 using TheCharityDAL.Entities;
+using TheCharityDAL.Enums;
 
 namespace TheCharityBLL.Services.Abstraction
 {
@@ -43,5 +44,21 @@ namespace TheCharityBLL.Services.Abstraction
         Task<bool> IsInRoleAsync(string userId, string role);
         Task<IdentityResult> AddToRoleAsync(string userId, string role);
         Task<IdentityResult> RemoveFromRoleAsync(string userId, string role);
+
+        // ===== SuperAdmin Check (Identity Role) =====
+        Task<bool> IsSuperAdminAsync(string userId);
+
+        // ===== Organization Role Queries (OrganizationRole Entity) =====
+        Task<bool> IsOrganizationAdminAsync(string userId, int organizationId);
+        Task<bool> IsOrganizationSubAdminAsync(string userId, int organizationId);
+        Task<bool> IsOrganizationAdminOrSubAdminAsync(string userId, int organizationId);
+        Task<OrganizationRoleType?> GetUserRoleInOrganizationAsync(string userId, int organizationId);
+
+        // ===== Organization Management Queries =====
+        Task<IEnumerable<Organization>> GetOrganizationsUserManagesAsync(string userId);
+        Task<IEnumerable<Organization>> GetOrganizationsUserIsSubAdminOfAsync(string userId);
+        Task<IEnumerable<Organization>> GetAllOrganizationsUserHasAccessToAsync(string userId);
+        Task<bool> UserHasAnyManagementRoleAsync(string userId);
+        Task<IEnumerable<OrganizationRole>> GetUserOrganizationRolesAsync(string userId);
     }
 }
