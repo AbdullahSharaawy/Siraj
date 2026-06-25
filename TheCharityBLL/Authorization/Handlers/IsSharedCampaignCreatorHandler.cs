@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
-using TheCharityBLL.Authorization.Attributes;
+using TheCharityBLL.Authorization.Requirements;
 using IAuthorizationService = TheCharityBLL.Services.Abstraction.IAuthorizationService;
 
 namespace TheCharityBLL.Authorization.Handlers
