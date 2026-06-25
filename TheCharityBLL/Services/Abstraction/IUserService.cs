@@ -43,7 +43,5 @@ namespace TheCharityBLL.Services.Abstraction
         Task<bool> IsInRoleAsync(string userId, string role);
         Task<IdentityResult> AddToRoleAsync(string userId, string role);
         Task<IdentityResult> RemoveFromRoleAsync(string userId, string role);
-
-       
     }
 }
