@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 
-namespace TheCharityBLL.Authorization.Attributes
+namespace TheCharityBLL.Authorization.Requirements
 {
     public class CanManageCampaignRequirement : IAuthorizationRequirement
     {
