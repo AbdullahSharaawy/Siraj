@@ -6,12 +6,12 @@ using IAuthorizationService = TheCharityBLL.Services.Abstraction.IAuthorizationS
 
 namespace TheCharityBLL.Authorization.Handlers
 {
-    public class CanManageCampaignHandler : AuthorizationHandler<CanManageCampaignRequirement>
+    public class CanManageOrganizationHandler : AuthorizationHandler<CanManageOrganizationRequirement>
     {
         private readonly IAuthorizationService _authService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public CanManageCampaignHandler(
+        public CanManageOrganizationHandler(
             IAuthorizationService authService,
             IHttpContextAccessor httpContextAccessor)
         {
@@ -21,7 +21,7 @@ namespace TheCharityBLL.Authorization.Handlers
 
         protected override async Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
-            CanManageCampaignRequirement requirement)
+            CanManageOrganizationRequirement requirement)
         {
             var user = context.User;
             if (user?.Identity?.IsAuthenticated != true)
@@ -37,7 +37,6 @@ namespace TheCharityBLL.Authorization.Handlers
                 return;
             }
 
-            // Get campaign ID from route or query
             var httpContext = _httpContextAccessor.HttpContext;
             if (httpContext == null)
             {
@@ -45,14 +44,14 @@ namespace TheCharityBLL.Authorization.Handlers
                 return;
             }
 
-            var campaignId = GetCampaignId(httpContext);
-            if (!campaignId.HasValue)
+            var organizationId = GetOrganizationId(httpContext);
+            if (!organizationId.HasValue)
             {
                 context.Fail();
                 return;
             }
 
-            var canManage = await _authService.CanManageCampaignAsync(userId, campaignId.Value);
+            var canManage = await _authService.CanManageOrganizationAsync(userId, organizationId.Value);
             if (canManage)
             {
                 context.Succeed(requirement);
@@ -63,18 +62,18 @@ namespace TheCharityBLL.Authorization.Handlers
             }
         }
 
-        private int? GetCampaignId(HttpContext httpContext)
+        private int? GetOrganizationId(HttpContext httpContext)
         {
             // Try route values
             if (httpContext.Request.RouteValues.TryGetValue("id", out var idObj) ||
-                httpContext.Request.RouteValues.TryGetValue("campaignId", out idObj))
+                httpContext.Request.RouteValues.TryGetValue("organizationId", out idObj))
             {
                 if (int.TryParse(idObj?.ToString(), out int id))
                     return id;
             }
 
             // Try query string
-            if (httpContext.Request.Query.TryGetValue("campaignId", out var queryValue))
+            if (httpContext.Request.Query.TryGetValue("organizationId", out var queryValue))
             {
                 if (int.TryParse(queryValue, out int id))
                     return id;
