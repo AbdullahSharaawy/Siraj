@@ -80,6 +80,7 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<IDonatedItemService, DonatedItemService>();
             services.AddScoped<IPaymentInfoService, PaymentInfoService>();
             services.AddScoped<IDonationService, DonationService>();
+            services.AddScoped<IAuthorizationService, AuthorizationService>();
             // mapper Injection
             services.AddAutoMapper(cfg => {
                 cfg.AddProfile<UserMapperProfile>();
