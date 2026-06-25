@@ -847,7 +847,7 @@ namespace TheCharityBLL.Services.Implementation
                 }
 
                 // Check if user exists
-                var user = await _userRepository.GetUserByIdAsync(userId);
+                var user = await _userService.GetUserByIdAsync(userId);
                 if (user == null)
                 {
                     return new ServiceResponse<OrganizationRoleResponseDto>
@@ -858,7 +858,7 @@ namespace TheCharityBLL.Services.Implementation
                 }
 
                 // Check if user is already an admin
-                var isAdmin = await _userRepository.IsOrganizationAdminAsync(userId, organizationId);
+                var isAdmin = await _userService.IsOrganizationAdminAsync(userId, organizationId);
                 if (isAdmin)
                 {
                     return new ServiceResponse<OrganizationRoleResponseDto>
@@ -1043,7 +1043,7 @@ namespace TheCharityBLL.Services.Implementation
                 }
 
                 // Check if user exists
-                var user = await _userRepository.GetUserByIdAsync(adminUserId);
+                var user = await _userService.GetUserByIdAsync(adminUserId);
                 if (user == null)
                 {
                     return new ServiceResponse<OrganizationResponseDto>
@@ -1132,7 +1132,7 @@ namespace TheCharityBLL.Services.Implementation
                 }
 
                 // Check if user exists
-                var user = await _userRepository.GetUserByIdAsync(newAdminUserId);
+                var user = await _userService.GetUserByIdAsync(newAdminUserId);
                 if (user == null)
                 {
                     return new ServiceResponse<OrganizationResponseDto>
