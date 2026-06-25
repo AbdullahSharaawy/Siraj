@@ -6,12 +6,12 @@ using IAuthorizationService = TheCharityBLL.Services.Abstraction.IAuthorizationS
 
 namespace TheCharityBLL.Authorization.Handlers
 {
-    public class CanUpdatePaymentInfoHandler : AuthorizationHandler<CanUpdatePaymentInfoRequirement>
+    public class CanManageSubAdminsHandler : AuthorizationHandler<CanManageSubAdminsRequirement>
     {
         private readonly IAuthorizationService _authService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public CanUpdatePaymentInfoHandler(
+        public CanManageSubAdminsHandler(
             IAuthorizationService authService,
             IHttpContextAccessor httpContextAccessor)
         {
@@ -21,7 +21,7 @@ namespace TheCharityBLL.Authorization.Handlers
 
         protected override async Task HandleRequirementAsync(
             AuthorizationHandlerContext context,
-            CanUpdatePaymentInfoRequirement requirement)
+            CanManageSubAdminsRequirement requirement)
         {
             var user = context.User;
             if (user?.Identity?.IsAuthenticated != true)
@@ -51,8 +51,8 @@ namespace TheCharityBLL.Authorization.Handlers
                 return;
             }
 
-            var canUpdate = await _authService.CanUpdatePaymentInfoAsync(userId, organizationId.Value);
-            if (canUpdate)
+            var canManage = await _authService.CanManageSubAdminsAsync(userId, organizationId.Value);
+            if (canManage)
             {
                 context.Succeed(requirement);
             }
