@@ -72,10 +72,6 @@ namespace TheCharityBLL.Authorization.Handlers
                     return id;
             }
 
-            // For POST requests, read from body
-            // This requires reading the request body - you might want to use a custom model binder
-            // For simplicity, you can also get it from the DTO property
-
             // Alternative: Get from query string
             if (httpContext.Request.Query.TryGetValue("organizationId", out var queryValue))
             {
