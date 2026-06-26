@@ -99,20 +99,14 @@ namespace TheCharityBLL.Helpers
             // Add Authorization Policies
             services.AddAuthorization(options =>
             {
+                options.AddPolicy("CanCreateCampaign", policy =>
+                    policy.Requirements.Add(new CanCreateCampaignRequirement()));
+
                 options.AddPolicy("CanManageCampaign", policy =>
                     policy.Requirements.Add(new CanManageCampaignRequirement()));
 
                 options.AddPolicy("CanManageOrganization", policy =>
                     policy.Requirements.Add(new CanManageOrganizationRequirement()));
-
-                options.AddPolicy("IsSharedCampaignCreator", policy =>
-                    policy.Requirements.Add(new IsSharedCampaignCreatorRequirement()));
-
-                options.AddPolicy("IsSuperAdmin", policy =>
-                    policy.Requirements.Add(new IsSuperAdminRequirement()));
-
-                options.AddPolicy("CanUpdatePaymentInfo", policy =>
-                    policy.Requirements.Add(new CanUpdatePaymentInfoRequirement()));
 
                 options.AddPolicy("CanManageSubAdmins", policy =>
                     policy.Requirements.Add(new CanManageSubAdminsRequirement()));
@@ -120,8 +114,14 @@ namespace TheCharityBLL.Helpers
                 options.AddPolicy("CanPerformBulkOperations", policy =>
                     policy.Requirements.Add(new CanPerformBulkOperationsRequirement()));
 
-                options.AddPolicy("CanCreateCampaign", policy =>
-                    policy.Requirements.Add(new CanCreateCampaignRequirement()));
+                options.AddPolicy("CanUpdatePaymentInfo", policy =>
+                    policy.Requirements.Add(new CanUpdatePaymentInfoRequirement()));
+
+                options.AddPolicy("IsSharedCampaignCreator", policy =>
+                    policy.Requirements.Add(new IsSharedCampaignCreatorRequirement()));
+
+                options.AddPolicy("IsSuperAdmin", policy =>
+                    policy.Requirements.Add(new IsSuperAdminRequirement()));
             });
             // mapper Injection
             services.AddAutoMapper(cfg => {
