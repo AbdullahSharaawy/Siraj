@@ -88,13 +88,14 @@ namespace TheCharityBLL.Helpers
             // Register IHttpContextAccessor (for handlers)
             services.AddHttpContextAccessor();
             // Register Authorization Handlers
+            services.AddScoped<IAuthorizationHandler, CanCreateCampaignHandler>();
             services.AddScoped<IAuthorizationHandler, CanManageCampaignHandler>();
             services.AddScoped<IAuthorizationHandler, CanManageOrganizationHandler>();
-            services.AddScoped<IAuthorizationHandler, IsSharedCampaignCreatorHandler>();
-            services.AddScoped<IAuthorizationHandler, IsSuperAdminHandler>();
-            services.AddScoped<IAuthorizationHandler, CanUpdatePaymentInfoHandler>();
             services.AddScoped<IAuthorizationHandler, CanManageSubAdminsHandler>();
             services.AddScoped<IAuthorizationHandler, CanPerformBulkOperationsHandler>();
+            services.AddScoped<IAuthorizationHandler, CanUpdatePaymentInfoHandler>();
+            services.AddScoped<IAuthorizationHandler, IsSharedCampaignCreatorHandler>();
+            services.AddScoped<IAuthorizationHandler, IsSuperAdminHandler>();
             // Add Authorization Policies
             services.AddAuthorization(options =>
             {
@@ -118,6 +119,9 @@ namespace TheCharityBLL.Helpers
 
                 options.AddPolicy("CanPerformBulkOperations", policy =>
                     policy.Requirements.Add(new CanPerformBulkOperationsRequirement()));
+
+                options.AddPolicy("CanCreateCampaign", policy =>
+                    policy.Requirements.Add(new CanCreateCampaignRequirement()));
             });
             // mapper Injection
             services.AddAutoMapper(cfg => {
