@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Security.Cryptography;
+using TheCharityBLL.Authorization.Attributes;
 using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.OrganizationContactMethodDTOs;
 using TheCharityBLL.DTOs.OrganizationDTOs;
@@ -287,6 +288,102 @@ namespace TheCharityPL.Controllers
         {
             var result = await _organizationService.GetOrganizationsWithoutCampaigns();
             return Ok(result);
+        }
+
+        // ==============================
+        // Organization Admin Management
+        // ==============================
+
+        /// <summary>
+        /// Assign an organization admin (SuperAdmin only)
+        /// </summary>
+        [HttpPost("{orgId}/admin")]
+        [IsSuperAdmin] // Only SuperAdmin can assign organization admin
+        public async Task<IActionResult> AssignOrganizationAdmin(int orgId, [FromBody] AssignAdminRequest request)
+        {
+            var result = await _organizationService.AssignOrganizationAdminAsync(orgId, request.UserId);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Remove organization admin (SuperAdmin only)
+        /// </summary>
+        [HttpDelete("{orgId}/admin")]
+        [IsSuperAdmin]
+        public async Task<IActionResult> RemoveOrganizationAdmin(int orgId)
+        {
+            var result = await _organizationService.RemoveOrganizationAdminAsync(orgId);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Transfer organization admin to another user (SuperAdmin only)
+        /// </summary>
+        [HttpPost("{orgId}/admin/transfer")]
+        [IsSuperAdmin]
+        public async Task<IActionResult> TransferOrganizationAdmin(int orgId, [FromBody] AssignAdminRequest request)
+        {
+            var result = await _organizationService.TransferOrganizationAdminAsync(orgId, request.UserId);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Get organization admin
+        /// </summary>
+        [HttpGet("{orgId}/admin")]
+        [CanManageOrganization] // OrganizationAdmin + SuperAdmin can view
+        public async Task<IActionResult> GetOrganizationAdmin(int orgId)
+        {
+            var result = await _organizationService.GetOrganizationAdminAsync(orgId);
+            return result.Success ? Ok(result) : NotFound(result);
+        }
+
+        // ==============================
+        // Sub-Admin Management
+        // ==============================
+
+        /// <summary>
+        /// Add a sub-admin to an organization (SuperAdmin + OrganizationAdmin only)
+        /// </summary>
+        [HttpPost("{orgId}/sub-admins")]
+        [CanManageSubAdmins] // SuperAdmin + OrganizationAdmin (NOT SubAdmin)
+        public async Task<IActionResult> AddSubAdmin(int orgId, [FromBody] AssignAdminRequest request)
+        {
+            var result = await _organizationService.AddSubAdminAsync(orgId, request.UserId);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Remove a sub-admin from an organization (SuperAdmin + OrganizationAdmin only)
+        /// </summary>
+        [HttpDelete("{orgId}/sub-admins/{userId}")]
+        [CanManageSubAdmins] // SuperAdmin + OrganizationAdmin (NOT SubAdmin)
+        public async Task<IActionResult> RemoveSubAdmin(int orgId, string userId)
+        {
+            var result = await _organizationService.RemoveSubAdminAsync(orgId, userId);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Get all sub-admins of an organization
+        /// </summary>
+        [HttpGet("{orgId}/sub-admins")]
+        [CanManageOrganization] // SuperAdmin + OrganizationAdmin + SubAdmin can view
+        public async Task<IActionResult> GetSubAdmins(int orgId)
+        {
+            var result = await _organizationService.GetOrganizationSubAdminsAsync(orgId);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
+        /// <summary>
+        /// Check if a user is a sub-admin of an organization
+        /// </summary>
+        [HttpGet("{orgId}/sub-admins/{userId}/check")]
+        [CanManageOrganization] // SuperAdmin + OrganizationAdmin + SubAdmin
+        public async Task<IActionResult> IsUserSubAdmin(int orgId, string userId)
+        {
+            var result = await _organizationService.IsUserSubAdminAsync(orgId, userId);
+            return result.Success ? Ok(result) : BadRequest(result);
         }
     }
 }
