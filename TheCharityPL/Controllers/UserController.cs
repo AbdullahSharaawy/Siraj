@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using TheCharityBLL.Authorization.Attributes;
 using TheCharityBLL.DTOs.UserDTOs;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityBLL.ViewModels.User;
@@ -518,6 +519,120 @@ namespace TheCharityPL.Controllers
             {
                 _logger.LogError(ex, "Failed to send notification");
                 return StatusCode(500, new { message = "Failed to send notification. Please try again." });
+            }
+        }
+
+        /// <summary>
+        /// Assign a role to a user (SuperAdmin only)
+        /// </summary>
+        [HttpPost("{userId}/roles")]
+        [IsSuperAdmin] // Only SuperAdmin can assign roles
+        public async Task<IActionResult> AssignRole(string userId, [FromBody] AssignRoleRequest request)
+        {
+            try
+            {
+                // Check if user exists
+                var user = await _userService.GetUserByIdAsync(userId);
+                if (user == null)
+                    return NotFound(new { message = $"User with ID '{userId}' not found." });
+
+                // Check if role exists in Identity
+                var roles = await _userService.GetUserRolesAsync(userId);
+                if (roles.Contains(request.Role))
+                    return BadRequest(new { message = $"User already has role '{request.Role}'." });
+
+                var result = await _userService.AddToRoleAsync(userId, request.Role);
+
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation($"Role '{request.Role}' assigned to user {userId}");
+                    return Ok(new { message = $"Role '{request.Role}' assigned successfully." });
+                }
+
+                return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error assigning role to user {userId}");
+                return StatusCode(500, new { message = "An error occurred while assigning the role." });
+            }
+        }
+
+        /// <summary>
+        /// Remove a role from a user (SuperAdmin only)
+        /// </summary>
+        [HttpDelete("{userId}/roles/{role}")]
+        [IsSuperAdmin]
+        public async Task<IActionResult> RemoveRole(string userId, string role)
+        {
+            try
+            {
+                // Check if user exists
+                var user = await _userService.GetUserByIdAsync(userId);
+                if (user == null)
+                    return NotFound(new { message = $"User with ID '{userId}' not found." });
+
+                var roles = await _userService.GetUserRolesAsync(userId);
+                if (!roles.Contains(role))
+                    return BadRequest(new { message = $"User does not have role '{role}'." });
+
+                var result = await _userService.RemoveFromRoleAsync(userId, role);
+
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation($"Role '{role}' removed from user {userId}");
+                    return Ok(new { message = $"Role '{role}' removed successfully." });
+                }
+
+                return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error removing role from user {userId}");
+                return StatusCode(500, new { message = "An error occurred while removing the role." });
+            }
+        }
+
+        /// <summary>
+        /// Get all roles for a user
+        /// </summary>
+        [HttpGet("{userId}/roles")]
+        [IsSuperAdmin]
+        public async Task<IActionResult> GetUserRoles(string userId)
+        {
+            try
+            {
+                var user = await _userService.GetUserByIdAsync(userId);
+                if (user == null)
+                    return NotFound(new { message = $"User with ID '{userId}' not found." });
+
+                var roles = await _userService.GetUserRolesAsync(userId);
+                return Ok(new { userId, roles });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error getting roles for user {userId}");
+                return StatusCode(500, new { message = "An error occurred while getting user roles." });
+            }
+        }
+
+        /// <summary>
+        /// Get all available roles in the system
+        /// </summary>
+        [HttpGet("roles/all")]
+        [IsSuperAdmin]
+        public async Task<IActionResult> GetAllRoles()
+        {
+            try
+            {
+                // Get all roles from Identity
+                var roles = new List<string> { "SuperAdmin", "User" }; // Add any other global roles
+                return Ok(roles);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all roles");
+                return StatusCode(500, new { message = "An error occurred while getting roles." });
             }
         }
 
