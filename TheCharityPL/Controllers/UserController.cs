@@ -638,6 +638,67 @@ namespace TheCharityPL.Controllers
             }
         }
 
+        // ─── Seed SuperAdmin ─────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Seed the first SuperAdmin (should be disabled in production or protected)
+        /// </summary>
+        [HttpPost("seed-superadmin")]
+        [AllowAnonymous] // Or use a secret key/token
+        public async Task<IActionResult> SeedSuperAdmin([FromBody] CreateSuperAdminRequest request)
+        {
+            // WARNING: This should be protected with a secret key or environment check
+            // Consider using: if (!Environment.IsDevelopment()) return NotFound();
+
+            try
+            {
+                // Check if any SuperAdmin exists
+                var allUsers = await _userService.GetAllUsersAsync();
+                foreach (var user in allUsers)
+                {
+                    var roles = await _userService.GetUserRolesAsync(user.Id);
+                    if (roles.Contains("SuperAdmin"))
+                        return BadRequest(new { message = "SuperAdmin already exists." });
+                }
+
+                // Create the user
+                var createUserDto = new CreateUserDTO
+                {
+                    Email = request.Email,
+                    UserName = request.UserName,
+                    FullName = request.FullName,
+                    Password = request.Password,
+                    PhoneNumber = request.PhoneNumber
+                };
+
+                var result = await _userService.CreateUserAsync(createUserDto);
+                if (!result.Succeeded)
+                    return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+
+                // Get the created user
+                var createdUser = await _userService.GetUserByEmailAsync(request.Email);
+                if (createdUser == null)
+                    return BadRequest(new { message = "Failed to create user." });
+
+                // Assign SuperAdmin role
+                var roleResult = await _userService.AddToRoleAsync(createdUser.Id, "SuperAdmin");
+                if (!roleResult.Succeeded)
+                    return BadRequest(new { errors = roleResult.Errors.Select(e => e.Description) });
+
+                return Ok(new
+                {
+                    message = "SuperAdmin created successfully.",
+                    userId = createdUser.Id,
+                    email = createdUser.Email
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error seeding SuperAdmin");
+                return StatusCode(500, new { message = "An error occurred while seeding SuperAdmin." });
+            }
+        }
+
         // ─── Private Helpers ─────────────────────────────────────────────────────────
 
         private string BuildFrontendLink(string path, string email, string token)
