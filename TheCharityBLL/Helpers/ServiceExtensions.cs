@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using TheCharityBLL.Authorization.Filters;
 using TheCharityBLL.Authorization.Handlers;
 using TheCharityBLL.Authorization.Requirements;
 using TheCharityBLL.Jobs.Registry.Abstraction;
@@ -95,6 +96,8 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<IAuthorizationHandler, CanUpdatePaymentInfoHandler>();
             services.AddScoped<IAuthorizationHandler, IsSharedCampaignCreatorHandler>();
             services.AddScoped<IAuthorizationHandler, IsSuperAdminHandler>();
+            // Register Authorization Filters
+            services.AddScoped<CanCreateCampaignFilter>();
             // Add Authorization Policies
             services.AddAuthorization(options =>
             {
