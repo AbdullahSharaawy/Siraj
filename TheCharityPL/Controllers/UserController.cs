@@ -77,7 +77,10 @@ namespace TheCharityPL.Controllers
                 return StatusCode(500, new { message = "An error occurred while loading users." });
             }
         }
-
+        /// <summary>
+        /// get user information by user id 
+        /// </summary>
+        
         // ─── GET api/user/{id} ───────────────────────────────────────────────────────
 
         [HttpGet("{id}")]
@@ -122,7 +125,9 @@ namespace TheCharityPL.Controllers
                 return StatusCode(500, new { message = "An error occurred while loading user details." });
             }
         }
-
+        /// <summary>
+        /// create account method 
+        /// </summary>
         // ─── POST api/user/register ──────────────────────────────────────────────────
 
         [HttpPost("register")]
@@ -174,7 +179,10 @@ namespace TheCharityPL.Controllers
                 return StatusCode(500, new { message = "An error occurred while creating the user." });
             }
         }
-
+        /// <summary>
+        /// login by enter user name, password and jwt token
+        /// </summary>
+        
         // ─── POST api/user/login ─────────────────────────────────────────────────────
 
         [HttpPost("login")]
@@ -217,7 +225,9 @@ namespace TheCharityPL.Controllers
                 return StatusCode(500, new { message = "An error occurred during login." });
             }
         }
-
+        /// <summary>
+        /// resend email confirmation ,to check if the email valid or not 
+        /// </summary>
         // ─── POST api/user/resend-confirmation ───────────────────────────────────────
 
         [HttpPost("resend-confirmation")]
@@ -248,12 +258,12 @@ namespace TheCharityPL.Controllers
                 return StatusCode(500, new { message = "An error occurred while resending the confirmation email." });
             }
         }
-
+        
         // ─── POST api/user/confirm-email ─────────────────────────────────────────────
 
         [HttpGet("confirm-email")]
         [AllowAnonymous]
-        public async Task<IActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] string encodedToken)
+        private async Task<IActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] string encodedToken)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(encodedToken))
                 return BadRequest(new { message = "Email and token are required." });
@@ -273,7 +283,10 @@ namespace TheCharityPL.Controllers
                 return StatusCode(500, new { message = "An error occurred while confirming the email." });
             }
         }
-
+        /// <summary>
+        /// change password method
+        /// </summary>
+      
         // ─── POST api/user/forgot-password ───────────────────────────────────────────
 
         [HttpPost("forgot-password")]
@@ -308,7 +321,7 @@ namespace TheCharityPL.Controllers
 
         [HttpPost("reset-password")]
         [AllowAnonymous]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordViewModel model)
+        private async Task<IActionResult> ResetPassword([FromBody] ResetPasswordViewModel model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
@@ -339,10 +352,14 @@ namespace TheCharityPL.Controllers
                 return StatusCode(500, new { message = "An error occurred while resetting the password." });
             }
         }
-
+        /// <summary>
+        /// update user info method by user id
+        /// </summary>
+        
         // ─── PUT api/user/{id} ───────────────────────────────────────────────────────
 
         [HttpPut("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> Update(string id, [FromBody] EditUserViewModel viewModel)
         {
             if (id != viewModel.Id)
@@ -392,10 +409,13 @@ namespace TheCharityPL.Controllers
                 return StatusCode(500, new { message = "An error occurred while updating the user." });
             }
         }
-
+        /// <summary>
+        /// change password method by user id
+        /// </summary>
         // ─── PUT api/user/{id}/change-password ───────────────────────────────────────
 
         [HttpPut("{id}/change-password")]
+        [AllowAnonymous]
         public async Task<IActionResult> ChangePassword(string id, [FromBody] ChangePasswordViewModel viewModel)
         {
             if (id != viewModel.UserId)
@@ -436,10 +456,14 @@ namespace TheCharityPL.Controllers
                 return StatusCode(500, new { message = "An error occurred while changing the password." });
             }
         }
-
+        /// <summary>
+        /// delete user by user id
+        /// </summary>
+       
         // ─── DELETE api/user/{id} ────────────────────────────────────────────────────
 
         [HttpDelete("{id}")]
+        [AllowAnonymous]
         public async Task<IActionResult> Delete(string id)
         {
             try
@@ -472,11 +496,14 @@ namespace TheCharityPL.Controllers
                 return StatusCode(500, new { message = "An error occurred while deleting the user." });
             }
         }
-
+        /// <summary>
+        /// restore user deleted by user id
+        /// </summary>
+      
         // ─── POST api/user/restore/{id} ──────────────────────────────────────────────
 
         [HttpPost("restore/{id}")]
-        [Authorize(Roles = "Admin")]
+        [AllowAnonymous]
         public async Task<IActionResult> Restore(string id)  // FIX: removed [FromBody] — id comes from route
         {
             try
@@ -501,24 +528,6 @@ namespace TheCharityPL.Controllers
             {
                 _logger.LogError(ex, "Error restoring user ID: {UserId}", id);
                 return StatusCode(500, new { message = "An error occurred while restoring the user." });
-            }
-        }
-
-        // ─── POST api/user/send-notification ─────────────────────────────────────────
-
-        [HttpPost("send-notification")]
-        [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> SendNotification([FromBody] SendNotificationViewModel model)
-        {
-            try
-            {
-                await _emailService.SendNotificationAsync(model.Email, model.Subject, model.Message);
-                return Ok(new { message = "Notification sent successfully." });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send notification");
-                return StatusCode(500, new { message = "Failed to send notification. Please try again." });
             }
         }
 
