@@ -522,6 +522,8 @@ namespace TheCharityPL.Controllers
             }
         }
 
+        // ─── Role Management ─────────────────────────────────────────────────────────
+
         /// <summary>
         /// Assign a role to a user (SuperAdmin only)
         /// </summary>
