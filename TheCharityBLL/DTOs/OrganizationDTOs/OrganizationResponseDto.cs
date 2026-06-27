@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TheCharityBLL.DTOs.OrganizationContactMethodDTOs;
+﻿using TheCharityBLL.DTOs.OrganizationContactMethodDTOs;
 using TheCharityBLL.DTOs.PaymentInfoDTOs;
 
 namespace TheCharityBLL.DTOs.OrganizationDTOs
@@ -31,5 +26,10 @@ namespace TheCharityBLL.DTOs.OrganizationDTOs
 
         /// <example>2025-06-20T14:15:00</example>
         public DateTime? UpdatedOn { get; set; }
+        public int? PaymentId { get; set; }
+        public string? AdminUserId { get; set; }
+        public string AdminUserName { get; set; }
+        public string AdminUserFullName { get; set; }
+        public string AdminUserEmail { get; set; }
     }
 }
