@@ -101,7 +101,7 @@ namespace TheCharityPL
                 jobRegistry.RegisterAllRecurringJobs();
             }
 
-            app.MapHealthChecks("/health");
+            app.MapHealthChecks("/health");// check if the db connected or not
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
