@@ -88,7 +88,6 @@ namespace TheCharityBLL.Helpers
             // Register IHttpContextAccessor (for handlers)
             services.AddHttpContextAccessor();
             // Register Authorization Handlers
-            services.AddScoped<IAuthorizationHandler, CanCreateCampaignHandler>();
             services.AddScoped<IAuthorizationHandler, CanManageCampaignHandler>();
             services.AddScoped<IAuthorizationHandler, CanManageOrganizationHandler>();
             services.AddScoped<IAuthorizationHandler, CanManageSubAdminsHandler>();
@@ -99,9 +98,6 @@ namespace TheCharityBLL.Helpers
             // Add Authorization Policies
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("CanCreateCampaign", policy =>
-                    policy.Requirements.Add(new CanCreateCampaignRequirement()));
-
                 options.AddPolicy("CanManageCampaign", policy =>
                     policy.Requirements.Add(new CanManageCampaignRequirement()));
 
