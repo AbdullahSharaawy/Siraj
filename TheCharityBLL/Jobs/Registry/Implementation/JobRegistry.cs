@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using TheCharityBLL.Jobs.Emails;
 using TheCharityBLL.Jobs.Registry.Abstraction;
-using TheCharityBLL.Jobs.Scheduled;
 using TheCharityBLL.Services.Abstraction;
 
 namespace TheCharityBLL.Jobs.Registry.Implementation
@@ -21,12 +20,6 @@ namespace TheCharityBLL.Jobs.Registry.Implementation
         public void RegisterAllRecurringJobs()
         {
             _logger.LogInformation("Registering all recurring jobs...");
-
-            // Register CheckExpiredCampaignsJob to run every hour
-            _jobScheduler.AddOrUpdateRecurringJob<AutoCompleteCampaignsJob>(
-                "auto-complete-campaigns",
-                Cron.Hourly()
-            );
 
             // Daily at 9 AM - deadline reminders
             _jobScheduler.AddOrUpdateRecurringJob<CampaignDeadlineReminderJob>(
