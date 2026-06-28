@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -6,6 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using TheCharityBLL.Authorization.Filters;
+using TheCharityBLL.Authorization.Handlers;
+using TheCharityBLL.Authorization.Requirements;
 using TheCharityBLL.Events.Abstraction;
 using TheCharityBLL.Events.CampaignEvents;
 using TheCharityBLL.Events.DonationEvents;
@@ -30,6 +34,7 @@ using TheCharityDAL.Database;
 using TheCharityDAL.Entities;
 using TheCharityDAL.Repositories.Abstraction;
 using TheCharityDAL.Repositories.Implementation;
+using IAuthorizationService = TheCharityBLL.Services.Abstraction.IAuthorizationService;
 
 namespace TheCharityBLL.Helpers
 {
@@ -79,13 +84,51 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<IOrganizationRepository, OrganizationRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
             // Services Injection
+            services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<ICampaignService, CampaignService>();
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped<IPaymobService,PaymobService>();
-            services.AddScoped<IOrganizationService, OrganizationService>();
             services.AddScoped<IDonatedItemService, DonatedItemService>();
+            services.AddScoped<IDonationService, DonationService>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IOrganizationService, OrganizationService>();
+            services.AddScoped<IPaymobService,PaymobService>();
             services.AddScoped<IPaymentInfoService, PaymentInfoService>();
+            services.AddScoped<IUserService, UserService>();
+            // Register IHttpContextAccessor (for handlers)
+            services.AddHttpContextAccessor();
+            // Register Authorization Handlers
+            services.AddScoped<IAuthorizationHandler, CanManageCampaignHandler>();
+            services.AddScoped<IAuthorizationHandler, CanManageOrganizationHandler>();
+            services.AddScoped<IAuthorizationHandler, CanManageSubAdminsHandler>();
+            services.AddScoped<IAuthorizationHandler, CanPerformBulkOperationsHandler>();
+            services.AddScoped<IAuthorizationHandler, CanUpdatePaymentInfoHandler>();
+            services.AddScoped<IAuthorizationHandler, IsSharedCampaignCreatorHandler>();
+            services.AddScoped<IAuthorizationHandler, IsSuperAdminHandler>();
+            // Register Authorization Filters
+            services.AddScoped<CanCreateCampaignFilter>();
+            // Add Authorization Policies
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("CanManageCampaign", policy =>
+                    policy.Requirements.Add(new CanManageCampaignRequirement()));
+
+                options.AddPolicy("CanManageOrganization", policy =>
+                    policy.Requirements.Add(new CanManageOrganizationRequirement()));
+
+                options.AddPolicy("CanManageSubAdmins", policy =>
+                    policy.Requirements.Add(new CanManageSubAdminsRequirement()));
+
+                options.AddPolicy("CanPerformBulkOperations", policy =>
+                    policy.Requirements.Add(new CanPerformBulkOperationsRequirement()));
+
+                options.AddPolicy("CanUpdatePaymentInfo", policy =>
+                    policy.Requirements.Add(new CanUpdatePaymentInfoRequirement()));
+
+                options.AddPolicy("IsSharedCampaignCreator", policy =>
+                    policy.Requirements.Add(new IsSharedCampaignCreatorRequirement()));
+
+                options.AddPolicy("IsSuperAdmin", policy =>
+                    policy.Requirements.Add(new IsSuperAdminRequirement()));
+            });
             services.AddScoped<IDonationService, DonationService>();
             // Email Job Services
             services.AddScoped<SendMilestoneEmailJob>();
