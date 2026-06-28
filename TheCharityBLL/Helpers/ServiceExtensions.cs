@@ -93,6 +93,23 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<IPaymobService,PaymobService>();
             services.AddScoped<IPaymentInfoService, PaymentInfoService>();
             services.AddScoped<IUserService, UserService>();
+            // Email Job Services
+            services.AddScoped<SendMilestoneEmailJob>();
+            services.AddScoped<NewCampaignNotificationJob>();
+            services.AddScoped<DeadlineExtensionConfirmationJob>();
+            services.AddScoped<CampaignDeadlineReminderJob>();
+            services.AddScoped<AutoExpireCampaignsJob>();
+            services.AddScoped<WeeklyCampaignDigestJob>();
+            // Event Handlers
+            services.AddScoped<IEventHandler<CampaignDonationReceivedEvent>, CampaignDonationEventHandler>();
+            services.AddScoped<IEventHandler<CampaignDonationReceivedEvent>, IncrementCampaignMoneyEventHandler>();
+            services.AddScoped<IEventHandler<CampaignCreatedEvent>, CampaignCreatedEventHandler>();
+            services.AddScoped<IEventHandler<CampaignCompletedEvent>, CampaignCompletedEventHandler>();
+            services.AddScoped<IEventHandler<CampaignDismissedEvent>, CampaignDismissedEventHandler>();
+            services.AddScoped<IEventHandler<CampaignDeadlineExtendedEvent>, CampaignDeadlineExtendedEventHandler>();
+            services.AddScoped<IEventHandler<CampaignExpiredEvent>, CampaignExpiredEventHandler>();
+            services.AddScoped<IEventHandler<CampaignPostponedEvent>, CampaignPostponedEventHandler>();
+            services.AddScoped<IEventDispatcher, EventDispatcher>();
             // Register IHttpContextAccessor (for handlers)
             services.AddHttpContextAccessor();
             // Register Authorization Handlers
@@ -129,24 +146,6 @@ namespace TheCharityBLL.Helpers
                 options.AddPolicy("IsSuperAdmin", policy =>
                     policy.Requirements.Add(new IsSuperAdminRequirement()));
             });
-            services.AddScoped<IDonationService, DonationService>();
-            // Email Job Services
-            services.AddScoped<SendMilestoneEmailJob>();
-            services.AddScoped<NewCampaignNotificationJob>();
-            services.AddScoped<DeadlineExtensionConfirmationJob>();
-            services.AddScoped<CampaignDeadlineReminderJob>();
-            services.AddScoped<AutoExpireCampaignsJob>();
-            services.AddScoped<WeeklyCampaignDigestJob>();
-            // Event Handlers
-            services.AddScoped<IEventHandler<CampaignDonationReceivedEvent>, CampaignDonationEventHandler>();
-            services.AddScoped<IEventHandler<CampaignDonationReceivedEvent>, IncrementCampaignMoneyEventHandler>();
-            services.AddScoped<IEventHandler<CampaignCreatedEvent>, CampaignCreatedEventHandler>();
-            services.AddScoped<IEventHandler<CampaignCompletedEvent>, CampaignCompletedEventHandler>();
-            services.AddScoped<IEventHandler<CampaignDismissedEvent>, CampaignDismissedEventHandler>();
-            services.AddScoped<IEventHandler<CampaignDeadlineExtendedEvent>, CampaignDeadlineExtendedEventHandler>();
-            services.AddScoped<IEventHandler<CampaignExpiredEvent>, CampaignExpiredEventHandler>();
-            services.AddScoped<IEventHandler<CampaignPostponedEvent>, CampaignPostponedEventHandler>();
-            services.AddScoped<IEventDispatcher, EventDispatcher>();
             // mapper Injection
             services.AddAutoMapper(cfg => {
                 cfg.AddProfile<UserMapperProfile>();
