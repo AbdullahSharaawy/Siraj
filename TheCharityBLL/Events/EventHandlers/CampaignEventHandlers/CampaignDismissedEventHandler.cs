@@ -1,44 +1,51 @@
-﻿using TheCharityBLL.Events.Abstraction;
+﻿using Microsoft.Extensions.Logging;
+using TheCharityBLL.Events.Abstraction;
 using TheCharityBLL.Events.CampaignEvents;
 using TheCharityBLL.Services.Abstraction;
-using TheCharityDAL.Enums;
+using TheCharityBLL.Services.Enums;
 
 namespace TheCharityBLL.Events.EventHandlers.CampaignEventHandlers
 {
     public class CampaignDismissedEventHandler : IEventHandler<CampaignDismissedEvent>
     {
-        private readonly IEmailService _emailService;
-        private readonly IOrganizationService _organizationService;
+        private readonly ICampaignNotificationService _notificationService;
+        private readonly ILogger<CampaignDismissedEventHandler> _logger;
 
         public CampaignDismissedEventHandler(
-            IEmailService emailService,
-            IOrganizationService organizationService)
+            ICampaignNotificationService notificationService,
+            ILogger<CampaignDismissedEventHandler> logger)
         {
-            _emailService = emailService;
-            _organizationService = organizationService;
+            _notificationService = notificationService;
+            _logger = logger;
         }
 
         public async Task HandleAsync(CampaignDismissedEvent @event)
         {
-            var campaign = @event.Campaign;
+            try
+            {
+                var campaign = @event.Campaign;
 
-            if (campaign.OrganizationId == null) return;
-            var organization = await _organizationService.GetOrganizationById(campaign.OrganizationId.Value);
-            if (!organization.Success) return;
+                var subject = $"📌 Campaign Dismissed: {campaign.Title}";
+                var message =
+                    $"The campaign '{campaign.Title}' has been dismissed.\n\n" +
+                    $"📊 Final Results:\n" +
+                    $"   • Target: ${campaign.Target:F2}\n" +
+                    $"   • Raised: ${campaign.Achieved:F2}\n" +
+                    $"   • Achievement: {((campaign.Achieved / campaign.Target) * 100):F1}%\n\n" +
+                    $"You can create a new campaign whenever you're ready.";
 
-            var contactMethods = await _organizationService.GetOrganizationContactMethods(campaign.OrganizationId.Value);
-            var emailContact = contactMethods.Data?.FirstOrDefault(cm => cm.Type == ContactType.Email);
+                await _notificationService.SendCampaignNotificationAsync(
+                    campaign.Id,
+                    subject,
+                    message,
+                    NotificationType.General);
 
-            if (emailContact == null || string.IsNullOrEmpty(emailContact.Value)) return;
-
-            await _emailService.SendNotificationAsync(
-                emailContact.Value,
-                $"Campaign Dismissed: {campaign.Title}",
-                $"Your campaign '{campaign.Title}' has been dismissed.\n\n" +
-                $"Target: ${campaign.Target}\n" +
-                $"Achieved: ${campaign.Achieved}\n\n" +
-                $"You can create a new campaign whenever you're ready."
-            );
+                _logger.LogInformation("Sent dismissed notification for campaign {CampaignId}", campaign.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to handle CampaignDismissedEvent for campaign {CampaignId}", @event.Campaign?.Id);
+            }
         }
     }
 }
