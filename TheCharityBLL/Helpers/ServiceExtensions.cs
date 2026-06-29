@@ -84,6 +84,7 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<IUserRepository, UserRepository>();
             // Services Injection
             services.AddScoped<IAuthorizationService, AuthorizationService>();
+            services.AddScoped<ICampaignNotificationService, CampaignNotificationService>();
             services.AddScoped<ICampaignService, CampaignService>();
             services.AddScoped<IDonatedItemService, DonatedItemService>();
             services.AddScoped<IDonationService, DonationService>();
