@@ -94,22 +94,23 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<IPaymentInfoService, PaymentInfoService>();
             services.AddScoped<IUserService, UserService>();
             // Email Job Services
-            services.AddScoped<SendMilestoneEmailJob>();
-            services.AddScoped<NewCampaignNotificationJob>();
-            services.AddScoped<DeadlineExtensionConfirmationJob>();
-            services.AddScoped<CampaignDeadlineReminderJob>();
             services.AddScoped<AutoExpireCampaignsJob>();
+            services.AddScoped<CampaignDeadlineReminderJob>();
+            services.AddScoped<DeadlineExtensionConfirmationJob>();
+            services.AddScoped<NewCampaignNotificationJob>();
+            services.AddScoped<SendMilestoneEmailJob>();
             services.AddScoped<WeeklyCampaignDigestJob>();
             // Event Handlers
+            services.AddScoped<IEventDispatcher, EventDispatcher>();
+            services.AddScoped<IEventHandler<CampaignCompletedEvent>, CampaignCompletedEventHandler>();
+            services.AddScoped<IEventHandler<CampaignCreatedEvent>, CampaignCreatedEventHandler>();
+            services.AddScoped<IEventHandler<CampaignDeadlineExtendedEvent>, CampaignDeadlineExtendedEventHandler>();
+            services.AddScoped<IEventHandler<CampaignDismissedEvent>, CampaignDismissedEventHandler>();
             services.AddScoped<IEventHandler<CampaignDonationReceivedEvent>, CampaignDonationEventHandler>();
             services.AddScoped<IEventHandler<CampaignDonationReceivedEvent>, IncrementCampaignMoneyEventHandler>();
-            services.AddScoped<IEventHandler<CampaignCreatedEvent>, CampaignCreatedEventHandler>();
-            services.AddScoped<IEventHandler<CampaignCompletedEvent>, CampaignCompletedEventHandler>();
-            services.AddScoped<IEventHandler<CampaignDismissedEvent>, CampaignDismissedEventHandler>();
-            services.AddScoped<IEventHandler<CampaignDeadlineExtendedEvent>, CampaignDeadlineExtendedEventHandler>();
             services.AddScoped<IEventHandler<CampaignExpiredEvent>, CampaignExpiredEventHandler>();
             services.AddScoped<IEventHandler<CampaignPostponedEvent>, CampaignPostponedEventHandler>();
-            services.AddScoped<IEventDispatcher, EventDispatcher>();
+            services.AddScoped<IEventHandler<CampaignStatusChangedEvent>, CampaignStatusChangedEventHandler>();
             // Register IHttpContextAccessor (for handlers)
             services.AddHttpContextAccessor();
             // Register Authorization Handlers
