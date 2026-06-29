@@ -17,6 +17,7 @@ namespace TheCharityBLL.Mapper
             return new CampaignResponseDto
             {
                 Id = campaign.Id,
+                OrganizationId = campaign.OrganizationId ?? 0,
                 Title = campaign.Title,
                 Description = campaign.Description,
                 ImgPath = campaign.ImgPath,

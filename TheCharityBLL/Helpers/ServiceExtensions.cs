@@ -10,9 +10,15 @@ using System.Text;
 using TheCharityBLL.Authorization.Filters;
 using TheCharityBLL.Authorization.Handlers;
 using TheCharityBLL.Authorization.Requirements;
+using TheCharityBLL.Events.Abstraction;
+using TheCharityBLL.Events.CampaignEvents;
+using TheCharityBLL.Events.DonationEvents;
+using TheCharityBLL.Events.EventHandlers.CampaignEventHandlers;
+using TheCharityBLL.Events.EventHandlers.DonationEventHandlers;
+using TheCharityBLL.Events.Implementation;
+using TheCharityBLL.Jobs.Emails;
 using TheCharityBLL.Jobs.Registry.Abstraction;
 using TheCharityBLL.Jobs.Registry.Implementation;
-using TheCharityBLL.Jobs.Scheduled;
 using TheCharityBLL.Jobs.Services;
 using TheCharityBLL.Mapper;
 using TheCharityBLL.Services.Abstraction;
@@ -48,7 +54,7 @@ namespace TheCharityBLL.Helpers
             .AddEntityFrameworkStores<TheCharityDbContext>()
             .AddDefaultTokenProviders();
         }
-        public static void FoxArtEmailConfiguration(this IServiceCollection services, IConfiguration configuration)
+        public static void TheCharityConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
         }
@@ -78,6 +84,7 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<IUserRepository, UserRepository>();
             // Services Injection
             services.AddScoped<IAuthorizationService, AuthorizationService>();
+            services.AddScoped<ICampaignNotificationService, CampaignNotificationService>();
             services.AddScoped<ICampaignService, CampaignService>();
             services.AddScoped<IDonatedItemService, DonatedItemService>();
             services.AddScoped<IDonationService, DonationService>();
@@ -86,6 +93,24 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<IPaymobService,PaymobService>();
             services.AddScoped<IPaymentInfoService, PaymentInfoService>();
             services.AddScoped<IUserService, UserService>();
+            // Email Job Services
+            services.AddScoped<AutoExpireCampaignsJob>();
+            services.AddScoped<CampaignDeadlineReminderJob>();
+            services.AddScoped<DeadlineExtensionConfirmationJob>();
+            services.AddScoped<NewCampaignNotificationJob>();
+            services.AddScoped<SendMilestoneEmailJob>();
+            services.AddScoped<WeeklyCampaignDigestJob>();
+            // Event Handlers
+            services.AddScoped<IEventDispatcher, EventDispatcher>();
+            services.AddScoped<IEventHandler<CampaignCompletedEvent>, CampaignCompletedEventHandler>();
+            services.AddScoped<IEventHandler<CampaignCreatedEvent>, CampaignCreatedEventHandler>();
+            services.AddScoped<IEventHandler<CampaignDeadlineExtendedEvent>, CampaignDeadlineExtendedEventHandler>();
+            services.AddScoped<IEventHandler<CampaignDismissedEvent>, CampaignDismissedEventHandler>();
+            services.AddScoped<IEventHandler<CampaignDonationReceivedEvent>, CampaignDonationEventHandler>();
+            services.AddScoped<IEventHandler<CampaignDonationReceivedEvent>, IncrementCampaignMoneyEventHandler>();
+            services.AddScoped<IEventHandler<CampaignExpiredEvent>, CampaignExpiredEventHandler>();
+            services.AddScoped<IEventHandler<CampaignPostponedEvent>, CampaignPostponedEventHandler>();
+            services.AddScoped<IEventHandler<CampaignStatusChangedEvent>, CampaignStatusChangedEventHandler>();
             // Register IHttpContextAccessor (for handlers)
             services.AddHttpContextAccessor();
             // Register Authorization Handlers
@@ -167,9 +192,6 @@ namespace TheCharityBLL.Helpers
         }
         public static void AddHangfireServices(this IServiceCollection services)
         {
-            // Add more jobs here as you create them
-            services.AddScoped<CheckExpiredCampaignsJob>();
-
             // Register services
             services.AddScoped<IJobSchedulerService, HangfireJobSchedulerService>();
             services.AddScoped<IJobRegistry, JobRegistry>();

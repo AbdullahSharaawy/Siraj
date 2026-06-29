@@ -46,7 +46,7 @@ namespace TheCharityDAL.Database
                 .WithMany(o => o.SharedCampaigns)
                 .UsingEntity(j => j.ToTable("SharedCampaignOrganizations"));
 
-            // 4. DonatedItem - Attachment relationships (FIX THE ISSUE HERE)
+            // 4. DonatedItem - Attachment relationships
             builder.Entity<DonatedItem>()
                 .HasMany(di => di.ItemAttachments)
                 .WithOne(a => a.DonatedItem)
