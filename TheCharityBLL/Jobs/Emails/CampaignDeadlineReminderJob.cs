@@ -3,24 +3,21 @@ using TheCharityBLL.Jobs.Context;
 using TheCharityBLL.Jobs.Result.Abstraction;
 using TheCharityBLL.Jobs.Result.Implementation;
 using TheCharityBLL.Services.Abstraction;
-using TheCharityDAL.Enums;
+using TheCharityBLL.Services.Enums;
 
 namespace TheCharityBLL.Jobs.Emails
 {
     public class CampaignDeadlineReminderJob : BaseJob
     {
         private readonly ICampaignService _campaignService;
-        private readonly IEmailService _emailService;
-        private readonly IOrganizationService _organizationService;
+        private readonly ICampaignNotificationService _notificationService;
 
         public CampaignDeadlineReminderJob(
             ICampaignService campaignService,
-            IEmailService emailService,
-            IOrganizationService organizationService)
+            ICampaignNotificationService notificationService)
         {
             _campaignService = campaignService;
-            _emailService = emailService;
-            _organizationService = organizationService;
+            _notificationService = notificationService;
         }
 
         public override string JobName => "Send campaign deadline reminders";
@@ -36,25 +33,21 @@ namespace TheCharityBLL.Jobs.Emails
 
             foreach (var campaign in expiringCampaigns.Data)
             {
-                var organization = await _organizationService.GetOrganizationById(campaign.OrganizationId);
-                if (!organization.Success) continue;
-
-                // Get organization email from contact methods
-                var contactMethods = await _organizationService.GetOrganizationContactMethods(campaign.OrganizationId);
-                var emailContact = contactMethods.Data?.FirstOrDefault(cm => cm.Type == ContactType.Email);
-
-                if (emailContact == null || string.IsNullOrEmpty(emailContact.Value)) continue;
-
-                var percentage = campaign.Target > 0 ? (campaign.Achieved / campaign.Target) * 100 : 0;
                 var daysLeft = campaign.Deadline.HasValue ? (campaign.Deadline.Value - DateTime.UtcNow).Days : 0;
+                var percentage = campaign.Target > 0 ? (campaign.Achieved / campaign.Target) * 100 : 0;
 
-                await _emailService.SendNotificationAsync(
-                    emailContact.Value,
-                    $"⚠️ Campaign Ending Soon: {campaign.Title}",
+                var subject = $"⚠️ Campaign Ending Soon: {campaign.Title}";
+                var message =
                     $"Your campaign '{campaign.Title}' ends in {daysLeft} days.\n" +
-                    $"Current progress: {percentage:F1}% (${campaign.Achieved} / ${campaign.Target})\n" +
-                    $"Visit your dashboard to extend the deadline if needed."
-                );
+                    $"Current progress: {percentage:F1}% (${campaign.Achieved:F2} / ${campaign.Target:F2})\n" +
+                    $"Visit your dashboard to extend the deadline if needed.";
+
+                await _notificationService.SendCampaignNotificationAsync(
+                    campaign.Id,
+                    subject,
+                    message,
+                    NotificationType.DeadlineReminder);
+
                 remindersSent++;
             }
 
