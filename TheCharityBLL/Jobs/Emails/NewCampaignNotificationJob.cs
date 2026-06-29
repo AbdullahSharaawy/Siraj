@@ -3,25 +3,21 @@ using TheCharityBLL.Jobs.Context;
 using TheCharityBLL.Jobs.Result.Abstraction;
 using TheCharityBLL.Jobs.Result.Implementation;
 using TheCharityBLL.Services.Abstraction;
-using TheCharityDAL.Enums;
+using TheCharityBLL.Services.Enums;
 
 namespace TheCharityBLL.Jobs.Emails
 {
     public class NewCampaignNotificationJob : BaseJob
     {
         private readonly ICampaignService _campaignService;
-        private readonly IEmailService _emailService;
-        private readonly IOrganizationService _organizationService;
+        private readonly ICampaignNotificationService _notificationService;
 
         public NewCampaignNotificationJob(
             ICampaignService campaignService,
-            IEmailService emailService,
-            IOrganizationService organizationService,
-            IUserService userService)
+            ICampaignNotificationService notificationService)
         {
             _campaignService = campaignService;
-            _emailService = emailService;
-            _organizationService = organizationService;
+            _notificationService = notificationService;
         }
 
         public override string JobName => "Send new campaign notification";
@@ -31,27 +27,26 @@ namespace TheCharityBLL.Jobs.Emails
             var campaignId = context.GetMetadata<int>("CampaignId");
 
             var campaign = await _campaignService.GetCampaignByIdAsync(campaignId);
-            if (!campaign.Success)
+            if (!campaign.Success || campaign.Data == null)
                 return JobResult.Failure($"Campaign {campaignId} not found");
 
-            var organization = await _organizationService.GetOrganizationById(campaign.Data.OrganizationId);
-            if (!organization.Success)
-                return JobResult.Failure($"Organization {campaign.Data.OrganizationId} not found");
+            var subject = $"🚀 New Campaign Created: {campaign.Data.Title}";
+            var message =
+                $"A new campaign has been created!\n\n" +
+                $"📌 Title: {campaign.Data.Title}\n" +
+                $"📝 Description: {campaign.Data.Description ?? "No description provided"}\n" +
+                $"🎯 Target: ${campaign.Data.Target:F2}\n" +
+                $"💰 Current Progress: ${campaign.Data.Achieved:F2}\n" +
+                $"📅 Deadline: {campaign.Data.Deadline:yyyy-MM-dd}\n\n" +
+                $"Visit the dashboard to manage this campaign.";
 
-            // Get organization email from contact methods
-            var contactMethods = await _organizationService.GetOrganizationContactMethods(campaign.Data.OrganizationId);
-            var emailContact = contactMethods.Data?.FirstOrDefault(cm => cm.Type == ContactType.Email);
+            await _notificationService.SendCampaignNotificationAsync(
+                campaignId,
+                subject,
+                message,
+                NotificationType.CampaignCreated);
 
-            if (emailContact == null || string.IsNullOrEmpty(emailContact.Value))
-                return JobResult.Failure($"No email found for organization {campaign.Data.OrganizationId}");
-
-            await _emailService.SendNotificationAsync(
-                emailContact.Value,
-                $"New Campaign Created: {campaign.Data.Title}",
-                $"A new campaign '{campaign.Data.Title}' has been created with target ${campaign.Data.Target}. Deadline: {campaign.Data.Deadline:yyyy-MM-dd}"
-            );
-
-            return JobResult.Success($"Sent new campaign notification to organization {campaign.Data.OrganizationId}");
+            return JobResult.Success($"Sent new campaign notification for campaign {campaignId}");
         }
     }
 }
