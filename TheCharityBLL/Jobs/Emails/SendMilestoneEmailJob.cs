@@ -3,24 +3,21 @@ using TheCharityBLL.Jobs.Context;
 using TheCharityBLL.Jobs.Result.Abstraction;
 using TheCharityBLL.Jobs.Result.Implementation;
 using TheCharityBLL.Services.Abstraction;
-using TheCharityDAL.Enums;
+using TheCharityBLL.Services.Enums;
 
 namespace TheCharityBLL.Jobs.Emails
 {
     public class SendMilestoneEmailJob : BaseJob
     {
         private readonly ICampaignService _campaignService;
-        private readonly IEmailService _emailService;
-        private readonly IOrganizationService _organizationService;
+        private readonly ICampaignNotificationService _notificationService;
 
         public SendMilestoneEmailJob(
             ICampaignService campaignService,
-            IEmailService emailService,
-            IOrganizationService organizationService)
+            ICampaignNotificationService notificationService)
         {
             _campaignService = campaignService;
-            _emailService = emailService;
-            _organizationService = organizationService;
+            _notificationService = notificationService;
         }
 
         public override string JobName => "Send milestone celebration email";
@@ -31,25 +28,24 @@ namespace TheCharityBLL.Jobs.Emails
             var milestone = context.GetMetadata<int>("Milestone");
 
             var campaign = await _campaignService.GetCampaignByIdAsync(campaignId);
-            if (!campaign.Success)
+            if (!campaign.Success || campaign.Data == null)
                 return JobResult.Failure($"Campaign {campaignId} not found");
 
-            var organization = await _organizationService.GetOrganizationById(campaign.Data.OrganizationId);
-            if (!organization.Success)
-                return JobResult.Failure($"Organization {campaign.Data.OrganizationId} not found");
+            var subject = $"🎉 {milestone}% Milestone Reached! - {campaign.Data.Title}";
+            var message =
+                $"🎊 Congratulations!\n\n" +
+                $"Your campaign '{campaign.Data.Title}' has reached {milestone}% of its target!\n\n" +
+                $"📊 Current Progress:\n" +
+                $"   • Target: ${campaign.Data.Target:F2}\n" +
+                $"   • Raised: ${campaign.Data.Achieved:F2}\n" +
+                $"   • Achievement: {milestone}%\n\n" +
+                $"Keep up the great work!";
 
-            // Get organization email from contact methods
-            var contactMethods = await _organizationService.GetOrganizationContactMethods(campaign.Data.OrganizationId);
-            var emailContact = contactMethods.Data?.FirstOrDefault(cm => cm.Type == ContactType.Email);
-
-            if (emailContact == null || string.IsNullOrEmpty(emailContact.Value))
-                return JobResult.Failure($"No email found for organization {campaign.Data.OrganizationId}");
-
-            await _emailService.SendNotificationAsync(
-                emailContact.Value,
-                $"🎉 {milestone}% Milestone Reached! - {campaign.Data.Title}",
-                $"Your campaign '{campaign.Data.Title}' has reached {milestone}% of its target! Current progress: {campaign.Data.Achieved} / {campaign.Data.Target}"
-            );
+            await _notificationService.SendCampaignNotificationAsync(
+                campaignId,
+                subject,
+                message,
+                NotificationType.MilestoneReached);
 
             return JobResult.Success($"Sent {milestone}% milestone email for campaign {campaignId}");
         }
