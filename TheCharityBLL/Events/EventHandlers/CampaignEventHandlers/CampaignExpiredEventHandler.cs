@@ -1,49 +1,52 @@
-﻿using TheCharityBLL.Events.Abstraction;
+﻿using Microsoft.Extensions.Logging;
+using TheCharityBLL.Events.Abstraction;
 using TheCharityBLL.Events.CampaignEvents;
 using TheCharityBLL.Services.Abstraction;
+using TheCharityBLL.Services.Enums;
 using TheCharityDAL.Enums;
 
 namespace TheCharityBLL.Events.EventHandlers.CampaignEventHandlers
 {
     public class CampaignExpiredEventHandler : IEventHandler<CampaignExpiredEvent>
     {
-        private readonly IEmailService _emailService;
-        private readonly IOrganizationService _organizationService;
+        private readonly ICampaignNotificationService _notificationService;
+        private readonly ILogger<CampaignExpiredEventHandler> _logger;
 
         public CampaignExpiredEventHandler(
-            IEmailService emailService,
-            IOrganizationService organizationService)
+            ICampaignNotificationService notificationService,
+            ILogger<CampaignExpiredEventHandler> logger)
         {
-            _emailService = emailService;
-            _organizationService = organizationService;
+            _notificationService = notificationService;
+            _logger = logger;
         }
 
         public async Task HandleAsync(CampaignExpiredEvent @event)
         {
-            var campaign = @event.Campaign;
+            try
+            {
+                var campaign = @event.Campaign;
 
-            // Get organization details
-            if (!campaign.OrganizationId.HasValue) return;
-            var organization = await _organizationService.GetOrganizationById(campaign.OrganizationId.Value);
-            if (!organization.Success) return;
+                var subject = $"⚠️ Campaign Expired: {campaign.Title}";
+                var message =
+                    $"Your campaign '{campaign.Title}' has expired.\n\n" +
+                    $"📊 Final Results:\n" +
+                    $"   • Target: ${campaign.Target:F2}\n" +
+                    $"   • Raised: ${campaign.Achieved:F2}\n" +
+                    $"   • Achievement: {((campaign.Achieved / campaign.Target) * 100):F1}%\n\n" +
+                    $"You can extend the deadline or start a new campaign.";
 
-            // Get organization email from contact methods
-            var contactMethods = await _organizationService.GetOrganizationContactMethods(campaign.OrganizationId.Value);
-            var emailContact = contactMethods.Data?.FirstOrDefault(cm => cm.Type == ContactType.Email);
+                await _notificationService.SendCampaignNotificationAsync(
+                    campaign.Id,
+                    subject,
+                    message,
+                    NotificationType.CampaignExpired);
 
-            if (emailContact == null || string.IsNullOrEmpty(emailContact.Value)) return;
-
-            // Send email notification
-            await _emailService.SendNotificationAsync(
-                emailContact.Value,
-                $"Campaign Expired: {campaign.Title}",
-                $"Your campaign '{campaign.Title}' has passed its deadline and has been marked as expired.\n\n" +
-                $"Campaign Details:\n" +
-                $"- Target: ${campaign.Target}\n" +
-                $"- Achieved: ${campaign.Achieved}\n" +
-                $"- Deadline: {campaign.Deadline:yyyy-MM-dd}\n\n" +
-                $"You can extend the deadline by visiting your campaign dashboard."
-            );
+                _logger.LogInformation("Sent expired notification for campaign {CampaignId}", campaign.Id);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to handle CampaignExpiredEvent for campaign {CampaignId}", @event.Campaign?.Id);
+            }
         }
     }
 }
