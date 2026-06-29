@@ -3,7 +3,6 @@ using TheCharityBLL.Events.Abstraction;
 using TheCharityBLL.Events.CampaignEvents;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityBLL.Services.Enums;
-using TheCharityDAL.Enums;
 
 namespace TheCharityBLL.Events.EventHandlers.CampaignEventHandlers
 {
