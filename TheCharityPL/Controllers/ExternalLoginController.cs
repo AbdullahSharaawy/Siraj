@@ -1,12 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.UserDTOs;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityDAL.Entities;
@@ -37,13 +39,13 @@ namespace TheCharityPL.Controllers
             returnUrl = returnUrl ?? "/";
 
             if (remoteError != null)
-                return BadRequest($"Error from external provider: {remoteError}");
+                return BadRequest(new ServiceResponse{ Success = false, Message = $"Error from external provider: {remoteError}" });
 
             // Get the external login info from the authentication cookie
             var authenticateResult = await HttpContext.AuthenticateAsync("ExternalCookie");
 
             if (!authenticateResult.Succeeded)
-                return BadRequest("Error loading external login information.");
+                return BadRequest(new ServiceResponse { Message = "Error loading external login information." ,Success=false});
 
             // Extract provider info
             var externalUser = authenticateResult.Principal;
@@ -52,7 +54,7 @@ namespace TheCharityPL.Controllers
             var email = externalUser.FindFirstValue(ClaimTypes.Email);
 
             if (email == null)
-                return BadRequest($"Email claim not received from: {loginProvider}");
+                return BadRequest(new ServiceResponse { Success = false, Message = $"Email claim not received from: {loginProvider}" });
 
             // Check if user exists
             var user = await _userService.GetUserByEmailAsync(email);
@@ -63,13 +65,13 @@ namespace TheCharityPL.Controllers
                 var createResult = await _userService.CreateExternalUserAsync(email);
 
                 if (!createResult.Succeeded)
-                    return BadRequest(createResult.Errors);
+                    return BadRequest(new ServiceResponse<IEnumerable<string>> { Success = false, Message = "faild to create a new user.", Data = createResult.Errors.Select(e => e.Description) });
 
                 user = await _userService.GetUserByEmailAsync(email);
             }
            
             if (user == null)
-                return BadRequest("Failed to retrieve or create user.");
+                return BadRequest(new ServiceResponse { Success = false, Message = "Failed to retrieve or create user." });
 
             // Check if external login is linked
 
@@ -87,10 +89,15 @@ namespace TheCharityPL.Controllers
             // Sign out of the external cookie
             await HttpContext.SignOutAsync("ExternalCookie");
 
-            return Ok(new
+            return Ok(new ServiceResponse<Dictionary<string, string>>
             {
-                token,
-                returnUrl
+                Data = new Dictionary<string, string>
+                {
+                    ["token"] = token,
+                    ["returnUrl"] = returnUrl
+                },
+                Success = true,
+                Message = "login successfully."
             });
         }
 

@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection.Metadata.Ecma335;
+using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.AttachmentDTOs;
+using TheCharityBLL.DTOs.CampaignDTOs;
 using TheCharityBLL.DTOs.DonatedItemDTOs;
 using TheCharityBLL.DTOs.ItemImageDTOs;
 using TheCharityBLL.Services.Abstraction;
-using TheCharityBLL.ViewModels;
+
 using TheCharityDAL.Enums;
 
 namespace TheCharityPL.Controllers
@@ -26,6 +28,7 @@ namespace TheCharityPL.Controllers
         public async Task<IActionResult> GetAll([FromQuery] bool includeDeleted = false)
         {
             var result = await _donatedItemService.GetAllDonatedItems(includeDeleted);
+            
             return Ok(result);
         }
 

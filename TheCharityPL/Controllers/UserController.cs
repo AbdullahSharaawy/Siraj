@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Security.Claims;
+using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.UserDTOs;
+using TheCharityBLL.DTOs.UserResponseDTOs;
 using TheCharityBLL.Services.Abstraction;
-using TheCharityBLL.ViewModels.User;
+
 
 namespace TheCharityPL.Controllers
 {
@@ -56,7 +58,7 @@ namespace TheCharityPL.Controllers
                 if (!showDeleted)
                     users = users.Where(u => !u.IsDeleted);
 
-                var result = users.Select(u => new UserListViewModel
+                var result = users.Select(u => new UserListResponseDto
                 {
                     Id = u.Id,
                     UserName = u.UserName,
@@ -68,12 +70,18 @@ namespace TheCharityPL.Controllers
                     EmailConfirmed = u.EmailConfirmed
                 }).OrderByDescending(u => u.RegistrationDate).ToList();
 
-                return Ok(result);
+                var api_response=new ServiceResponse<List<UserListResponseDto>> 
+                {
+                    Data = result,
+                    Success = true,
+                    Message = "Users loaded successfully."
+                };
+                return Ok(api_response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading users");
-                return StatusCode(500, new { message = "An error occurred while loading users." });
+                return StatusCode(500, new ServiceResponse{Success = false, Message = "An error occurred while loading users." });
             }
         }
 
@@ -90,10 +98,10 @@ namespace TheCharityPL.Controllers
                 if (user == null)
                 {
                     _logger.LogWarning("User with ID {UserId} not found", id);
-                    return NotFound(new { message = $"User with ID '{id}' not found." });
+                    return NotFound(new ServiceResponse { Success = false, Message = $"User with ID '{id}' not found." });
                 }
 
-                var viewModel = new UserDetailViewModel
+                var ResponseDto = new UserDetailResponseDto
                 {
                     Id = user.Id,
                     UserName = user.UserName,
@@ -112,13 +120,18 @@ namespace TheCharityPL.Controllers
                     LockoutEnd = user.LockoutEnd,
                     AccessFailedCount = user.AccessFailedCount
                 };
-
-                return Ok(viewModel);
+                var api_response= new ServiceResponse<UserDetailResponseDto>
+                {
+                    Data = ResponseDto,
+                    Success = true,
+                    Message = "User details loaded successfully."
+                };
+                return Ok(api_response);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading details for user ID: {UserId}", id);
-                return StatusCode(500, new { message = "An error occurred while loading user details." });
+                return StatusCode(500, new ServiceResponse { Success = false, Message = "An error occurred while loading user details." });
             }
         }
 
@@ -126,51 +139,51 @@ namespace TheCharityPL.Controllers
 
         [HttpPost("register")]
         [AllowAnonymous]
-        public async Task<IActionResult> Register([FromBody] CreateUserViewModel viewModel)
+        public async Task<IActionResult> Register([FromBody] CreateUserResponseDto ResponseDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(new ServiceResponse<ModelStateDictionary> { Data = ModelState, Success = false, Message = "your credentials is invalid" });
 
             try
             {
-                _logger.LogInformation("Creating new user with email: {Email}", viewModel.Email);
+                _logger.LogInformation("Creating new user with email: {Email}", ResponseDto.Email);
 
                 var existingUsers = await _userService.GetAllUsersAsync();
 
-                if (existingUsers.Any(u => u.Email == viewModel.Email))
-                    return Conflict(new { message = "This email is already registered." });
+                if (existingUsers.Any(u => u.Email == ResponseDto.Email))
+                    return Conflict(new ServiceResponse{Success = false, Message = "This email is already registered." });
 
                 // FIX: original used return View() which is MVC-only — replaced with proper API response
-                if (existingUsers.Any(u => u.UserName == viewModel.UserName))
-                    return Conflict(new { message = "This username is already taken." });
+                if (existingUsers.Any(u => u.UserName == ResponseDto.UserName))
+                    return Conflict(new ServiceResponse { Success = false, Message = "This username is already taken." });
 
                 var createUserDTO = new CreateUserDTO
                 {
-                    Email = viewModel.Email,
-                    UserName = viewModel.UserName,
-                    FullName = viewModel.FullName,
-                    PhoneNumber = viewModel.PhoneNumber,
-                    Address = viewModel.Address,
-                    Password = viewModel.Password
+                    Email = ResponseDto.Email,
+                    UserName = ResponseDto.UserName,
+                    FullName = ResponseDto.FullName,
+                    PhoneNumber = ResponseDto.PhoneNumber,
+                    Address = ResponseDto.Address,
+                    Password = ResponseDto.Password
                 };
 
                 var result = await _userService.CreateUserAsync(createUserDTO);
 
-                if (result.Succeeded)
+                if (result.Data.Succeeded)
                 {
                     var token = await _userService.GenerateEmailConfirmationTokenAsync(createUserDTO.Email);
                     var confirmationLink = BuildFrontendLink("api/User/confirm-email", createUserDTO.Email, token);
                     await _emailService.SendEmailConfirmationAsync(createUserDTO.Email, confirmationLink);
 
-                    return Ok(new { message = "Registration successful. Please check your email to confirm your account." });
+                    return Ok(new ServiceResponse{Success=true, Message = "Registration successful. Please check your email to confirm your account." });
                 }
 
-                return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+                return BadRequest(new ServiceResponse<IEnumerable< string>>{ Success=false,Message="your credentials is invalid", Data= result.Data.Errors.Select(e => e.Description) });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating user");
-                return StatusCode(500, new { message = "An error occurred while creating the user." });
+                return StatusCode(500, new ServiceResponse{Success = false, Message = "An error occurred while creating the user." });
             }
         }
 
@@ -178,42 +191,43 @@ namespace TheCharityPL.Controllers
 
         [HttpPost("login")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] LoginViewModel viewModel)
+        public async Task<IActionResult> Login([FromBody] LoginResponseDto ResponseDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(new ServiceResponse<ModelStateDictionary> { Data = ModelState, Success = false, Message = "your credentials is invalid" });
+
 
             try
             {
-                _logger.LogInformation("Login attempt for: {UserName}", viewModel.UserName);
+                _logger.LogInformation("Login attempt for: {UserName}", ResponseDto.UserName);
 
                 // Check email confirmed before attempting login
-                var user = await _userService.GetUserByEmailAsync(viewModel.UserName)
+                var user = await _userService.GetUserByEmailAsync(ResponseDto.UserName)
                            ?? (await _userService.GetAllUsersAsync())
-                               .FirstOrDefault(u => u.UserName == viewModel.UserName && !u.IsDeleted);
+                               .FirstOrDefault(u => u.UserName == ResponseDto.UserName && !u.IsDeleted);
 
                 if (user == null)
-                    return Unauthorized(new { message = "Invalid credentials." });
+                    return Unauthorized(new ServiceResponse{Success = false, Message = "Invalid credentials." });
 
                 if (!user.EmailConfirmed)
-                    return Unauthorized(new { message = "Please confirm your email before logging in." });
+                    return Unauthorized(new ServiceResponse{Success = false, Message = "Please confirm your email before logging in." });
 
                 // AuthService handles password validation, lockout, and JWT generation
-                var token = await _userService.LoginAsync(viewModel.UserName, viewModel.Password);
+                var token = await _userService.LoginAsync(ResponseDto.UserName, ResponseDto.Password);
 
                 if (token == null)
                 {
-                    _logger.LogWarning("Login failed for: {UserName}", viewModel.UserName);
-                    return Unauthorized(new { message = "Invalid credentials." });
+                    _logger.LogWarning("Login failed for: {UserName}", ResponseDto.UserName);
+                    return Unauthorized(new ServiceResponse { Success = false, Message = "Invalid credentials." });
                 }
 
-                _logger.LogInformation("User logged in successfully: {UserName}", viewModel.UserName);
-                return Ok(new { token });
-            }
+                _logger.LogInformation("User logged in successfully: {UserName}", ResponseDto.UserName);
+                return Ok(new ServiceResponse<string>{ Data = token?.Data, Message= $"User logged in successfully: {ResponseDto.UserName}",Success=true});
+                }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error during login for: {UserName}", viewModel.UserName);
-                return StatusCode(500, new { message = "An error occurred during login." });
+                _logger.LogError(ex, "Error during login for: {UserName}", ResponseDto.UserName);
+                return StatusCode(500, new ServiceResponse{Success = false, Message = "An error occurred during login." });
             }
         }
 
@@ -224,27 +238,27 @@ namespace TheCharityPL.Controllers
         public async Task<IActionResult> ResendEmailConfirmation([FromBody] string email)
         {
             if (string.IsNullOrEmpty(email))
-                return BadRequest(new { message = "Email is required." });
+                return BadRequest(new ServiceResponse{Success = false, Message = "Email is required." });
 
             try
             {
                 var user = await _userService.GetUserByEmailAsync(email);
                 if (user == null)
-                    return NotFound(new { message = "User not found." });
+                    return NotFound(new ServiceResponse{Success = false, Message = "User not found." });
 
                 if (user.EmailConfirmed)
-                    return BadRequest(new { message = "Email is already confirmed." });
+                    return BadRequest(new ServiceResponse{Success = false, Message = "Email is already confirmed." });
 
                 var token = await _userService.GenerateEmailConfirmationTokenAsync(email);
                 var confirmationLink = BuildFrontendLink("api/User/confirm-email", email, token);
                 await _emailService.SendEmailConfirmationAsync(email, confirmationLink);
 
-                return Ok(new { message = "If the email exists, a confirmation link has been sent." });
+                return Ok(new ServiceResponse{Success = true, Message = "If the email exists, a confirmation link has been sent." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error resending confirmation email");
-                return StatusCode(500, new { message = "An error occurred while resending the confirmation email." });
+                return StatusCode(500, new ServiceResponse { Success = false, Message = "An error occurred while resending the confirmation email." });
             }
         }
 
@@ -255,21 +269,21 @@ namespace TheCharityPL.Controllers
         public async Task<IActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] string encodedToken)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(encodedToken))
-                return BadRequest(new { message = "Email and token are required." });
+                return BadRequest(new ServiceResponse{Success = false, Message = "Email and token are required." });
 
             try
             {
                 var result = await _userService.ConfirmEmailAsync(email, encodedToken);
 
                 if (result.Succeeded)
-                    return Ok(new { message = "Email confirmed successfully." });
+                    return Ok(new ServiceResponse{Success = true, Message = "Email confirmed successfully." });
 
-                return BadRequest(new { message = "Email confirmation failed.", errors = result.Errors.Select(e => e.Description) });
+                return BadRequest(new ServiceResponse<IEnumerable<string>>{Success=false, Message = "Email confirmation failed.", Data = result.Errors.Select(e => e.Description) });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error confirming email");
-                return StatusCode(500, new { message = "An error occurred while confirming the email." });
+                return StatusCode(500, new ServiceResponse { Success = false, Message = "An error occurred while confirming the email." });
             }
         }
 
@@ -280,7 +294,7 @@ namespace TheCharityPL.Controllers
         public async Task<IActionResult> ForgotPassword([FromBody] string email)
         {
             if (string.IsNullOrEmpty(email))
-                return BadRequest(new { message = "Email is required." });
+                return BadRequest(new ServiceResponse { Success = false, Message = "Email is required." });
 
             try
             {
@@ -294,12 +308,12 @@ namespace TheCharityPL.Controllers
                     await _emailService.SendPasswordResetAsync(email, resetLink);
                 }
 
-                return Ok(new { message = "If your email is registered, you will receive a password reset link shortly." });
+                return Ok(new ServiceResponse { Success = true, Message = "If your email is registered, you will receive a password reset link shortly." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error processing forgot password request");
-                return StatusCode(500, new { message = "An error occurred while processing your request." });
+                return StatusCode(500, new ServiceResponse { Success = false, Message = "An error occurred while processing your request." });
             }
         }
 
@@ -307,10 +321,11 @@ namespace TheCharityPL.Controllers
 
         [HttpPost("reset-password")]
         [AllowAnonymous]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordViewModel model)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordResponseDto model)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(new ServiceResponse<ModelStateDictionary> { Data = ModelState, Success = false, Message = "your credentials is invalid" });
+
 
             try
             {
@@ -318,7 +333,7 @@ namespace TheCharityPL.Controllers
 
                 // Return Ok to avoid email enumeration
                 if (user == null)
-                    return Ok(new { message = "Password has been reset successfully." });
+                    return Ok(new ServiceResponse { Success = true, Message = "Password has been reset successfully." });
 
                 var result = await _userService.ResetPasswordAsync(user.Id, model.Token, model.Password);
 
@@ -327,28 +342,29 @@ namespace TheCharityPL.Controllers
                     try { await _emailService.SendPasswordChangedNotificationAsync(user.Email); }
                     catch (Exception ex) { _logger.LogError(ex, "Failed to send password change notification"); }
 
-                    return Ok(new { message = "Password has been reset successfully." });
+                    return Ok(new ServiceResponse { Success = true, Message = "Password has been reset successfully." });
                 }
 
-                return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+                return BadRequest(new ServiceResponse<IEnumerable<string>>{Message="your credentials is invalid",Success=false, Data = result.Errors.Select(e => e.Description) });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error resetting password");
-                return StatusCode(500, new { message = "An error occurred while resetting the password." });
+                return StatusCode(500, new ServiceResponse{Success = false, Message = "An error occurred while resetting the password." });
             }
         }
 
         // ─── PUT api/user/{id} ───────────────────────────────────────────────────────
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(string id, [FromBody] EditUserViewModel viewModel)
+        public async Task<IActionResult> Update(string id, [FromBody] EditUserResponseDto ResponseDto)
         {
-            if (id != viewModel.Id)
-                return BadRequest(new { message = "ID mismatch." });
+            if (id != ResponseDto.Id)
+                return BadRequest(new ServiceResponse{Success = false, Message = "ID mismatch." });
 
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(new ServiceResponse<ModelStateDictionary> { Data = ModelState, Success = false, Message = "your credentials is invalid" });
+
 
             try
             {
@@ -356,23 +372,23 @@ namespace TheCharityPL.Controllers
 
                 var user = await _userService.GetUserByIdAsync(id);
                 if (user == null)
-                    return NotFound(new { message = $"User with ID '{id}' not found." });
+                    return NotFound(new ServiceResponse{Success=false, Message = $"User with ID '{id}' not found." });
 
                 var existingUsers = await _userService.GetAllUsersAsync();
 
-                if (existingUsers.Any(u => u.UserName == viewModel.UserName && u.Id != id))
-                    return Conflict(new { message = "This username is already taken." });
+                if (existingUsers.Any(u => u.UserName == ResponseDto.UserName && u.Id != id))
+                    return Conflict(new ServiceResponse{Success = false, Message = "This username is already taken." });
 
-                if (existingUsers.Any(u => u.Email == viewModel.Email && u.Id != id))
-                    return Conflict(new { message = "This email is already registered." });
+                if (existingUsers.Any(u => u.Email == ResponseDto.Email && u.Id != id))
+                    return Conflict(new ServiceResponse { Success = false, Message = "This email is already registered." });
 
                 var updateUserDTO = new UpdateUserDTO
                 {
                     Id = id,
-                    UserName = viewModel.UserName,
-                    Email = viewModel.Email,
-                    PhoneNumber = viewModel.PhoneNumber,
-                    Address = viewModel.Address
+                    UserName = ResponseDto.UserName,
+                    Email = ResponseDto.Email,
+                    PhoneNumber = ResponseDto.PhoneNumber,
+                    Address = ResponseDto.Address
                 };
 
                 var result = await _userService.UpdateUserAsync(updateUserDTO);
@@ -380,28 +396,29 @@ namespace TheCharityPL.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User updated successfully with ID: {UserId}", id);
-                    return Ok(new { message = $"User '{viewModel.UserName}' updated successfully." });
+                    return Ok(new ServiceResponse { Success = true, Message = $"User '{ResponseDto.UserName}' updated successfully." });
                 }
 
-                return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+                return BadRequest(new ServiceResponse<IEnumerable<string>>{Success=false,Message="your credentials is invalid", Data = result.Errors.Select(e => e.Description) });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating user ID: {UserId}", id);
-                return StatusCode(500, new { message = "An error occurred while updating the user." });
+                return StatusCode(500, new ServiceResponse { Success = false, Message = "An error occurred while updating the user." });
             }
         }
 
         // ─── PUT api/user/{id}/change-password ───────────────────────────────────────
 
         [HttpPut("{id}/change-password")]
-        public async Task<IActionResult> ChangePassword(string id, [FromBody] ChangePasswordViewModel viewModel)
+        public async Task<IActionResult> ChangePassword(string id, [FromBody] ChangePasswordResponseDto ResponseDto)
         {
-            if (id != viewModel.UserId)
-                return BadRequest(new { message = "ID mismatch." });
+            if (id != ResponseDto.UserId)
+                return BadRequest(new ServiceResponse{Success = false, Message = "ID mismatch." });
 
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest(new ServiceResponse<ModelStateDictionary> { Data = ModelState, Success = false, Message = "your credentials is invalid" });
+
 
             try
             {
@@ -409,13 +426,13 @@ namespace TheCharityPL.Controllers
 
                 var user = await _userService.GetUserByIdAsync(id);
                 if (user == null)
-                    return NotFound(new { message = $"User with ID '{id}' not found." });
+                    return NotFound(new ServiceResponse { Success = false, Message = $"User with ID '{id}' not found." });
 
                 var changePasswordDTO = new ChangePasswordDTO
                 {
-                    CurrentPassword = viewModel.CurrentPassword,
-                    NewPassword = viewModel.NewPassword,
-                    ConfirmPassword = viewModel.ConfirmPassword
+                    CurrentPassword = ResponseDto.CurrentPassword,
+                    NewPassword = ResponseDto.NewPassword,
+                    ConfirmPassword = ResponseDto.ConfirmPassword
                 };
 
                 var result = await _userService.ChangeUserPasswordAsync(user.Id, changePasswordDTO);
@@ -424,15 +441,16 @@ namespace TheCharityPL.Controllers
                 {
                     await _emailService.SendPasswordChangedNotificationAsync(user.Email);
                     _logger.LogInformation("Password changed successfully for user ID: {UserId}", id);
-                    return Ok(new { message = "Password changed successfully." });
+                    return Ok(new ServiceResponse{Success = true, Message = "Password changed successfully." });
                 }
 
-                return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+                return BadRequest(new ServiceResponse<IEnumerable<string>> { Success = false, Message = "your credentials is invalid", Data = result.Errors.Select(e => e.Description) });
+
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error changing password for user ID: {UserId}", id);
-                return StatusCode(500, new { message = "An error occurred while changing the password." });
+                return StatusCode(500, new ServiceResponse { Success = false, Message = "An error occurred while changing the password." });
             }
         }
 
@@ -447,7 +465,7 @@ namespace TheCharityPL.Controllers
 
                 var user = await _userService.GetUserByIdAsync(id);
                 if (user == null)
-                    return NotFound(new { message = $"User with ID '{id}' not found." });
+                    return NotFound(new ServiceResponse{Success = false, Message = $"User with ID '{id}' not found." });
 
                 var currentUserId = GetCurrentUserId();
                 var result = await _userService.DeleteUserAsync(user.Id);
@@ -458,17 +476,17 @@ namespace TheCharityPL.Controllers
 
                     // FIX: removed LogoutAsync() call — JWT is stateless, client discards the token
                     if (currentUserId == user.Id)
-                        return Ok(new { message = "Your account has been deleted. Please discard your token.", selfDeleted = true });
+                        return Ok(new ServiceResponse{ Message = "Your account has been deleted. Please discard your token.", Success = true });
 
-                    return Ok(new { message = $"User '{user.UserName}' deleted successfully." });
+                    return Ok(new ServiceResponse { Success = true, Message = $"User '{user.UserName}' deleted successfully." });
                 }
 
-                return BadRequest(new { message = "An error occurred while deleting the user." });
+                return BadRequest(new ServiceResponse{Success = false, Message = "An error occurred while deleting the user." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting user ID: {UserId}", id);
-                return StatusCode(500, new { message = "An error occurred while deleting the user." });
+                return StatusCode(500, new ServiceResponse { Success = false, Message = "An error occurred while deleting the user." });
             }
         }
 
@@ -484,22 +502,22 @@ namespace TheCharityPL.Controllers
 
                 var user = await _userService.GetUserByIdAsync(id);
                 if (user == null)
-                    return NotFound(new { message = $"User with ID '{id}' not found." });
+                    return NotFound(new ServiceResponse{Success=false, Message = $"User with ID '{id}' not found." });
 
                 var result = await _userService.RestoreUserAsync(id);
 
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User restored successfully with ID: {UserId}", id);
-                    return Ok(new { message = "User restored successfully." });
+                    return Ok(new ServiceResponse { Success = true, Message = "User restored successfully." });
                 }
 
-                return BadRequest(new { message = "An error occurred while restoring the user." });
+                return BadRequest(new ServiceResponse { Success = false, Message = "An error occurred while restoring the user." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error restoring user ID: {UserId}", id);
-                return StatusCode(500, new { message = "An error occurred while restoring the user." });
+                return StatusCode(500, new ServiceResponse{Success = false, Message = "An error occurred while restoring the user." });
             }
         }
 
@@ -507,17 +525,17 @@ namespace TheCharityPL.Controllers
 
         [HttpPost("send-notification")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> SendNotification([FromBody] SendNotificationViewModel model)
+        public async Task<IActionResult> SendNotification([FromBody] SendNotificationResponseDto model)
         {
             try
             {
                 await _emailService.SendNotificationAsync(model.Email, model.Subject, model.Message);
-                return Ok(new { message = "Notification sent successfully." });
+                return Ok(new ServiceResponse { Success = true, Message = "Notification sent successfully." });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to send notification");
-                return StatusCode(500, new { message = "Failed to send notification. Please try again." });
+                return StatusCode(500, new ServiceResponse { Success = false, Message = "Failed to send notification. Please try again." });
             }
         }
 

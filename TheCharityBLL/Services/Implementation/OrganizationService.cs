@@ -1,13 +1,13 @@
 ﻿using Hangfire.Storage.Monitoring;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
+using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.DonatedItemDTOs;
 using TheCharityBLL.DTOs.OrganizationContactMethodDTOs;
 using TheCharityBLL.DTOs.OrganizationDTOs;
 using TheCharityBLL.DTOs.PaymentInfoDTOs;
 using TheCharityBLL.Mapper;
 using TheCharityBLL.Services.Abstraction;
-using TheCharityBLL.ViewModels;
 using TheCharityDAL.Entities;
 using TheCharityDAL.Enums;
 using TheCharityDAL.Repositories.Abstraction;
