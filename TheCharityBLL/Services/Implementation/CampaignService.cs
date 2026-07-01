@@ -1,4 +1,5 @@
-﻿using TheCharityBLL.DTOs.CampaignDTOs;
+﻿using TheCharityBLL.DTOs;
+using TheCharityBLL.DTOs.CampaignDTOs;
 using TheCharityBLL.Events.Abstraction;
 using TheCharityBLL.Events.CampaignEvents;
 using TheCharityBLL.Mapper;
