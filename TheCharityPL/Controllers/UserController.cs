@@ -335,7 +335,7 @@ namespace TheCharityPL.Controllers
 
         [HttpPost("reset-password")]
         [AllowAnonymous]
-        private async Task<IActionResult> ResetPassword([FromBody] ResetPasswordViewModel model)
+        private async Task<IActionResult> ResetPassword([FromBody] ResetPasswordResponseDto model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new ServiceResponse<ModelStateDictionary> { Data = ModelState, Success = false, Message = "your credentials is invalid" });
@@ -375,7 +375,7 @@ namespace TheCharityPL.Controllers
 
         [HttpPut("{id}")]
         [AllowAnonymous]
-        public async Task<IActionResult> Update(string id, [FromBody] EditUserViewModel viewModel)
+        public async Task<IActionResult> Update(string id, [FromBody] EditUserResponseDto ResponseDto)
         {
             if (id != ResponseDto.Id)
                 return BadRequest(new ServiceResponse{Success = false, Message = "ID mismatch." });
@@ -432,7 +432,7 @@ namespace TheCharityPL.Controllers
 
         [HttpPut("{id}/change-password")]
         [AllowAnonymous]
-        public async Task<IActionResult> ChangePassword(string id, [FromBody] ChangePasswordViewModel viewModel)
+        public async Task<IActionResult> ChangePassword(string id, [FromBody] ChangePasswordResponseDto ResponseDto)
         {
             if (id != ResponseDto.UserId)
                 return BadRequest(new ServiceResponse{Success = false, Message = "ID mismatch." });
@@ -563,27 +563,27 @@ namespace TheCharityPL.Controllers
                 // Check if user exists
                 var user = await _userService.GetUserByIdAsync(userId);
                 if (user == null)
-                    return NotFound(new { message = $"User with ID '{userId}' not found." });
+                    return NotFound(new ServiceResponse{Success = false, Message = $"User with ID '{userId}' not found." });
 
                 // Check if role exists in Identity
                 var roles = await _userService.GetUserRolesAsync(userId);
-                if (roles.Contains(request.Role))
-                    return BadRequest(new { message = $"User already has role '{request.Role}'." });
+                if (roles.Data.Contains(request.Role))
+                    return BadRequest(new ServiceResponse{Success=false, Message = $"User already has role '{request.Role}'." });
 
                 var result = await _userService.AddToRoleAsync(userId, request.Role);
 
-                if (result.Succeeded)
+                if (result.Data.Succeeded)
                 {
                     _logger.LogInformation($"Role '{request.Role}' assigned to user {userId}");
-                    return Ok(new { message = $"Role '{request.Role}' assigned successfully." });
+                    return Ok(new ServiceResponse { Success = false, Message = $"Role '{request.Role}' assigned successfully." });
                 }
 
-                return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+                return BadRequest(new ServiceResponse<IEnumerable<string>> {Data= result.Data.Errors.Select(e => e.Description) });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error assigning role to user {userId}");
-                return StatusCode(500, new { message = "An error occurred while assigning the role." });
+                return StatusCode(500, new ServiceResponse { Message = "An error occurred while assigning the role.", Success = false });
             }
         }
 
@@ -599,26 +599,26 @@ namespace TheCharityPL.Controllers
                 // Check if user exists
                 var user = await _userService.GetUserByIdAsync(userId);
                 if (user == null)
-                    return NotFound(new { message = $"User with ID '{userId}' not found." });
+                    return NotFound(new ServiceResponse{Success = false, Message = $"User with ID '{userId}' not found." });
 
                 var roles = await _userService.GetUserRolesAsync(userId);
-                if (!roles.Contains(role))
-                    return BadRequest(new { message = $"User does not have role '{role}'." });
+                if (!roles.Data.Contains(role))
+                    return BadRequest(new ServiceResponse{Success = false, Message = $"User does not have role '{role}'." });
 
                 var result = await _userService.RemoveFromRoleAsync(userId, role);
 
-                if (result.Succeeded)
+                if (result.Data.Succeeded)
                 {
                     _logger.LogInformation($"Role '{role}' removed from user {userId}");
-                    return Ok(new { message = $"Role '{role}' removed successfully." });
+                    return Ok(new ServiceResponse { Success = true, Message = $"Role '{role}' removed successfully." });
                 }
 
-                return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+                return BadRequest(new ServiceResponse<IEnumerable<string>>{Success=false,Message="your credentials invalid", Data = result.Data.Errors.Select(e => e.Description) });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error removing role from user {userId}");
-                return StatusCode(500, new { message = "An error occurred while removing the role." });
+                return StatusCode(500, new ServiceResponse{Success = false, Message = "An error occurred while removing the role." });
             }
         }
 
@@ -633,15 +633,15 @@ namespace TheCharityPL.Controllers
             {
                 var user = await _userService.GetUserByIdAsync(userId);
                 if (user == null)
-                    return NotFound(new { message = $"User with ID '{userId}' not found." });
+                    return NotFound(new ServiceResponse { Success = false, Message = $"User with ID '{userId}' not found." });
 
                 var roles = await _userService.GetUserRolesAsync(userId);
-                return Ok(new { userId, roles });
+                return Ok(new { roles });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error getting roles for user {userId}");
-                return StatusCode(500, new { message = "An error occurred while getting user roles." });
+                return StatusCode(500, new ServiceResponse{Success = false, Message = "An error occurred while getting user roles." });
             }
         }
 
@@ -661,7 +661,7 @@ namespace TheCharityPL.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting all roles");
-                return StatusCode(500, new { message = "An error occurred while getting roles." });
+                return StatusCode(500, new ServiceResponse{ Message = "An error occurred while getting roles.",Success=false });
             }
         }
 
@@ -684,8 +684,8 @@ namespace TheCharityPL.Controllers
                 foreach (var user in allUsers)
                 {
                     var roles = await _userService.GetUserRolesAsync(user.Id);
-                    if (roles.Contains("SuperAdmin"))
-                        return BadRequest(new { message = "SuperAdmin already exists." });
+                    if (roles.Data.Contains("SuperAdmin"))
+                        return BadRequest(new ServiceResponse{Success = false, Message = "SuperAdmin already exists." });
                 }
 
                 // Create the user
@@ -699,30 +699,29 @@ namespace TheCharityPL.Controllers
                 };
 
                 var result = await _userService.CreateUserAsync(createUserDto);
-                if (!result.Succeeded)
-                    return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
+                if (!result.Data.Succeeded)
+                    return BadRequest(new ServiceResponse<IEnumerable<string>>{ Data = result.Data.Errors.Select(e => e.Description) ,Success=false,Message="faild to create user"});
 
                 // Get the created user
                 var createdUser = await _userService.GetUserByEmailAsync(request.Email);
                 if (createdUser == null)
-                    return BadRequest(new { message = "Failed to create user." });
+                    return BadRequest(new ServiceResponse { Success = false, Message = "Failed to create user." });
 
                 // Assign SuperAdmin role
                 var roleResult = await _userService.AddToRoleAsync(createdUser.Id, "SuperAdmin");
-                if (!roleResult.Succeeded)
-                    return BadRequest(new { errors = roleResult.Errors.Select(e => e.Description) });
+                if (!roleResult.Data.Succeeded)
+                    return BadRequest(new ServiceResponse<IEnumerable<string>>{Data = roleResult.Data.Errors.Select(e => e.Description),Success=false,Message="faild to add role to the user." });
 
-                return Ok(new
+                return Ok(new ServiceResponse
                 {
-                    message = "SuperAdmin created successfully.",
-                    userId = createdUser.Id,
-                    email = createdUser.Email
+                    Message = $"SuperAdmin created for user id:{createdUser.Id} and Email:{createdUser.Email} successfully."
+                   ,Success=true
                 });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error seeding SuperAdmin");
-                return StatusCode(500, new { message = "An error occurred while seeding SuperAdmin." });
+                return StatusCode(500, new ServiceResponse{ Message = "An error occurred while seeding SuperAdmin.",Success=false });
             }
         }
 
