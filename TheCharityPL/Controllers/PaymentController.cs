@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -10,7 +10,7 @@ using TheCharityBLL.DTOs.PaymentDTOs;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityBLL.Services.Abstraction.MoneyDonation;
 using TheCharityBLL.Services.Abstraction.Payment;
-using TheCharityBLL.Services.Repository;
+
 
 namespace TheCharityPL.Controllers
 {

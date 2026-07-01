@@ -1,17 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
+
 using TheCharityBLL.DTOs;
-using TheCharityBLL.DTOs.UserDTOs;
+
 using TheCharityBLL.Services.Abstraction;
-using TheCharityDAL.Entities;
+
 
 namespace TheCharityPL.Controllers
 {

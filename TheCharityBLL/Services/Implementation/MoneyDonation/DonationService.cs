@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 using TheCharityBLL.DTOs;
-using TheCharityBLL.DTOs.CampaignDTOs;
+
 using TheCharityBLL.DTOs.DonationDTOs;
 using TheCharityBLL.Events.Abstraction;
 using TheCharityBLL.Events.DonationEvents;
 using TheCharityBLL.Mapper;
 using TheCharityBLL.Services.Abstraction.MoneyDonation;
-using TheCharityDAL.Entities;
+
 using TheCharityDAL.Repositories.Abstraction;
 
 namespace TheCharityBLL.Services.Implementation.MoneyDonation

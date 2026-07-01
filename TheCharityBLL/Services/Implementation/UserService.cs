@@ -6,12 +6,12 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
+
 using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.UserDTOs;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityDAL.Entities;
-using TheCharityDAL.Enums;
+
 using TheCharityDAL.Repositories.Abstraction;
 
 namespace TheCharityBLL.Services.Repository

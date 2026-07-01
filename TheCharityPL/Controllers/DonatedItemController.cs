@@ -1,11 +1,8 @@
-﻿using Azure;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using System.Reflection.Metadata.Ecma335;
-using TheCharityBLL.DTOs;
+﻿using Microsoft.AspNetCore.Mvc;
+
+
 using TheCharityBLL.DTOs.AttachmentDTOs;
-using TheCharityBLL.DTOs.CampaignDTOs;
+
 using TheCharityBLL.DTOs.DonatedItemDTOs;
 using TheCharityBLL.DTOs.ItemImageDTOs;
 using TheCharityBLL.Services.Abstraction;
