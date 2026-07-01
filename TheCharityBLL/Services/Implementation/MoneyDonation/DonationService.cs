@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.CampaignDTOs;
 using TheCharityBLL.DTOs.DonationDTOs;
+using TheCharityBLL.Events.Abstraction;
+using TheCharityBLL.Events.DonationEvents;
 using TheCharityBLL.Mapper;
 using TheCharityBLL.Services.Abstraction.MoneyDonation;
 using TheCharityDAL.Entities;
@@ -16,12 +18,14 @@ namespace TheCharityBLL.Services.Implementation.MoneyDonation
     public class DonationService : IDonationService
     {
         private readonly IDonationRepository _repo;
+        private readonly IEventDispatcher _eventDispatcher;
         private readonly DonationMapper _mapper;
 
-        public DonationService(IDonationRepository repo, DonationMapper mapper)
+        public DonationService(IDonationRepository repo, DonationMapper mapper, IEventDispatcher eventDispatcher)
         {
             _repo = repo;
             _mapper = mapper;
+            _eventDispatcher = eventDispatcher;
         }
 
         // ===== CRUD =====
@@ -52,6 +56,13 @@ namespace TheCharityBLL.Services.Implementation.MoneyDonation
             var isValid = await _repo.IsDonationValidAsync(entity);
             if (!isValid)
                 throw new InvalidOperationException("Donation data is invalid.");
+
+            if (dto.CampaignId.HasValue && dto.Amount.HasValue)
+                await _eventDispatcher.DispatchAsync(new CampaignDonationReceivedEvent
+                {
+                    CampaignId = dto.CampaignId.Value,
+                    Amount = dto.Amount.Value
+                });
 
             var created = await _repo.AddDonationAsync(entity);
             return new ServiceResponse<DonationResponseDto> { Success = true, Message = "added donation info successfully.", Data = _mapper.MapToDonationResponseDto(created) };

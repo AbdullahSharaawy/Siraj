@@ -24,6 +24,10 @@ namespace TheCharityPL.Controllers
             _donatedItemService = donatedItemService;
         }
         //donated items
+
+        /// <summary> 
+        /// Get all donated items 
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] bool includeDeleted = false)
         {
@@ -32,6 +36,9 @@ namespace TheCharityPL.Controllers
             return Ok(result);
         }
 
+        /// <summary> 
+        /// Get donated item by ID 
+        /// </summary>
         [HttpGet("{itemId:int}")]
         public async Task<IActionResult> GetById(int itemId)
         {
@@ -39,6 +46,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary> 
+        /// Create a new donated item 
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateDonatedItemDto dto)
         {
@@ -49,14 +59,19 @@ namespace TheCharityPL.Controllers
             return CreatedAtAction(nameof(GetById), new { id = result.Data.Id }, result);
 
         }
-
+        /// <summary> 
+        /// Update donated item
+        /// </summary>
         [HttpPut("{itemId:int}")]
         public async Task<IActionResult> Update(int itemId, [FromBody] UpdateDonatedItemDto dto)
         {
-            var result = await _donatedItemService.UpdateDonatedItem(itemId,dto);
+            var result = await _donatedItemService.UpdateDonatedItem(itemId, dto);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        /// <summary>
+        /// Soft delete donated item
+        /// </summary>
         [HttpDelete("{itemId:int}")]
         public async Task<IActionResult> Delete(int itemId)
         {
@@ -64,6 +79,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? NoContent() : NotFound(result);
         }
 
+        /// <summary>
+        /// Restore deleted donated item
+        /// </summary>
         [HttpPatch("{itemId:int}/restore")]
         public async Task<IActionResult> Restore(int itemId)
         {
@@ -71,6 +89,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get donated items by organization
+        /// </summary>
         [HttpGet("filter/organization/{organizationId:int}")]
         public async Task<IActionResult> GetByOrganization(int organizationId)
         {
@@ -78,6 +99,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get donated items by donor
+        /// </summary>
         [HttpGet("filter/donor/{donorId}")]
         public async Task<IActionResult> GetByDonor(string donorId)
         {
@@ -85,6 +109,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get donated items by category
+        /// </summary>
         [HttpGet("filter/category")]
         public async Task<IActionResult> GetByCategory([FromQuery] ItemCategory category)
         {
@@ -92,6 +119,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get available donated items
+        /// </summary>
         [HttpGet("filter/available")]
         public async Task<IActionResult> GetAvailable()
         {
@@ -99,6 +129,9 @@ namespace TheCharityPL.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Get unavailable donated items
+        /// </summary>
         [HttpGet("filter/unavailable")]
         public async Task<IActionResult> GetUnAvailable()
         {
@@ -106,6 +139,9 @@ namespace TheCharityPL.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Get deleted donated items
+        /// </summary>
         [HttpGet("filter/deleted")]
         public async Task<IActionResult> GetDeleted()
         {
@@ -113,6 +149,9 @@ namespace TheCharityPL.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Search donated items
+        /// </summary>
         [HttpGet("search")]
         public async Task<IActionResult> Search([FromQuery] string searchTerm)
         {
@@ -122,6 +161,10 @@ namespace TheCharityPL.Controllers
 
 
         //images
+
+        /// <summary>
+        /// Get all images for a donated item
+        /// </summary>
         [HttpGet("image/{itemId:int}")]
         public async Task<IActionResult> GetItemImages(int itemId)
         {
@@ -129,6 +172,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get item image by ID
+        /// </summary>
         [HttpGet("{imageId:int}/image")]
         public async Task<IActionResult> GetImageById(int imageId)
         {
@@ -136,6 +182,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Upload a new item image
+        /// </summary>
         [HttpPost("image")]
         public async Task<IActionResult> CreateImage([FromForm] CreateItemImageDto dto)
         {
@@ -143,6 +192,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        /// <summary>
+        /// Delete item image
+        /// </summary>
         [HttpDelete("image/{imageId:int}")]
         public async Task<IActionResult> DeleteImage(int imageId)
         {
@@ -150,6 +202,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? NoContent() : NotFound(result);
         }
 
+        /// <summary>
+        /// Get image count for a donated item
+        /// </summary>
         [HttpGet("image/{itemId:int}/count")]
         public async Task<IActionResult> GetImageCount(int itemId)
         {
@@ -157,6 +212,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get primary image for a donated item
+        /// </summary>
         [HttpGet("image/{itemId:int}/primary")]
         public async Task<IActionResult> GetPrimaryImage(int itemId)
         {
@@ -166,12 +224,20 @@ namespace TheCharityPL.Controllers
 
 
         //attachment
+
+        /// <summary>
+        /// Get all attachments for a donated item
+        /// </summary>
         [HttpGet("attachment/{itemId:int}/all")]
         public async Task<IActionResult> GetAllAttachments(int itemId)
         {
             var result = await _donatedItemService.GetAllAttachments(itemId);
             return Ok(result);
         }
+
+        /// <summary>
+        /// Get item attachments
+        /// </summary>
         [HttpGet("attachment/{itemId:int}")]
         public async Task<IActionResult> GetItemAttachments(int itemId)
         {
@@ -179,6 +245,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get recipient attachments for a donated item
+        /// </summary>
         [HttpGet("attachment/{itemId:int}/recipient")]
         public async Task<IActionResult> GetItemRecipientAttachments(int itemId)
         {
@@ -186,6 +255,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get attachment by ID 
+        /// </summary>
         [HttpGet("{attachmentId:int}/attachment")]
         public async Task<IActionResult> GetAttachmentById(int attachmentId)
         {
@@ -193,6 +265,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Upload a new attachment
+        /// </summary>
         [HttpPost("attachment")]
         public async Task<IActionResult> CreateAttachment([FromForm] CreateAttachmentDto dto)
         {
@@ -200,6 +275,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        /// <summary>
+        /// Delete attachment
+        /// </summary>
         [HttpDelete("attachment/{id:int}")]
         public async Task<IActionResult> DeleteAttachment(int id)
         {
@@ -209,6 +287,10 @@ namespace TheCharityPL.Controllers
 
 
         //advanced
+
+        /// <summary>
+        /// Update item availability
+        /// </summary>
         [HttpPatch("{itemId:int}/availability")]
         public async Task<IActionResult> UpdateAvailability(int itemId, [FromQuery] bool isAvailable)
         {
@@ -216,6 +298,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Mark item as available
+        /// </summary>
         [HttpPatch("{itemId:int}/available")]
         public async Task<IActionResult> MarkAsAvailable(int itemId)
         {
@@ -223,6 +308,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Mark item as unavailable
+        /// </summary>
         [HttpPatch("{itemId:int}/unavailable")]
         public async Task<IActionResult> MarkAsUnAvailable(int itemId)
         {
@@ -230,6 +318,10 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+
+        /// <summary>
+        /// Update item category
+        /// </summary>
         [HttpPatch("{itemId:int}/category")]
         public async Task<IActionResult> UpdateCategory(int itemId, [FromQuery] ItemCategory category)
         {
@@ -238,6 +330,10 @@ namespace TheCharityPL.Controllers
         }
 
         //statistics
+
+        /// <summary>
+        /// Get total donated items count
+        /// </summary>
         [HttpGet("count")]
         public async Task<IActionResult> GetTotalItemsCount()
         {
@@ -245,6 +341,9 @@ namespace TheCharityPL.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Get available donated items count
+        /// </summary>
         [HttpGet("availabl/count")]
         public async Task<IActionResult> GetAvailablItemsCount()
         {
@@ -252,6 +351,9 @@ namespace TheCharityPL.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Get donated items count by organization
+        /// </summary>
         [HttpGet("organization/{organizationId:int}/count")]
         public async Task<IActionResult> GetItemsCountByOrganization(int organizationId)
         {
@@ -259,6 +361,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get donated items count by donor
+        /// </summary>
         [HttpGet("donor/{donorId}/count")]
         public async Task<IActionResult> GetItemsCountByDonor(string donorId)
         {
@@ -266,6 +371,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get donated items count by category
+        /// </summary>
         [HttpGet("category/count")]
         public async Task<IActionResult> GetItemsCountByCategory(ItemCategory category)
         {
@@ -273,6 +381,9 @@ namespace TheCharityPL.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Get donated items count for all categories
+        /// </summary>
         [HttpGet("categories/count/all")]
         public async Task<IActionResult> GetItemsCountToAllCategories()
         {
@@ -280,6 +391,9 @@ namespace TheCharityPL.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Get top donors
+        /// </summary>
         [HttpGet("top-donors")]
         public async Task<IActionResult> GetTopDonors(int top)
         {
@@ -287,7 +401,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-
+        /// <summary>
+        /// Get top organizations by donations
+        /// </summary>
         [HttpGet("top-organization/donation")]
         public async Task<IActionResult> GetTopOrganizations(int top)
         {
@@ -297,6 +413,10 @@ namespace TheCharityPL.Controllers
 
 
         // advanced queries
+
+        /// <summary>
+        /// Get recently donated items
+        /// </summary>
         [HttpGet("items/recent")]
         public async Task<IActionResult> GetRecentItems([FromQuery] int days = 30)
         {
@@ -304,6 +424,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        /// <summary>
+        /// Get donated items without images
+        /// </summary>  
         [HttpGet("items/without-images")]
         public async Task<IActionResult> GetItemsWithoutImages()
         {
@@ -311,6 +434,9 @@ namespace TheCharityPL.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Get donated items with attachments
+        /// </summary>
         [HttpGet("items/with-attachments")]
         public async Task<IActionResult> GetItemsWithAttachments()
         {
@@ -318,6 +444,9 @@ namespace TheCharityPL.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Get donated items by date range
+        /// </summary>
         [HttpGet("items/date-range")]
         public async Task<IActionResult> GetItemsByDateRange([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
@@ -325,7 +454,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-
+        /// <summary>
+        /// Bulk update item categories
+        /// </summary>
         [HttpPatch("bulk/category")]
         public async Task<IActionResult> BulkUpdateItemCategories([FromQuery] ItemCategory oldCategory, [FromQuery] ItemCategory newCategory)
         {
@@ -333,6 +464,9 @@ namespace TheCharityPL.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Bulk mark organization items as unavailable
+        /// </summary>
         [HttpPatch("bulk/unavailable")]
         public async Task<IActionResult> BulkMarkItemsAsUnavailable([FromQuery] int organizationId)
         {
@@ -340,6 +474,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Delete old donated items
+        /// </summary>
         [HttpDelete("delete-old")]
         public async Task<IActionResult> DeleteOldItems([FromQuery] int daysOld = 365)
         {
@@ -347,6 +484,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        /// <summary>
+        /// Get donated item with images
+        /// </summary>
         [HttpGet("{itemId:int}/with-images")]
         public async Task<IActionResult> GetItemWithImages(int itemId)
         {
@@ -354,6 +494,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get donated item with attachments
+        /// </summary>
         [HttpGet("{itemId:int}/with-attachments")]
         public async Task<IActionResult> GetItemWithAttachments(int itemId)
         {
@@ -361,6 +504,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get donated item details with donor and organization
+        /// </summary>
         [HttpGet("{itemId:int}/details")]
         public async Task<IActionResult> GetItemWithDonorAndOrganization(int itemId)
         {
@@ -368,6 +514,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get most recent donated items
+        /// </summary>
         [HttpGet("recent/limit")]
         public async Task<IActionResult> GetMostRecentItems([FromQuery] int limit = 10)
         {
@@ -375,6 +524,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        /// <summary>
+        /// Get donated items trend
+        /// </summary>
         [HttpGet("trend")]
         public async Task<IActionResult> GetItemsTrend([FromQuery] int days = 30)
         {
@@ -382,7 +534,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-
+        /// <summary>
+        /// Get donor's donated items history
+        /// </summary>
         [HttpGet("donor/{donorId}/history")]
         public async Task<IActionResult> GetDonorDonatedItemsHistory(string donorId)
         {
@@ -390,6 +544,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get total donated items count for a donor
+        /// </summary>
         [HttpGet("donor/count/{donorId}")]
         public async Task<IActionResult> GetDonorTotalItemsCount(string donorId)
         {
@@ -397,6 +554,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get donor's most common donated category
+        /// </summary>
         [HttpGet("donor/{donorId}/favorite-category")]
         public async Task<IActionResult> GetDonorMostCommonCategory(string donorId)
         {
@@ -404,7 +564,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
-
+        /// <summary>
+        /// Get organization inventory
+        /// </summary>
         [HttpGet("organization/{organizationId}/inventory")]
         public async Task<IActionResult> GetOrganizationInventory(int organizationId)
         {
@@ -412,6 +574,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get available donated items count for an organization
+        /// </summary>
         [HttpGet("organization/{organizationId}/available-count")]
         public async Task<IActionResult> GetOrganizationAvailableItemsCount(int organizationId)
         {
@@ -419,6 +584,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get organization inventory grouped by category
+        /// </summary>
         [HttpGet("organization/{organizationId}/inventory-by-category")]
         public async Task<IActionResult> GetOrganizationInventoryByCategory(int organizationId)
         {
@@ -426,6 +594,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get total storage used by a donated item
+        /// </summary>
         [HttpGet("{itemId:int}/storage")]
         public async Task<IActionResult> GetTotalFileSize(int itemId)
         {
@@ -433,6 +604,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get total storage used by all donated items
+        /// </summary>
         [HttpGet("storage/total")]
         public async Task<IActionResult> GetTotalStorageUsed()
         {
@@ -440,6 +614,9 @@ namespace TheCharityPL.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Get large attachments
+        /// </summary>
         [HttpGet("attachments/large")]
         public async Task<IActionResult> GetLargeAttachments([FromQuery] long sizeThreshold)
         {
@@ -447,6 +624,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        /// <summary>
+        /// Get donated items by multiple categories
+        /// </summary>
         [HttpPost("categories/multiple")]
         public async Task<IActionResult> GetItemsByMultipleCategories([FromBody] IEnumerable<ItemCategory> categories)
         {
@@ -454,6 +634,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        /// <summary>
+        /// Get category distribution percentage
+        /// </summary>
         [HttpGet("categories/distribution")]
         public async Task<IActionResult> GetCategoryDistributionPercentage()
         {
@@ -461,6 +644,9 @@ namespace TheCharityPL.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Get most popular categories
+        /// </summary>
         [HttpGet("categories/popular")]
         public async Task<IActionResult> GetMostPopularCategories([FromQuery] int limit = 2)
         {
@@ -468,7 +654,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-
+        /// <summary>
+        /// Search available items by category
+        /// </summary>
         [HttpGet("search/category")]
         public async Task<IActionResult> SearchAvailableItemsByCategory([FromQuery] string searchTerm, [FromQuery] ItemCategory category)
         {
@@ -476,6 +664,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        /// <summary>
+        /// Get organization items by category
+        /// </summary>
         [HttpGet("organization/{organizationId}/category")]
         public async Task<IActionResult> GetItemsByOrganizationAndCategory(int organizationId, [FromQuery] ItemCategory category)
         {
@@ -483,6 +674,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get donor items within a date range
+        /// </summary>
         [HttpGet("donor/{donorId}/date-range")]
         public async Task<IActionResult> GetItemsByDonorAndDateRange(string donorId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
@@ -490,7 +684,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
-
+        /// <summary>
+        /// Transfer donated item to another organization
+        /// </summary>
         [HttpPatch("{itemId:int}/transfer")]
         public async Task<IActionResult> TransferItemToOrganization(int itemId, [FromQuery] int newOrganizationId)
         {
@@ -498,6 +694,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Update donated item donor
+        /// </summary>
         [HttpPatch("{itemId:int}/donor")]
         public async Task<IActionResult> UpdateItemDonor(int itemId, [FromQuery] string newDonorId)
         {
@@ -505,6 +704,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : NotFound(result);
         }
 
+        /// <summary>
+        /// Get recently updated donated items
+        /// </summary>
         [HttpGet("recently-updated")]
         public async Task<IActionResult> GetRecentlyUpdatedItems([FromQuery] int hours = 24)
         {
@@ -512,6 +714,9 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
+        /// <summary>
+        /// Get donor activity
+        /// </summary>
         [HttpGet("activity/donors")]
         public async Task<IActionResult> GetActivityByDonor([FromQuery] int days = 30)
         {

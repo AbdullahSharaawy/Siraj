@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.UserDTOs;
 using TheCharityDAL.Entities;
+using TheCharityDAL.Enums;
 
 namespace TheCharityBLL.Services.Abstraction
 {

@@ -24,6 +24,10 @@ namespace TheCharityPL.Controllers
         {
             _userService = userService; 
         }
+        /// <summary>
+        /// login using external provider (Google, Facebook, etc.)
+        /// </summary>
+
         [HttpGet("external-login")]
         public IActionResult ExternalLogin(string provider, string returnUrl)
         {
@@ -31,10 +35,11 @@ namespace TheCharityPL.Controllers
             var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
             return Challenge(properties, provider);
         }
-
+       
+       
         [AllowAnonymous]
         [HttpGet("external-login-callback")]
-        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        private async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
         {
             returnUrl = returnUrl ?? "/";
 

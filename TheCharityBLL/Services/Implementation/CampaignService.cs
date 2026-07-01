@@ -1,5 +1,6 @@
-﻿using TheCharityBLL.DTOs;
-using TheCharityBLL.DTOs.CampaignDTOs;
+﻿using TheCharityBLL.DTOs.CampaignDTOs;
+using TheCharityBLL.Events.Abstraction;
+using TheCharityBLL.Events.CampaignEvents;
 using TheCharityBLL.Mapper;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityDAL.Entities;
@@ -13,16 +14,20 @@ namespace TheCharityBLL.Services.Repository
         private readonly ICampaignRepository _campaignRepository;
         private readonly IDonationRepository _donationRepository;
         private readonly IOrganizationRepository _organizationRepository;
+        private readonly IEventDispatcher _eventDispatcher;
         private readonly CampaignMapper _mapper;
 
         public CampaignService(
             ICampaignRepository campaignRepository,
             IDonationRepository donationRepository,
-            IOrganizationRepository organizationRepository)
+            IOrganizationRepository organizationRepository,
+            IEventDispatcher eventDispatcher
+            )
         {
             _campaignRepository = campaignRepository;
             _donationRepository = donationRepository;
             _organizationRepository = organizationRepository;
+            _eventDispatcher = eventDispatcher;
             _mapper = new CampaignMapper();
         }
 
@@ -240,6 +245,11 @@ namespace TheCharityBLL.Services.Repository
 
             var campaign = _mapper.MapToSoloEntity(createDto);
             var created = await _campaignRepository.AddSoloCampaignAsync(campaign);
+
+            await _eventDispatcher.DispatchAsync(new CampaignCreatedEvent
+            {
+                Campaign = created
+            });
 
             return new ServiceResponse<int>
             {
@@ -625,10 +635,9 @@ namespace TheCharityBLL.Services.Repository
             // Check if target is reached
             if (campaign.Target.HasValue && campaign.Achieved >= campaign.Target)
             {
-                campaign.UpdateStatus(CampaignStatus.Completed);
-                await _campaignRepository.UpdateCampaignAsync(campaign);
+                await UpdateCampaignStatusAsync(campaignId, CampaignStatus.Completed);
             }
-
+   
             return new ServiceResponse<bool>
             {
                 Success = true,
@@ -648,6 +657,13 @@ namespace TheCharityBLL.Services.Repository
                     Message = $"Campaign with ID {campaignId} not found."
                 };
             }
+
+            await _eventDispatcher.DispatchAsync(new CampaignStatusChangedEvent
+            {
+                Campaign = campaign,
+                OldStatus = campaign.Status.Value,
+                NewStatus = status
+            });
 
             campaign.UpdateStatus(status);
             await _campaignRepository.UpdateCampaignAsync(campaign);
@@ -1108,6 +1124,12 @@ namespace TheCharityBLL.Services.Repository
                 }
 
                 var updatedCampaign = await _campaignRepository.ExtendCampaignDeadlineAsync(campaignId, newDeadline);
+
+                await _eventDispatcher.DispatchAsync(new CampaignDeadlineExtendedEvent
+                {
+                    Campaign = campaign,
+                    NewDeadline = newDeadline
+                });
 
                 return new ServiceResponse<bool>
                 {
