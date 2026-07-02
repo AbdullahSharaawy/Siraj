@@ -114,7 +114,7 @@ namespace TheCharityDAL.Repositories.Implementation
             var userRoles = await _userManager.GetRolesAsync(user);
             return userRoles.Any(r => r.Equals(role, StringComparison.OrdinalIgnoreCase));
         }
-
+     
         public async Task<bool> IsUserDeletedAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);

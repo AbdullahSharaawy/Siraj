@@ -35,7 +35,7 @@ namespace TheCharityPL.Controllers
        
         [AllowAnonymous]
         [HttpGet("external-login-callback")]
-        private async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
+        public async Task<IActionResult> ExternalLoginCallback(string returnUrl = null, string remoteError = null)
         {
             returnUrl = returnUrl ?? "/";
 
