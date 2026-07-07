@@ -16,7 +16,7 @@ namespace TheCharityPL
             builder.Services.TheCharityEnhancedConnectionString(builder.Configuration);
             builder.Services.TheCharityDependencyInjection();
             builder.Services.TheCharityIdentity(builder.Configuration);
-            builder.Services.FoxArtEmailConfiguration(builder.Configuration);
+            builder.Services.TheCharityConfiguration(builder.Configuration);
             builder.Services.ThirdPartyAuthentication(builder.Configuration);
             builder.Services.AddHangfireServices();
             // Add services to the container.
@@ -104,12 +104,11 @@ namespace TheCharityPL
             app.MapHealthChecks("/health");// check if the db connected or not
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
+           
                 app.UseSwagger();
                 app.UseSwaggerUI();
-            }
-
+           
+            app.UseDeveloperExceptionPage();
             //global exception handling middleware
             app.UseMiddleware<ExceptionMiddleware>();
 

@@ -25,7 +25,13 @@ jobs:
 
       - name: Build with dotnet
         run: dotnet build --configuration Release
+        
+      - name: Install dotnet-ef tool
+        run: dotnet tool install --global dotnet-ef
 
+      - name: Run Entity Framework Migrations
+        # استبدل YourProjectName.csproj باسم ملف مشروعك الحقيقي
+        run: dotnet ef database update --project TheCharityDAL/TheCharityDAL.csproj --startup-project TheCharityPL/TheCharityPL.csproj --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING }}"    
       - name: dotnet publish
         run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
