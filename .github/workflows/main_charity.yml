@@ -32,6 +32,9 @@ jobs:
       - name: Run Entity Framework Migrations
         # استبدل YourProjectName.csproj باسم ملف مشروعك الحقيقي
         run: dotnet ef database update --project TheCharityDAL/TheCharityDAL.csproj --startup-project TheCharityPL/TheCharityPL.csproj --connection "${{ secrets.AZURE_SQL_CONNECTION_STRING }}"    
+        env:
+          ConnectionStrings__DefaultConnection: ${{ secrets.AZURE_SQL_CONNECTION_STRING }}
+          ASPNETCORE_ENVIRONMENT: Production
       - name: dotnet publish
         run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
 
