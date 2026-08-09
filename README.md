@@ -1,8 +1,8 @@
-## What this project is
+# What this project is
 
 `TheCharity` is a .NET 8 charity platform backend with a REST API, database persistence, authentication, payment integration, email configuration, and background job scheduling.
 
-### Architecture
+## Architecture
 
 - TheCharityPL  
   - ASP.NET Core Web API project
@@ -15,7 +15,7 @@
   - Entity Framework Core `TheCharityDbContext`
   - Entities and repository implementations
 
-### Key features
+## Key features
 
 - API endpoints for:
   - campaigns
@@ -44,7 +44,7 @@
 - Health checks:
   - Database health check exposed at `/health`
 
-### Important implementation details
+## Important implementation details
 
 - Program.cs configures:
   - service registration from `TheCharityBLL.Helpers.ServiceExtensions`
@@ -61,6 +61,8 @@
 - `TheCharityDbContext` includes:
   - `DbSet<Attachment>`, `Campaign`, `DonatedItem`, `Donation`, `ItemImage`, `Organization`, `PaymentInfo`, `SharedCampaign`, `SoloCampaign`, `ScheduledJob`
   - relationship mapping and query filters
+
+
 
 # Functional Requirements for The Charity System
 
