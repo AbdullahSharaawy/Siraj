@@ -14,8 +14,6 @@
   - Data access layer
   - Entity Framework Core `TheCharityDbContext`
   - Entities and repository implementations
-- FrontEnd  
-  - Frontend folder present, likely Angular or other client app (CORS configured for `http://localhost:4200`)
 
 ### Key features
 
