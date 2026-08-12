@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.AttachmentDTOs;
 using TheCharityBLL.DTOs.DonatedItemDTOs;
 using TheCharityBLL.DTOs.ItemImageDTOs;
-using TheCharityBLL.ViewModels;
 using TheCharityDAL.Entities;
 using TheCharityDAL.Enums;
 

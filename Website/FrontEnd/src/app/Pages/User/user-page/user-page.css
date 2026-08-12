@@ -1,6 +1,0 @@
-.user-layout-container {
-    /* Offset by the height of the navbar defined in app.css */
-    padding-top: calc(var(--nb-height) + 2rem);
-    min-height: 100vh;
-    background-color: var(--background-color);
-}

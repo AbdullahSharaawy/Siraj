@@ -1,15 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
+
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.DonationDTOs;
 using TheCharityBLL.DTOs.PaymentDTOs;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityBLL.Services.Abstraction.MoneyDonation;
 using TheCharityBLL.Services.Abstraction.Payment;
-using TheCharityBLL.Services.Repository;
+
 
 namespace TheCharityPL.Controllers
 {
@@ -35,9 +36,11 @@ namespace TheCharityPL.Controllers
             _configuration = configuration;
             _userService = userService;
         }
-
-              [HttpPost("create")]
-        [Authorize]
+        /// <summary>
+        /// create payment request to donate to specific campaign by user
+        /// </summary>
+        [HttpPost("create")]
+              [Authorize]
         public async Task<IActionResult> Create([FromBody] CreatePaymentRequestDto request)
         {
             if (!ModelState.IsValid)
@@ -77,15 +80,17 @@ namespace TheCharityPL.Controllers
                 "Payment session created. UserId: {UserId}, CampaignId: {CampaignId}",
                 userId, request.CampaignId);
 
-            return Ok(new { iframeUrl });
+            return Ok(new ServiceResponse<string>{Data= iframeUrl,Success=true,Message = $"Payment session created. UserId: {userId}, CampaignId: {request.CampaignId}" });
         }
 
         // =====================================================================
         // POST api/payment/callback
-        // Anonymous — called by Paymob after payment.
-        // UserId + CampaignId are read from order metadata (no server state needed).
-        // On success: creates the donation record.
-        // Always returns 200 — Paymob retries on any other status code.
+        /// <summary>
+        /// Anonymous — called by Paymob after payment.
+        /// UserId + CampaignId are read from order metadata (no server state needed).
+        /// On success: creates the donation record.
+        /// Always returns 200 — Paymob retries on any other status code.
+        /// </summary>
         // =====================================================================
         [HttpPost("callback")]
         [AllowAnonymous]
@@ -153,7 +158,7 @@ namespace TheCharityPL.Controllers
                     "Donation created. DonationId: {DonationId}, OrderId: {OrderId}, " +
                     "TransactionId: {TransactionId}, Amount: {Amount} {Currency}, " +
                     "UserId: {UserId}, CampaignId: {CampaignId}.",
-                    donation.Id, transaction.OrderId, transaction.Id,
+                    donation.Data.Id, transaction.OrderId, transaction.Id,
                     donationDto.Amount, transaction.Currency ?? "EGP",
                     userId, campaignId);
 
@@ -163,7 +168,7 @@ namespace TheCharityPL.Controllers
                     message = "Callback processed successfully.",
                     transaction_id = transaction.Id,
                     order_id = transaction.OrderId,
-                    donation_id = donation.Id,
+                    donation_id = donation.Data.Id,
                     status = "success"
                 });
             }

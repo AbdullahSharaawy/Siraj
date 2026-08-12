@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.OrganizationContactMethodDTOs;
 using TheCharityBLL.DTOs.OrganizationDTOs;
 using TheCharityBLL.DTOs.PaymentInfoDTOs;
-using TheCharityBLL.ViewModels;
+using TheCharityBLL.DTOs.UserDTOs;
 using TheCharityDAL.Entities;
 using TheCharityDAL.Enums;
 
@@ -68,5 +64,17 @@ namespace TheCharityBLL.Services.Abstraction
         //Task<ServiceResponse<bool> ValidatePaymentInfo(int organizationId);
         Task<ServiceResponse<IEnumerable<OrganizationResponseDto>>> GetOrganizationsWithValidPaymentInfo();
         Task<ServiceResponse<Dictionary<int, DateTime>>> GetOrganizationLastPaymentUpdate();
+
+        // ===== Sub-Admin Management =====
+        Task<ServiceResponse<OrganizationRoleResponseDto>> AddSubAdminAsync(int organizationId, string userId);
+        Task<ServiceResponse<bool>> RemoveSubAdminAsync(int organizationId, string userId);
+        Task<ServiceResponse<IEnumerable<UserResponseDTO>>> GetOrganizationSubAdminsAsync(int organizationId);
+        Task<ServiceResponse<bool>> IsUserSubAdminAsync(int organizationId, string userId);
+
+        // ===== Organization Admin Management =====
+        Task<ServiceResponse<OrganizationResponseDto>> AssignOrganizationAdminAsync(int organizationId, string adminUserId);
+        Task<ServiceResponse<OrganizationResponseDto>> RemoveOrganizationAdminAsync(int organizationId);
+        Task<ServiceResponse<OrganizationResponseDto>> TransferOrganizationAdminAsync(int organizationId, string newAdminUserId);
+        Task<ServiceResponse<UserResponseDTO?>> GetOrganizationAdminAsync(int organizationId);
     }
 }
