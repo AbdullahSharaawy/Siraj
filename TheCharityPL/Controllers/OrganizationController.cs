@@ -4,8 +4,7 @@ using TheCharityBLL.Authorization.Attributes;
 
 using TheCharityBLL.DTOs.OrganizationContactMethodDTOs;
 using TheCharityBLL.DTOs.OrganizationDTOs;
-
-using TheCharityBLL.Services.Abstraction;
+using TheCharityBLL.Services.Abstraction.Organization;
 using TheCharityDAL.Enums;
 
 namespace TheCharityPL.Controllers

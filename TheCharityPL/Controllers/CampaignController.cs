@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using TheCharityBLL.DTOs;
 using TheCharityBLL.Authorization.Attributes;
 using TheCharityBLL.DTOs.CampaignDTOs;
-using TheCharityBLL.Services.Abstraction;
 using TheCharityDAL.Enums;
+using TheCharityBLL.Services.Abstraction.Campaign;
 
 namespace TheCharityPL.Controllers
 {

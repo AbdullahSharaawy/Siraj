@@ -1,6 +1,7 @@
 using Hangfire;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using TheCharityBLL.Helpers;
 using TheCharityBLL.Jobs.Registry.Abstraction;
 using TheCharityPL.Middlewares;
@@ -20,11 +21,16 @@ namespace TheCharityPL
             builder.Services.ThirdPartyAuthentication(builder.Configuration);
             builder.Services.AddHangfireServices();
             // Add services to the container.
+
             builder.Services.AddControllers().AddJsonOptions(options =>
             {
                 options.JsonSerializerOptions.PropertyNameCaseInsensitive = true;
                 // This prevents unknown properties from crashing deserialization
-            }); ;
+
+                // This converts all enums to strings globally
+                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+
+            }); 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
