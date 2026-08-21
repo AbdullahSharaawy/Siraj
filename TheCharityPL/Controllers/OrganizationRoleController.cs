@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TheCharityBLL.DTOs.OrganizationRoleDTOs;
-using TheCharityBLL.Services.Abstraction.Organization;
+using TheCharityBLL.Services.Abstraction.OrganizationAbstraction;
 using TheCharityDAL.FilterModels;
 
 namespace TheCharityPL.Controllers

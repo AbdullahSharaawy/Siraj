@@ -6,11 +6,11 @@ using TheCharityBLL.DTOs.PaymentInfoDTOs;
 using TheCharityBLL.DTOs.UserDTOs;
 using TheCharityBLL.Mapper;
 using TheCharityBLL.Services.Abstraction;
-using TheCharityBLL.Services.Abstraction.Organization;
+using TheCharityBLL.Services.Abstraction.OrganizationAbstraction;
 using TheCharityDAL.Enums;
 using TheCharityDAL.Repositories.Abstraction;
 
-namespace TheCharityBLL.Services.Implementation.Organization
+namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 {
     public class OrganizationService : IOrganizationService
     {

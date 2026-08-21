@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.OrganizationRoleDTOs;
 using TheCharityBLL.Mapper.OrganizationRoleMapper;
-using TheCharityBLL.Services.Abstraction.Organization;
+using TheCharityBLL.Services.Abstraction.OrganizationAbstraction;
 using TheCharityDAL.Entities;
 using TheCharityDAL.FilterModels;
 using TheCharityDAL.Repositories.Abstraction;
 
-namespace TheCharityBLL.Services.Implementation.Organization
+namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 {
     public class OrganizationRoleService : IOrganizationRoleService
     {
@@ -20,14 +20,14 @@ namespace TheCharityBLL.Services.Implementation.Organization
         {
             _OrganizationRoleRepository = OrganizationRoleRepository;
         }
-       
+
         public async Task<ServiceResponse<OrganizationRoleResponseDto>> AddOrganizationRoleAsync(CreateOrganizationRoleDto organizationRole)
         {
 
-           
+
 
             OrganizationRole mappedEntity = new CreateOrganizationRole().MapToOrganizationRole(organizationRole);
-           
+
 
 
             OrganizationRole result = await _OrganizationRoleRepository.AddOrganizationRoleAsync(mappedEntity);
@@ -51,11 +51,11 @@ namespace TheCharityBLL.Services.Implementation.Organization
             };
         }
 
-       
+
 
         public async Task<ServiceResponse<bool>> DeleteAsync(string userId, int organizationId)
         {
-            bool result = await _OrganizationRoleRepository.DeleteAsync( userId,  organizationId);
+            bool result = await _OrganizationRoleRepository.DeleteAsync(userId, organizationId);
 
             if (!result)
             {
@@ -122,8 +122,8 @@ namespace TheCharityBLL.Services.Implementation.Organization
                 Success = true
             };
         }
-       
-        public async Task<ServiceResponse<OrganizationRoleResponseDto>> UpdateAsync(UpdateOrganizationRoleDto OrganizationRole,string userId, int OrganizationId)
+
+        public async Task<ServiceResponse<OrganizationRoleResponseDto>> UpdateAsync(UpdateOrganizationRoleDto OrganizationRole, string userId, int OrganizationId)
         {
             OrganizationRole currentOrganizationRole = await _OrganizationRoleRepository.GetByIdAsync(userId, OrganizationId);
             if (currentOrganizationRole == null)
@@ -158,8 +158,8 @@ namespace TheCharityBLL.Services.Implementation.Organization
             };
         }
 
-        
 
-       
+
+
     }
 }

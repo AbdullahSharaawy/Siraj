@@ -8,7 +8,7 @@ using TheCharityBLL.DTOs.OrganizationRoleDTOs;
 using TheCharityDAL.Entities;
 using TheCharityDAL.FilterModels;
 
-namespace TheCharityBLL.Services.Abstraction.Organization
+namespace TheCharityBLL.Services.Abstraction.OrganizationAbstraction
 {
     public interface IOrganizationRoleService
     {
