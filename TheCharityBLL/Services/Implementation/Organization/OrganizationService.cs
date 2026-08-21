@@ -1,15 +1,16 @@
 ﻿using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.OrganizationContactMethodDTOs;
 using TheCharityBLL.DTOs.OrganizationDTOs;
+using TheCharityBLL.DTOs.OrganizationRoleDTOs;
 using TheCharityBLL.DTOs.PaymentInfoDTOs;
 using TheCharityBLL.DTOs.UserDTOs;
 using TheCharityBLL.Mapper;
 using TheCharityBLL.Services.Abstraction;
-
+using TheCharityBLL.Services.Abstraction.Organization;
 using TheCharityDAL.Enums;
 using TheCharityDAL.Repositories.Abstraction;
 
-namespace TheCharityBLL.Services.Implementation
+namespace TheCharityBLL.Services.Implementation.Organization
 {
     public class OrganizationService : IOrganizationService
     {
@@ -761,7 +762,7 @@ namespace TheCharityBLL.Services.Implementation
             };
         }
 
-        public async Task<ServiceResponse<OrganizationResponseDto>> UpdateOrganization(int id,UpdateOrganizationDto organization)
+        public async Task<ServiceResponse<OrganizationResponseDto>> UpdateOrganization(int id, UpdateOrganizationDto organization)
         {
             var existingOrganization = await _repository.GetOrganizationByIdAsync(id);
             if (existingOrganization == null)

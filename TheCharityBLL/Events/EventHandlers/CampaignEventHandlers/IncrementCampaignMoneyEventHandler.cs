@@ -1,6 +1,6 @@
 ﻿using TheCharityBLL.Events.Abstraction;
 using TheCharityBLL.Events.DonationEvents;
-using TheCharityBLL.Services.Abstraction;
+using TheCharityBLL.Services.Abstraction.Campaign;
 
 namespace TheCharityBLL.Events.EventHandlers.CampaignEventHandlers
 {

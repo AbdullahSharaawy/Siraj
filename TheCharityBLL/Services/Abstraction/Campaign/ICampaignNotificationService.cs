@@ -1,6 +1,6 @@
 ﻿using TheCharityBLL.Services.Enums;
 
-namespace TheCharityBLL.Services.Abstraction
+namespace TheCharityBLL.Services.Abstraction.Campaign
 {
     public interface ICampaignNotificationService
     {

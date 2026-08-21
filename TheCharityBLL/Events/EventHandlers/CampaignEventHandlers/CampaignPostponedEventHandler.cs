@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using TheCharityBLL.Events.Abstraction;
 using TheCharityBLL.Events.CampaignEvents;
-using TheCharityBLL.Services.Abstraction;
+using TheCharityBLL.Services.Abstraction.Campaign;
 using TheCharityBLL.Services.Enums;
 
 namespace TheCharityBLL.Events.EventHandlers.CampaignEventHandlers

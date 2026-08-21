@@ -1,20 +1,20 @@
-﻿
-using TheCharityBLL.DTOs;
+﻿using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.OrganizationContactMethodDTOs;
 using TheCharityBLL.DTOs.OrganizationDTOs;
+using TheCharityBLL.DTOs.OrganizationRoleDTOs;
 using TheCharityBLL.DTOs.PaymentInfoDTOs;
 using TheCharityBLL.DTOs.UserDTOs;
 using TheCharityDAL.Entities;
 using TheCharityDAL.Enums;
 
-namespace TheCharityBLL.Services.Abstraction
+namespace TheCharityBLL.Services.Abstraction.Organization
 {
     public interface IOrganizationService
     {
         Task<ServiceResponse<IEnumerable<OrganizationResponseDto>>> GetAllOrganizations(bool includeDeleted = false);
         Task<ServiceResponse<OrganizationResponseDto>> GetOrganizationById(int id);
         Task<ServiceResponse<OrganizationResponseDto>> CreateOrganization(CreateOrganizationDto organization);
-        Task<ServiceResponse<OrganizationResponseDto>> UpdateOrganization(int id,UpdateOrganizationDto organization);
+        Task<ServiceResponse<OrganizationResponseDto>> UpdateOrganization(int id, UpdateOrganizationDto organization);
         Task<ServiceResponse<bool>> DeleteOrganization(int id);
         Task<ServiceResponse<bool>> RestoreOrganization(int id);
 
@@ -30,7 +30,7 @@ namespace TheCharityBLL.Services.Abstraction
         Task<ServiceResponse<IEnumerable<OrgContactMethodResponseDto>>> GetOrganizationContactMethods(int organizationId);
         Task<ServiceResponse<OrgContactMethodResponseDto>> GetContactMethodById(int contactMethodId);
         Task<ServiceResponse<OrgContactMethodResponseDto>> CreateContactMethod(CreateOrgContactMethodDto contactMethod);
-        Task<ServiceResponse<OrgContactMethodResponseDto>> UpdateContactMethod(int id,UpdateOrgContactMethodDto contactMethod);
+        Task<ServiceResponse<OrgContactMethodResponseDto>> UpdateContactMethod(int id, UpdateOrgContactMethodDto contactMethod);
         Task<ServiceResponse<bool>> DeleteContactMethod(int contactMethodId);
         Task<ServiceResponse<bool>> RestoreContactMethod(int contactMethodId);
         Task<ServiceResponse<IEnumerable<OrgContactMethodResponseDto>>> GetContactMethodsByType(int organizationId, ContactType type);

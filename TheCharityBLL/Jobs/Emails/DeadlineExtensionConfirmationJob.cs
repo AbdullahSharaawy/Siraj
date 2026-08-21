@@ -2,7 +2,7 @@
 using TheCharityBLL.Jobs.Context;
 using TheCharityBLL.Jobs.Result.Abstraction;
 using TheCharityBLL.Jobs.Result.Implementation;
-using TheCharityBLL.Services.Abstraction;
+using TheCharityBLL.Services.Abstraction.Campaign;
 using TheCharityBLL.Services.Enums;
 
 namespace TheCharityBLL.Jobs.Emails

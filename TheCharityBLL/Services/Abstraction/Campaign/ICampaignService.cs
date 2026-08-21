@@ -2,7 +2,7 @@
 using TheCharityBLL.DTOs.CampaignDTOs;
 using TheCharityDAL.Enums;
 
-namespace TheCharityBLL.Services.Abstraction
+namespace TheCharityBLL.Services.Abstraction.Campaign
 {
     public interface ICampaignService
     {

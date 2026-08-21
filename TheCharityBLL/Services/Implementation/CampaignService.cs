@@ -3,7 +3,7 @@ using TheCharityBLL.DTOs.CampaignDTOs;
 using TheCharityBLL.Events.Abstraction;
 using TheCharityBLL.Events.CampaignEvents;
 using TheCharityBLL.Mapper;
-using TheCharityBLL.Services.Abstraction;
+using TheCharityBLL.Services.Abstraction.Campaign;
 using TheCharityDAL.Entities;
 using TheCharityDAL.Enums;
 using TheCharityDAL.Repositories.Abstraction;

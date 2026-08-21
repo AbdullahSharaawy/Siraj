@@ -1,6 +1,6 @@
 ﻿using TheCharityDAL.Enums;
 
-namespace TheCharityBLL.DTOs.OrganizationDTOs
+namespace TheCharityBLL.DTOs.OrganizationRoleDTOs
 {
     public class OrganizationRoleResponseDto
     {
@@ -11,5 +11,8 @@ namespace TheCharityBLL.DTOs.OrganizationDTOs
         public string? UserName { get; set; }
         public string? UserEmail { get; set; }
         public string? UserFullName { get; set; }
+        public DateTime RegistrationDate { get; private set; } 
+        public DateTime? UpdatedOn { get; private set; }
+
     }
 }

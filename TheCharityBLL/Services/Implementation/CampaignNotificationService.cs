@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using TheCharityBLL.Services.Abstraction;
+using TheCharityBLL.Services.Abstraction.Campaign;
 using TheCharityBLL.Services.Enums;
 using TheCharityDAL.Entities;
 using TheCharityDAL.Repositories.Abstraction;
