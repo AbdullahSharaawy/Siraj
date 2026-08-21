@@ -12,7 +12,7 @@ namespace TheCharityDAL.Entities
         public bool IsDeleted { get; private set; } = false;
         public DateTime? DeletedOn { get; private set; }
         public DateTime RegistrationDate { get; private set; } = DateTime.UtcNow;
-        public DateTime? UpdatedOn { get; private set; }
+        public DateTime? UpdatedOn { get;  set; }
 
         [ForeignKey(nameof(OrganizationId))]
         public Organization? Organization { get; private set; }
