@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 using TheCharityBLL.Authorization.Attributes;
 
@@ -11,6 +12,7 @@ namespace TheCharityPL.Controllers
 {
     [Route("api/[controller]")]//we must specifc roles and policies for each endpoint
     [ApiController]
+    [Authorize]
     public class OrganizationController : ControllerBase
     {
         private readonly IOrganizationService _organizationService;
@@ -25,6 +27,7 @@ namespace TheCharityPL.Controllers
         /// Get all organizations
         /// </summary>
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAll([FromQuery] bool includeDeleted = false)
         {
             var result = await _organizationService.GetAllOrganizations(includeDeleted);
@@ -35,6 +38,7 @@ namespace TheCharityPL.Controllers
         /// Get organization by ID
         /// </summary>
         [HttpGet("{orgId:int}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetById(int orgId)
         {
             var result = await _organizationService.GetOrganizationById(orgId);
@@ -45,6 +49,7 @@ namespace TheCharityPL.Controllers
         /// Get organization details
         /// </summary>
         [HttpGet("{orgId:int}/details")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetDetails(int orgId)
         {
             var result = await _organizationService.GetOrganizationDetails(orgId);
@@ -55,6 +60,7 @@ namespace TheCharityPL.Controllers
         /// Create a new organization
         /// </summary>
         [HttpPost]
+        [IsSuperAdmin]
         public async Task<IActionResult> Create([FromBody] CreateOrganizationDto dto)
         {
             var result = await _organizationService.CreateOrganization(dto);
@@ -68,6 +74,7 @@ namespace TheCharityPL.Controllers
         /// Update organization
         /// </summary>
         [HttpPut("{orgId:int}")]
+        [IsSuperAdmin]
         public async Task<IActionResult> Update(int orgId, [FromBody] UpdateOrganizationDto dto)
         {
             var result = await _organizationService.UpdateOrganization(orgId, dto);
@@ -78,6 +85,7 @@ namespace TheCharityPL.Controllers
         /// Soft delete organization
         /// </summary>
         [HttpDelete("{orgId:int}")]
+        [IsSuperAdmin]
         public async Task<IActionResult> Delete(int orgId)
         {
             var result = await _organizationService.DeleteOrganization(orgId);
@@ -88,6 +96,7 @@ namespace TheCharityPL.Controllers
         /// Restore deleted organization
         /// </summary>
         [HttpPatch("{orgId:int}/restore")]
+        [IsSuperAdmin]
         public async Task<IActionResult> Restore(int orgId)
         {
             var result = await _organizationService.RestoreOrganization(orgId);
@@ -98,6 +107,7 @@ namespace TheCharityPL.Controllers
         /// Get all deleted organizations
         /// </summary>
         [HttpGet("deleted")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetDeleted()
         {
             var result = await _organizationService.GetDeletedOrganizations();
@@ -108,6 +118,7 @@ namespace TheCharityPL.Controllers
         /// Get organizations for dropdown list
         /// </summary>
         [HttpGet("dropdown")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetDropdown()
         {
             var result = await _organizationService.GetOrganizationsDropDown();
@@ -118,6 +129,7 @@ namespace TheCharityPL.Controllers
         /// Search organizations by keyword
         /// </summary>
         [HttpGet("search")]
+        [AllowAnonymous]
         public async Task<IActionResult> Search([FromQuery] string term)
         {
             var result = await _organizationService.SearchOrganizations(term);
@@ -128,6 +140,7 @@ namespace TheCharityPL.Controllers
         /// Get organization by name
         /// </summary>
         [HttpGet("filter/by-name")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetByName([FromQuery] string name)
         {
             var result = await _organizationService.GetOrganizationByName(name);
@@ -138,6 +151,7 @@ namespace TheCharityPL.Controllers
         /// Get organizations by address
         /// </summary>
         [HttpGet("filter/by-address")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetByAddress([FromQuery] string address)
         {
             var result = await _organizationService.GetOrganizationsByAddress(address);
@@ -148,6 +162,7 @@ namespace TheCharityPL.Controllers
         /// Get recently registered organizations
         /// </summary>
         [HttpGet("recent")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetRecent([FromQuery] int days)
         {
             var result = await _organizationService.GetRecentlyRegisteredOrganizations(days);
@@ -158,6 +173,7 @@ namespace TheCharityPL.Controllers
         /// Get total organizations count
         /// </summary>
         [HttpGet("count/total")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetTotalCount()
         {
             var result = await _organizationService.GetTotalOrganizationsCount();
@@ -168,6 +184,7 @@ namespace TheCharityPL.Controllers
         /// Get active organizations count
         /// </summary>
         [HttpGet("count/active")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetActiveCount()
         {
             var result = await _organizationService.GetActiveOrganizationsCount();
@@ -180,6 +197,7 @@ namespace TheCharityPL.Controllers
         /// Get contact methods for an organization
         /// </summary>
         [HttpGet("{orgId}/contact-methods")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetOrganizationContactMethods(int orgId)
         {
             var result = await _organizationService.GetOrganizationContactMethods(orgId);
@@ -190,6 +208,7 @@ namespace TheCharityPL.Controllers
         /// Get contact method by ID
         /// </summary>
         [HttpGet("contact-methods/{contactId}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetContactMethodById(int contactId)
         {
             var result = await _organizationService.GetContactMethodById(contactId);
@@ -200,6 +219,7 @@ namespace TheCharityPL.Controllers
         /// Create organization contact method
         /// </summary>
         [HttpPost("contact-methods")]
+        [CanManageOrganization]
         public async Task<IActionResult> CreateContactMethod(CreateOrgContactMethodDto dto)
         {
             var result = await _organizationService.CreateContactMethod(dto);
@@ -210,6 +230,7 @@ namespace TheCharityPL.Controllers
         /// Update organization contact method
         /// </summary>
         [HttpPut("contact-methods/{contactId:int}")]
+        [CanManageOrganization]
         public async Task<IActionResult> UpdateContactMethod(int contactId, UpdateOrgContactMethodDto dto)
         {
             var result = await _organizationService.UpdateContactMethod(contactId, dto);
@@ -220,6 +241,7 @@ namespace TheCharityPL.Controllers
         /// Delete organization contact method
         /// </summary>
         [HttpDelete("contact-methods/{contactId}")]
+        [CanManageOrganization]
         public async Task<IActionResult> DeleteContactMethod(int contactId)
         {
             var result = await _organizationService.DeleteContactMethod(contactId);
@@ -230,6 +252,7 @@ namespace TheCharityPL.Controllers
         /// Restore deleted contact method
         /// </summary>
         [HttpPost("contact-methods/restore/{contactId}")]
+        [CanManageOrganization]
         public async Task<IActionResult> RestoreContactMethod(int contactId)
         {
             var result = await _organizationService.RestoreContactMethod(contactId);
@@ -240,6 +263,7 @@ namespace TheCharityPL.Controllers
         /// Get contact methods by type
         /// </summary>
         [HttpGet("{orgId:int}/contact-type")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetContactMethodsByType(int orgId, ContactType type)
         {
             var result = await _organizationService.GetContactMethodsByType(orgId, type);
@@ -250,6 +274,7 @@ namespace TheCharityPL.Controllers
         /// Get contact methods count by type
         /// </summary>
         [HttpGet("{orgId:int}/contact-type/count")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetContactMethodCountByType(int orgId, ContactType type)
         {
             var result = await _organizationService.GetContactMethodCountByType(orgId, type);
@@ -260,6 +285,7 @@ namespace TheCharityPL.Controllers
         /// Get organizations by contact type
         /// </summary>
         [HttpGet("contact-type/{type}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetOrganizationsByContactType(ContactType type)
         {
             var result = await _organizationService.GetOrganizationsByContactType(type);
@@ -314,6 +340,7 @@ namespace TheCharityPL.Controllers
         /// Get organizations without payment information
         /// </summary>
         [HttpGet("payment/none")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetOrganizationsWithoutPaymentInfo()
         {
             var result = await _organizationService.GetOrganizationsWithoutPaymentInfo();
@@ -324,6 +351,7 @@ namespace TheCharityPL.Controllers
         /// Get organizations with valid payment information
         /// </summary>
         [HttpGet("payment/valid")]
+        [CanManageOrganization]
         public async Task<IActionResult> GetOrganizationsWithValidPaymentInfo()
         {
             var result = await _organizationService.GetOrganizationsWithValidPaymentInfo();
@@ -334,6 +362,7 @@ namespace TheCharityPL.Controllers
         /// Get organizations ordered by last payment update
         /// </summary>
         [HttpGet("payment/last-update")]
+        [CanManageOrganization]
         public async Task<IActionResult> GetLastPaymentUpdates()
         {
             var result = await _organizationService.GetOrganizationLastPaymentUpdate();
@@ -346,6 +375,7 @@ namespace TheCharityPL.Controllers
         /// Get organizations with at least the specified number of campaigns
         /// </summary>
         [HttpGet("campaigns/min-count")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetOrganizationsByCampaignCount(int minCampaigns)
         {
             var result = await _organizationService.GetOrganizationsByCampaignCount(minCampaigns);
@@ -356,6 +386,7 @@ namespace TheCharityPL.Controllers
         /// Get organizations with active campaigns
         /// </summary>  
         [HttpGet("campaigns/active")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetOrganizationsWithActiveCampaigns()
         {
             var result = await _organizationService.GetOrganizationsWithActiveCampaigns();
@@ -366,6 +397,7 @@ namespace TheCharityPL.Controllers
         /// Get organizations with completed campaigns
         /// </summary>
         [HttpGet("campaigns/completed")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetOrganizationsWithCompletedCampaigns()
         {
             var result = await _organizationService.GetOrganizationsWithCompletedCampaigns();
@@ -376,6 +408,7 @@ namespace TheCharityPL.Controllers
         /// Get organizations without campaigns
         /// </summary>
         [HttpGet("campaigns/none")]
+        [AllowAnonymous]
         public async Task<IActionResult> GetOrganizationsWithoutCampaigns()
         {
             var result = await _organizationService.GetOrganizationsWithoutCampaigns();
@@ -460,7 +493,7 @@ namespace TheCharityPL.Controllers
         /// Get all sub-admins of an organization
         /// </summary>
         [HttpGet("{orgId}/sub-admins")]
-        [CanManageOrganization] // SuperAdmin + OrganizationAdmin + SubAdmin can view
+        [CanManageOrganization] // SuperAdmin + OrganizationAdmin 
         public async Task<IActionResult> GetSubAdmins(int orgId)
         {
             var result = await _organizationService.GetOrganizationSubAdminsAsync(orgId);
@@ -471,7 +504,7 @@ namespace TheCharityPL.Controllers
         /// Check if a user is a sub-admin of an organization
         /// </summary>
         [HttpGet("{orgId}/sub-admins/{userId}/check")]
-        [CanManageOrganization] // SuperAdmin + OrganizationAdmin + SubAdmin
+        [CanManageOrganization] // SuperAdmin + OrganizationAdmin 
         public async Task<IActionResult> IsUserSubAdmin(int orgId, string userId)
         {
             var result = await _organizationService.IsUserSubAdminAsync(orgId, userId);

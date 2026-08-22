@@ -1,5 +1,7 @@
 ﻿
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TheCharityBLL.Authorization.Attributes;
 using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.DonationDTOs;
 using TheCharityBLL.Services.Abstraction.MoneyDonation;
@@ -8,6 +10,7 @@ namespace TheCharityPL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DonationsController : ControllerBase
     {
         private readonly IDonationService _service;
@@ -26,6 +29,7 @@ namespace TheCharityPL.Controllers
         /// get all donations
         /// </summary>
         [HttpGet]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetAll([FromQuery] bool includeDeleted = false)
         {
             var result = await _service.GetAllDonationsAsync(includeDeleted);
@@ -37,6 +41,7 @@ namespace TheCharityPL.Controllers
         /// get specific donation included his user and campaign by donation id
         /// </summary>
         [HttpGet("{id:int}")]
+        [CanManageDonation]
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _service.GetDonationByIdAsync(id);
@@ -47,6 +52,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/5/details
         [HttpGet("{id:int}/details")]
+        [CanManageDonation]
         public async Task<IActionResult> GetWithDetails(int id)
         {
             var result = await _service.GetDonationWithDetailsAsync(id);
@@ -57,6 +63,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // POST api/donations
         [HttpPost]
+        [CanCreateDonation]
         public async Task<IActionResult> Create([FromBody] CreateDonationDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -69,6 +76,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // PUT api/donations/5
         [HttpPut("{id:int}")]
+        [CanManageDonation]
         public async Task<IActionResult> Update(int id, [FromBody] UpdateDonationDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -81,6 +89,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // DELETE api/donations/5
         [HttpDelete("{id:int}")]
+        [CanManageDonation]
         public async Task<IActionResult> Delete(int id)
         {
             var success = await _service.DeleteDonationAsync(id);
@@ -91,6 +100,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // PATCH api/donations/5/restore
         [HttpPatch("{id:int}/restore")]
+        [CanManageDonation]
         public async Task<IActionResult> Restore(int id)
         {
             var success = await _service.RestoreDonationAsync(id);
@@ -106,6 +116,7 @@ namespace TheCharityPL.Controllers
         /// display all deleted donations  
         /// </summary>
         [HttpGet("deleted")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetDeleted()
             => Ok(await _service.GetDeletedDonationsAsync());
 
@@ -114,6 +125,7 @@ namespace TheCharityPL.Controllers
         /// get recent donations  based on num days , where if days=2,get recent transaction for last two days  (default 30 days)
         /// </summary>
         [HttpGet("recent")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetRecent([FromQuery] int days = 30)
             => Ok(await _service.GetRecentDonationsAsync(days));
         /// <summary>
@@ -121,6 +133,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/by-user/userId123
         [HttpGet("by-user/{userId}")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetByUser(string userId)
             => Ok(await _service.GetDonationsByUserAsync(userId));
         /// <summary>
@@ -128,6 +141,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/by-campaign/3
         [HttpGet("by-campaign/{campaignId:int}")]
+        [CanManageCampaign]
         public async Task<IActionResult> GetByCampaign(int campaignId)
             => Ok(await _service.GetDonationsByCampaignAsync(campaignId));
         /// <summary>
@@ -135,12 +149,14 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/by-amount-range?min=100&max=5000
         [HttpGet("by-amount-range")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetByAmountRange(
             [FromQuery] double min, [FromQuery] double max)
             => Ok(await _service.GetDonationsByAmountRangeAsync(min, max));
 
         // GET api/donations/by-date-range?startDate=2024-01-01&endDate=2024-12-31
         [HttpGet("by-date-range")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetByDateRange(
             [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
             => Ok(await _service.GetDonationsByDateRangeAsync(startDate, endDate));
@@ -149,6 +165,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/search?userId=xxx&campaignId=3
         [HttpGet("search")]
+        [CanManageCampaign]
         public async Task<IActionResult> SearchByUserAndCampaign(
             [FromQuery] string userId, [FromQuery] int campaignId)
             => Ok(await _service.SearchDonationsByUserAndCampaignAsync(userId, campaignId));
@@ -157,6 +174,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/by-amount-and-date?minAmount=100&startDate=2024-01-01
         [HttpGet("by-amount-and-date")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetByAmountAndDate(
             [FromQuery] double minAmount, [FromQuery] DateTime startDate)
             => Ok(await _service.GetDonationsByAmountAndDateAsync(minAmount, startDate));
@@ -165,6 +183,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // POST api/donations/by-users
         [HttpPost("by-users")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetByMultipleUsers([FromBody] IEnumerable<string> userIds)
             => Ok(await _service.GetDonationsByMultipleUsersAsync(userIds));
         /// <summary>
@@ -172,6 +191,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // POST api/donations/by-campaigns
         [HttpPost("by-campaigns")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetByMultipleCampaigns([FromBody] IEnumerable<int> campaignIds)
             => Ok(await _service.GetDonationsByMultipleCampaignsAsync(campaignIds));
 
@@ -183,6 +203,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/stats/total-amount
         [HttpGet("stats/total-amount")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetTotalAmount()
             => Ok(await _service.GetTotalDonationsAmountAsync());
         /// <summary>
@@ -190,6 +211,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/stats/total-count
         [HttpGet("stats/total-count")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetTotalCount()
             => Ok(await _service.GetTotalDonationsCountAsync());
         /// <summary>
@@ -197,6 +219,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/stats/total-amount/by-user/userId123
         [HttpGet("stats/total-amount/by-user/{userId}")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetTotalAmountByUser(string userId)
             => Ok(await _service.GetTotalDonationsAmountByUserAsync(userId));
         /// <summary>
@@ -204,6 +227,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/stats/total-amount/by-campaign/3
         [HttpGet("stats/total-amount/by-campaign/{campaignId:int}")]
+        [CanManageCampaign]
         public async Task<IActionResult> GetTotalAmountByCampaign(int campaignId)
             => Ok(await _service.GetTotalDonationsAmountByCampaignAsync(campaignId));
         /// <summary>
@@ -211,6 +235,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/stats/count/by-user/userId123
         [HttpGet("stats/count/by-user/{userId}")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetCountByUser(string userId)
             => Ok(await _service.GetDonationsCountByUserAsync(userId));
         /// <summary>
@@ -218,6 +243,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/stats/count/by-campaign/3
         [HttpGet("stats/count/by-campaign/{campaignId:int}")]
+        [CanManageCampaign]
         public async Task<IActionResult> GetCountByCampaign(int campaignId)
             => Ok(await _service.GetDonationsCountByCampaignAsync(campaignId));
 
@@ -229,6 +255,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/analytics/average
         [HttpGet("analytics/average")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetAverage()
             => Ok(await _service.GetAverageDonationAmountAsync());
         /// <summary>
@@ -236,6 +263,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/analytics/average/by-user/userId123
         [HttpGet("analytics/average/by-user/{userId}")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetAverageByUser(string userId)
             => Ok(await _service.GetAverageDonationAmountByUserAsync(userId));
         /// <summary>
@@ -243,6 +271,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/analytics/average/by-campaign/3
         [HttpGet("analytics/average/by-campaign/{campaignId:int}")]
+        [CanManageCampaign]
         public async Task<IActionResult> GetAverageByCampaign(int campaignId)
             => Ok(await _service.GetAverageDonationAmountByCampaignAsync(campaignId));
         /// <summary>
@@ -251,6 +280,7 @@ namespace TheCharityPL.Controllers
 
         // GET api/donations/analytics/top-donors?limit=10
         [HttpGet("analytics/top-donors")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetTopDonors([FromQuery] int limit = 10)
             => Ok(await _service.GetTopDonorsByAmountAsync(limit));
         /// <summary>
@@ -259,6 +289,7 @@ namespace TheCharityPL.Controllers
 
         // GET api/donations/analytics/top-campaigns?limit=10
         [HttpGet("analytics/top-campaigns")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetTopCampaigns([FromQuery] int limit = 10)
             => Ok(await _service.GetTopCampaignsByDonationsAsync(limit));
 
@@ -268,6 +299,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
 
         [HttpGet("analytics/trend")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetTrend([FromQuery] int days = 30)
             => Ok(await _service.GetDonationsTrendAsync(days));
         /// <summary>
@@ -276,6 +308,7 @@ namespace TheCharityPL.Controllers
 
         // GET api/donations/analytics/frequency-by-user
         [HttpGet("analytics/frequency-by-user")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetFrequencyByUser()
             => Ok(await _service.GetDonationFrequencyByUserAsync());
 
@@ -289,6 +322,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
 
         [HttpGet("dashboard/latest")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetLatest([FromQuery] int limit = 10)
             => Ok(await _service.GetLatestDonationsAsync(limit));
         /// <summary>
@@ -296,6 +330,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/dashboard/largest?limit=10
         [HttpGet("dashboard/largest")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetLargest([FromQuery] int limit = 10)
             => Ok(await _service.GetLargestDonationsAsync(limit));
 
@@ -304,6 +339,7 @@ namespace TheCharityPL.Controllers
         /// get list of campaign ids with count for their donations
         /// </summary>
         [HttpGet("dashboard/per-campaign-count")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetPerCampaignCount()
             => Ok(await _service.GetDonationsPerCampaignCountAsync());
         /// <summary>
@@ -311,6 +347,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/dashboard/per-user-count
         [HttpGet("dashboard/per-user-count")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetPerUserCount()
             => Ok(await _service.GetDonationsPerUserCountAsync());
         /// <summary>
@@ -318,6 +355,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/dashboard/today-total
         [HttpGet("dashboard/today-total")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetTodayTotal()
             => Ok(await _service.GetTodayDonationsTotalAsync());
         /// <summary>
@@ -325,6 +363,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/dashboard/week-total
         [HttpGet("dashboard/week-total")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetWeekTotal()
             => Ok(await _service.GetThisWeekDonationsTotalAsync());
         /// <summary>
@@ -332,6 +371,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/dashboard/month-total
         [HttpGet("dashboard/month-total")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetMonthTotal()
             => Ok(await _service.GetThisMonthDonationsTotalAsync());
 
@@ -343,6 +383,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/reports/monthly?year=2024
         [HttpGet("reports/monthly")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetMonthlyReport([FromQuery] int year)
             => Ok(await _service.GetMonthlyDonationsReportAsync(year));
         /// <summary>
@@ -350,6 +391,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/reports/quarterly?year=2024
         [HttpGet("reports/quarterly")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetQuarterlyReport([FromQuery] int year)
             => Ok(await _service.GetQuarterlyDonationsReportAsync(year));
         /// <summary>
@@ -357,6 +399,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/reports/yearly?yearsBack=5
         [HttpGet("reports/yearly")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetYearlyReport([FromQuery] int yearsBack = 5)
             => Ok(await _service.GetYearlyDonationsReportAsync(yearsBack));
         /// <summary>
@@ -366,6 +409,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/reports/by-time-of-day
         [HttpGet("reports/by-time-of-day")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetByTimeOfDay()
             => Ok(await _service.GetDonationsByTimeOfDayAsync());
         /// <summary>
@@ -375,6 +419,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/reports/by-day-of-week
         [HttpGet("reports/by-day-of-week")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetByDayOfWeek()
             => Ok(await _service.GetDonationsByDayOfWeekAsync());
         /// <summary>
@@ -382,6 +427,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/reports/record-count?startDate=2024-01-01&endDate=2024-12-31
         [HttpGet("reports/record-count")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetRecordCount(
             [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
             => Ok(await _service.GetDonationRecordCountForPeriodAsync(startDate, endDate));
@@ -394,6 +440,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/campaigns/3/total-raised
         [HttpGet("campaigns/{campaignId:int}/total-raised")]
+        [CanManageCampaign]
         public async Task<IActionResult> GetCampaignTotalRaised(int campaignId)
             => Ok(await _service.GetCampaignTotalRaisedAsync(campaignId));
         /// <summary>
@@ -401,6 +448,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/campaigns/3/progress
         [HttpGet("campaigns/{campaignId:int}/progress")]
+        [CanManageCampaign]
         public async Task<IActionResult> GetCampaignProgress(int campaignId)
             => Ok(await _service.GetCampaignProgressPercentageAsync(campaignId));
         /// <summary>
@@ -410,6 +458,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/campaigns/3/donors
         [HttpGet("campaigns/{campaignId:int}/donors")]
+        [CanManageCampaign]
         public async Task<IActionResult> GetCampaignDonors(int campaignId)
             => Ok(await _service.GetUsersDonationsOfACampaignAsync(campaignId));
         /// <summary>
@@ -417,6 +466,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/campaigns/3/timeline
         [HttpGet("campaigns/{campaignId:int}/timeline")]
+        [CanManageCampaign]
         public async Task<IActionResult> GetCampaignTimeline(int campaignId)
             => Ok(await _service.GetCampaignDonationTimelineAsync(campaignId));
 
@@ -429,6 +479,7 @@ namespace TheCharityPL.Controllers
         
         // GET api/donations/users/userId123/history
         [HttpGet("users/{userId}/history")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetUserHistory(string userId)
             => Ok(await _service.GetUserDonationHistoryAsync(userId));
         /// <summary>
@@ -437,6 +488,7 @@ namespace TheCharityPL.Controllers
       
         // GET api/donations/users/userId123/last-donation-date
         [HttpGet("users/{userId}/last-donation-date")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetUserLastDonationDate(string userId)
         {
             var date = await _service.GetUserLastDonationDateAsync(userId);
@@ -448,6 +500,7 @@ namespace TheCharityPL.Controllers
        
         // GET api/donations/users/userId123/campaigns
         [HttpGet("users/{userId}/campaigns")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetCampaignsDonatedByUser(string userId)
             => Ok(await _service.GetCampaignsDonatedByUserAsync(userId));
 
@@ -460,6 +513,7 @@ namespace TheCharityPL.Controllers
        
         // POST api/donations/bulk/transfer?from=1&to=2
         [HttpPost("bulk/transfer")]
+        [CanPerformBulkOperations]
         public async Task<IActionResult> TransferDonations(
             [FromQuery] int from, [FromQuery] int to)
         {
@@ -472,6 +526,7 @@ namespace TheCharityPL.Controllers
        
         // DELETE api/donations/bulk/old?daysOld=365
         [HttpDelete("bulk/old")]
+        [CanPerformBulkOperations]
         public async Task<IActionResult> DeleteOldDonations([FromQuery] int daysOld = 365)
         {
             var count = await _service.DeleteOldDonationsAsync(daysOld);
@@ -484,11 +539,13 @@ namespace TheCharityPL.Controllers
 
         // GET api/donations/5/exists
         [HttpGet("{id:int}/exists")]
+        [CanManageDonation]
         public async Task<IActionResult> Exists(int id)
             => Ok(await _service.DonationExistsAsync(id));
 
         // GET api/donations/check-donated?userId=xxx&campaignId=3
         [HttpGet("check-donated")]
+        [CanManageCampaign]
         public async Task<IActionResult> HasUserDonated(
             [FromQuery] string userId, [FromQuery] int campaignId)
             => Ok(await _service.HasUserDonatedToCampaignAsync(userId, campaignId));
@@ -502,6 +559,7 @@ namespace TheCharityPL.Controllers
 
         // GET api/donations/engagement/recurring?minDonations=3
         [HttpGet("engagement/recurring")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetRecurringDonors([FromQuery] int minDonations = 3)
             => Ok(await _service.GetRecurringDonorsAsync(minDonations));
         /// <summary>
@@ -510,6 +568,7 @@ namespace TheCharityPL.Controllers
         
         // GET api/donations/engagement/first-time?startDate=2024-01-01&endDate=2024-12-31
         [HttpGet("engagement/first-time")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetFirstTimeDonors(
             [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
             => Ok(await _service.GetFirstTimeDonorsAsync(startDate, endDate));
@@ -519,6 +578,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/engagement/lifetime-value
         [HttpGet("engagement/lifetime-value")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetUserLifetimeValue()
             => Ok(await _service.GetUserLifetimeValueAsync());
         /// <summary>
@@ -527,6 +587,7 @@ namespace TheCharityPL.Controllers
        
         // GET api/donations/engagement/loyal?minAmount=1000&minDonations=5
         [HttpGet("engagement/loyal")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetLoyalDonors(
             [FromQuery] double minTotalAmount = 1000, [FromQuery] int minDonations = 5)
             => Ok(await _service.GetLoyalDonorsAsync(minTotalAmount, minDonations));
@@ -540,6 +601,7 @@ namespace TheCharityPL.Controllers
 
         // GET api/donations/audit/suspicious?threshold=10000
         [HttpGet("audit/suspicious")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetSuspicious([FromQuery] double threshold = 10000)
             => Ok(await _service.GetSuspiciousDonationsAsync(threshold));
     }
