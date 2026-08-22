@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using TheCharityBLL.Authorization.Attributes;
 using TheCharityBLL.DTOs.OrganizationRoleDTOs;
 using TheCharityBLL.Services.Abstraction.OrganizationAbstraction;
 using TheCharityDAL.FilterModels;
@@ -8,6 +9,7 @@ namespace TheCharityPL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [IsSuperAdmin]
     public class OrganizationRoleController : ControllerBase
     {
        

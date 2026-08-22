@@ -118,6 +118,7 @@ namespace TheCharityBLL.Helpers
             services.AddHttpContextAccessor();
             // Register Authorization Handlers
             services.AddScoped<IAuthorizationHandler, CanManageCampaignHandler>();
+            services.AddScoped<IAuthorizationHandler, CanManageDonationHandler>();
             services.AddScoped<IAuthorizationHandler, CanManageOrganizationHandler>();
             services.AddScoped<IAuthorizationHandler, CanManageSubAdminsHandler>();
             services.AddScoped<IAuthorizationHandler, CanPerformBulkOperationsHandler>();
@@ -126,11 +127,16 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<IAuthorizationHandler, IsSuperAdminHandler>();
             // Register Authorization Filters
             services.AddScoped<CanCreateCampaignFilter>();
+            services.AddScoped<CanCreateDonationFilter>();
+            services.AddScoped<CanCreatePaymentInfoFilter>();
             // Add Authorization Policies
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("CanManageCampaign", policy =>
                     policy.Requirements.Add(new CanManageCampaignRequirement()));
+
+                options.AddPolicy("CanManageDonation", policy =>
+                    policy.Requirements.Add(new CanManageDonationRequirement()));
 
                 options.AddPolicy("CanManageOrganization", policy =>
                     policy.Requirements.Add(new CanManageOrganizationRequirement()));

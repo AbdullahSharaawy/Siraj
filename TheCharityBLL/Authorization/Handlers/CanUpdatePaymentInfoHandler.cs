@@ -45,6 +45,13 @@ namespace TheCharityBLL.Authorization.Handlers
             }
 
             var organizationId = GetOrganizationId(httpContext);
+            if (!organizationId.HasValue &&
+                httpContext.Request.RouteValues.TryGetValue("paymentInfoId", out var paymentInfoIdObj) &&
+                int.TryParse(paymentInfoIdObj?.ToString(), out var paymentInfoId))
+            {
+                organizationId = await _authService.GetOrganizationIdFromPaymentInfoAsync(paymentInfoId);
+            }
+
             if (!organizationId.HasValue)
             {
                 context.Fail();
@@ -65,7 +72,8 @@ namespace TheCharityBLL.Authorization.Handlers
         private int? GetOrganizationId(HttpContext httpContext)
         {
             if (httpContext.Request.RouteValues.TryGetValue("id", out var idObj) ||
-                httpContext.Request.RouteValues.TryGetValue("organizationId", out idObj))
+                httpContext.Request.RouteValues.TryGetValue("organizationId", out idObj) ||
+                httpContext.Request.RouteValues.TryGetValue("orgId", out idObj))
             {
                 if (int.TryParse(idObj?.ToString(), out int id))
                     return id;
