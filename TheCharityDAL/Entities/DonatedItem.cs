@@ -83,7 +83,7 @@ namespace TheCharityDAL.Entities
         }
         public void EditName(string? name)
         {
-            if (!name.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(name))
             {
                 this.Name = name;
                 UpdatedOn = DateTime.UtcNow;
@@ -91,7 +91,7 @@ namespace TheCharityDAL.Entities
         }
         public void EditDescription(string? description)
         {
-            if (!description.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(description))
             {
                 this.Description = description;
                 UpdatedOn = DateTime.UtcNow;
@@ -120,7 +120,7 @@ namespace TheCharityDAL.Entities
         }
         public void EditDonor(string donorId)
         {
-            if (!donorId.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(donorId))
             {
                 this.DonorId = donorId;
                 UpdatedOn = DateTime.UtcNow;

@@ -28,7 +28,7 @@ namespace TheCharityDAL.Entities
             this.IsItemAttachment = isItemAttachment;
         }
         public void EditName(string? name) {
-            if (!name.IsNullOrEmpty()) { 
+            if (!string.IsNullOrEmpty(name)) { 
                 this.Name = name;
                 this.UpdatedOn = DateTime.Now;
             }
