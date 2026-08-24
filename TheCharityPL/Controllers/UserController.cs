@@ -518,17 +518,13 @@ namespace TheCharityPL.Controllers
       
         // ─── POST api/user/restore/{id} ──────────────────────────────────────────────
 
-        [HttpPost("restore/{id}")]
-        [AllowAnonymous]
+        [HttpGet("restore/{id}")]
+        [IsSuperAdmin]
         public async Task<IActionResult> Restore(string id)  // FIX: removed [FromBody] — id comes from route
         {
             try
             {
                 _logger.LogInformation("Restoring user ID: {UserId}", id);
-
-                var user = await _userService.GetUserByIdAsync(id);
-                if (user == null)
-                    return NotFound(new ServiceResponse{Success=false, Message = $"User with ID '{id}' not found." });
 
                 var result = await _userService.RestoreUserAsync(id);
 
@@ -634,7 +630,7 @@ namespace TheCharityPL.Controllers
                     return NotFound(new ServiceResponse { Success = false, Message = $"User with ID '{userId}' not found." });
 
                 var roles = await _userService.GetUserRolesAsync(userId);
-                return Ok(new { roles });
+                return Ok(roles);
             }
             catch (Exception ex)
             {
@@ -653,8 +649,8 @@ namespace TheCharityPL.Controllers
             try
             {
                 // Get all roles from Identity
-                var roles = new List<string> { "SuperAdmin", "User" }; // Add any other global roles
-                return Ok(roles);
+                var roles = new List<string> { "SuperAdmin", "OrganizationAdmin","SupAdmin" }; // Add any other global roles
+                return Ok(new ServiceResponse<List<string>> {  Data= roles ,Success=true,Message="getting All Roles Successfuly"});
             }
             catch (Exception ex)
             {

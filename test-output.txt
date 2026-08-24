@@ -1,0 +1,19 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+c:\Users\abdal\source\repos\TheCharity\TheCharityDAL\Migrations\20260824054328_initial.cs(9,26): warning CS8981: The type name 'initial' only contains lower-cased ascii characters. Such names may become reserved for the language. [c:\Users\abdal\source\repos\TheCharity\TheCharityDAL\TheCharityDAL.csproj]
+c:\Users\abdal\source\repos\TheCharity\TheCharityDAL\Migrations\20260824054328_initial.Designer.cs(16,19): warning CS8981: The type name 'initial' only contains lower-cased ascii characters. Such names may become reserved for the language. [c:\Users\abdal\source\repos\TheCharity\TheCharityDAL\TheCharityDAL.csproj]
+c:\Users\abdal\source\repos\TheCharity\TheCharityDAL\Repositories\Implementation\UserRepository.cs(328,30): warning CS8602: Dereference of a possibly null reference. [c:\Users\abdal\source\repos\TheCharity\TheCharityDAL\TheCharityDAL.csproj]
+c:\Users\abdal\source\repos\TheCharity\TheCharityDAL\Repositories\Implementation\UserRepository.cs(328,30): warning CS8629: Nullable value type may be null. [c:\Users\abdal\source\repos\TheCharity\TheCharityDAL\TheCharityDAL.csproj]
+c:\Users\abdal\source\repos\TheCharity\TheCharityDAL\Repositories\Implementation\OrganizationRepository.cs(528,20): warning CS8603: Possible null reference return. [c:\Users\abdal\source\repos\TheCharity\TheCharityDAL\TheCharityDAL.csproj]
+c:\Users\abdal\source\repos\TheCharity\TheCharityDAL\Repositories\Implementation\OrganizationRepository.cs(589,20): warning CS8603: Possible null reference return. [c:\Users\abdal\source\repos\TheCharity\TheCharityDAL\TheCharityDAL.csproj]
+  TheCharityDAL -> c:\Users\abdal\source\repos\TheCharity\TheCharityDAL\bin\Debug\net8.0\TheCharityDAL.dll
+  TheCharityBLL -> c:\Users\abdal\source\repos\TheCharity\TheCharityBLL\bin\Debug\net8.0\TheCharityBLL.dll
+  TheCharityPL -> c:\Users\abdal\source\repos\TheCharity\TheCharityPL\bin\Debug\net8.0\TheCharityPL.dll
+  Charity.Tests -> c:\Users\abdal\source\repos\TheCharity\Charity.Tests\bin\Debug\net8.0\Charity.Tests.dll
+Test run for c:\Users\abdal\source\repos\TheCharity\Charity.Tests\bin\Debug\net8.0\Charity.Tests.dll (.NETCoreApp,Version=v8.0)
+VSTest version 17.14.1 (x64)
+
+Starting test execution, please wait...
+A total of 1 test files matched the specified pattern.
+
+Passed!  - Failed:     0, Passed:     1, Skipped:     0, Total:     1, Duration: 5 s - Charity.Tests.dll (net8.0)

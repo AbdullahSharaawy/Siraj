@@ -20,14 +20,11 @@ using TheCharityBLL.DTOs.UserRequestDTOs;
 
 namespace Charity.Tests.IntegrationTests
 {
-    public class UserFlowIntegrationTests: IClassFixture<CustomWebApplicationFactory>
+    public class UserFlowIntegrationTests : IClassFixture<CustomWebApplicationFactory>
     {
-        private  readonly HttpClient _client;
+        private readonly HttpClient _client;
         private readonly CustomWebApplicationFactory _factory;
-        private  string token = string.Empty;
-        private string email = string.Empty;
-        private string userName = string.Empty;
-        private User user { get; set; }
+       
         private JsonSerializerOptions JsonOptions = new()
         {
             PropertyNameCaseInsensitive = true,
@@ -50,11 +47,12 @@ namespace Charity.Tests.IntegrationTests
                 (await userManager.UpdateAsync(user)).Succeeded.Should().BeTrue();
             }
         }
-        private async Task SignUp()
+        private async Task<User> SignUp()
         {
+            User user;
             var postfix = Guid.NewGuid().ToString("N");
-            email = $"user{postfix}@gmail.com";
-            userName = $"user{postfix}";
+            string email = $"user{postfix}@gmail.com";
+            string userName = $"user{postfix}";
             var createdAccountResponse = await _client.PostAsJsonAsync("/api/user/register", new CreateUserRequestDto
             {
                 Email = email,
@@ -69,22 +67,30 @@ namespace Charity.Tests.IntegrationTests
             var createdAccountResult = await createdAccountResponse.Content
                 .ReadFromJsonAsync<ServiceResponse>(JsonOptions);
             createdAccountResult!.Success.Should().BeTrue();
-            
-            await ConfirmEmail(email);
 
+            using (var scope = _factory.Services.CreateScope())
+            {
+                var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+                user = await userManager.FindByEmailAsync(email);
+                user.Should().NotBeNull();
+            }
+            await ConfirmEmail(email);
+            return user;
         }
-        private async Task SignIn()
+        private async Task<string> SignIn(User user)
         {
-            var loginResponse = await _client.PostAsJsonAsync("/api/user/login", new LoginRequestDto { Password = "123456Ash", UserName = userName });
+            string token;
+            var loginResponse = await _client.PostAsJsonAsync("/api/user/login", new LoginRequestDto { Password = "123456Ash", UserName = user.UserName });
             loginResponse.StatusCode.Should().Be(HttpStatusCode.OK);
             var loginResult = await loginResponse.Content
                 .ReadFromJsonAsync<ServiceResponse<string>>(JsonOptions);
             loginResult!.Success.Should().BeTrue();
             token = loginResult.Data!;
-            
+
             token.Should().NotBeNullOrEmpty();
+            return token;
         }
-        private async Task ResetPassword()
+        private async Task ResetPassword(User user)
         {
             // reset password
             using var scope = _factory.Services.CreateScope();
@@ -92,9 +98,7 @@ namespace Charity.Tests.IntegrationTests
             var userManager = scope.ServiceProvider
                 .GetRequiredService<UserManager<User>>();
 
-            var user = await userManager.FindByEmailAsync(email);
-            user.Should().NotBeNull();
-
+            
             var resetToken = await userManager.GeneratePasswordResetTokenAsync(user!);
 
             var resetPasswordResponse = await _client.PostAsJsonAsync(
@@ -112,7 +116,7 @@ namespace Charity.Tests.IntegrationTests
 
         }
 
-        private async Task ChangePassword()
+        private async Task ChangePassword(string token)
         {
             _client.DefaultRequestHeaders.Authorization =
                 new AuthenticationHeaderValue("Bearer", token);
@@ -128,7 +132,7 @@ namespace Charity.Tests.IntegrationTests
 
             response.StatusCode.Should().Be(HttpStatusCode.OK);
         }
-        private async Task assignSuperAdminRole()
+        private async Task assignSuperAdminRole(string userId)
         {
             // assing role
             using var scope = _factory.Services.CreateScope();
@@ -140,37 +144,68 @@ namespace Charity.Tests.IntegrationTests
                 roleResult.Succeeded.Should().BeTrue();
             }
 
-            user = await userManager.FindByEmailAsync(email);
+            var user = await userManager.FindByIdAsync(userId);
             user.Should().NotBeNull();
 
             var addRoleResult = await userManager.AddToRoleAsync(user!, "SuperAdmin");
             addRoleResult.Succeeded.Should().BeTrue();
         }
         [Fact]
+        public async Task Flow0_SignUp_SignIn_Delete_Restore()
+        {
+            User userAdmin,guestUser;
+            
+            string token = string.Empty;
+            //sign up
+            userAdmin = await SignUp();
+            guestUser=await SignUp();
+            // assign role
+            await assignSuperAdminRole(userAdmin.Id);
+            //sign in
+            token = await SignIn(userAdmin);
+            // delete
+            _client.DefaultRequestHeaders.Authorization =
+                new AuthenticationHeaderValue("Bearer", token);
+
+            var deletedResponse=await _client.DeleteAsync($"api/user/{guestUser.Id}");
+            deletedResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+            var deletedResult= await deletedResponse.Content.ReadFromJsonAsync<ServiceResponse>(JsonOptions);
+            deletedResult!.Success.Should().BeTrue();
+
+            // restore
+            var restoreResponse = await _client.GetAsync($"api/user/restore/{guestUser.Id}");
+            restoreResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+            var restoreResult = await restoreResponse.Content.ReadFromJsonAsync<ServiceResponse>(JsonOptions);
+            restoreResult!.Success.Should().BeTrue();
+
+        }
+        [Fact]
         public async Task Flow1_SignUp_SingIn_ResetPassword_ChangePassword()
         {
-           
+            string token = string.Empty;
+            User user;
             //sign up
-            await SignUp();
+            user=await SignUp();
             //sign in
-           await SignIn();
+            token= await SignIn(user);
             // reset and forget password
-           await ResetPassword();
+            await ResetPassword(user);
             // change password
-           await ChangePassword();
+            await ChangePassword(token);
 
         }
         [Fact]
         public async Task Flow2_SignUp_SignIn_GetAll_GetById()
         {
-           
+            string token = string.Empty;    
+            User user;
             //sign up
-            await SignUp();
+             user = await SignUp();
 
-            await assignSuperAdminRole();
-            
+            await assignSuperAdminRole(user.Id);
+
             //sign in
-            await SignIn();
+            token=await SignIn(user);
 
             // get all
             _client.DefaultRequestHeaders.Authorization =
@@ -185,17 +220,19 @@ namespace Charity.Tests.IntegrationTests
             // get by id
             var getByIdResponse = await _client.GetAsync($"api/user/{user.Id}");
             getByIdResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-            var getByIdResult=await getByIdResponse.Content.ReadFromJsonAsync<ServiceResponse<UserDetailResponseDto>>(JsonOptions);
+            var getByIdResult = await getByIdResponse.Content.ReadFromJsonAsync<ServiceResponse<UserDetailResponseDto>>(JsonOptions);
             getByIdResult.Success.Should().BeTrue();
 
         }
         [Fact]
         public async Task Flow3_SignUp_SignIn_Update()
         {
+            string token = string.Empty;
+            User user;
             //sign up
-            await SignUp();
+            user=await SignUp();
             //sign in
-            await SignIn();
+            token = await SignIn(user);
 
             _client.DefaultRequestHeaders.Authorization =
              new AuthenticationHeaderValue("Bearer", token);
@@ -203,11 +240,47 @@ namespace Charity.Tests.IntegrationTests
             // update
             var updatedResponse = await _client.PutAsJsonAsync("api/user", new EditUserRequestDto { Address = "cairo" });
             updatedResponse.StatusCode.Should().Be(HttpStatusCode.OK);
-            var updatedResult=await updatedResponse.Content.ReadFromJsonAsync<ServiceResponse>(JsonOptions);
+            var updatedResult = await updatedResponse.Content.ReadFromJsonAsync<ServiceResponse>(JsonOptions);
             updatedResult.Success.Should().BeTrue();
-            
+
 
         }
-      
+        [Fact]
+        public async Task Flow4_SignUp_SignIn_AssignRole_GetUserRoles_GetAllRoles_RemoveRole()
+        {
+            string token = string.Empty;
+            User user;
+            //sign up
+            user = await SignUp();
+
+            // assign role
+            await assignSuperAdminRole(user.Id);
+
+            //sign in
+            token= await SignIn(user);
+
+            _client.DefaultRequestHeaders.Authorization =
+             new AuthenticationHeaderValue("Bearer", token);
+
+
+            // get user roles
+            var getUserRolesResponse = await _client.GetAsync($"api/user/{user.Id}/roles");
+            getUserRolesResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+            var getUserRolesResult = await getUserRolesResponse.Content.ReadFromJsonAsync<ServiceResponse<IList<string>>>(JsonOptions);
+            getUserRolesResult.Success.Should().BeTrue();
+            getUserRolesResult.Data.Should().Contain("SuperAdmin");
+
+            // get all roles
+            var getAllRolesResponse = await _client.GetAsync("api/user/roles/all");
+            getAllRolesResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+            var getAllRolesResult = await getAllRolesResponse.Content.ReadFromJsonAsync<ServiceResponse<List<string>>>(JsonOptions);
+            getAllRolesResult.Success.Should().BeTrue();
+            getAllRolesResult.Data.Should().Contain("SuperAdmin");
+
+            // remove role
+            var removeRoleResponse = await _client.DeleteAsync($"api/user/{user.Id}/roles/SuperAdmin");
+            removeRoleResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        }
     }
 }
