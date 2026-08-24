@@ -23,7 +23,7 @@ namespace TheCharityDAL.Entities
             this.CompanyId = companyId;
         }
         public void EditValue(string? value) {
-            if (!value.IsNullOrEmpty())
+            if (!string.IsNullOrEmpty(value))
             {
                 this.Value = value;
                 this.UpdatedOn = DateTime.UtcNow;

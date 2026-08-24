@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
 using TheCharityDAL.Database;
 
 namespace TaskManagement.Tests.IntegrationTests
@@ -14,7 +13,7 @@ namespace TaskManagement.Tests.IntegrationTests
     /// Requires Program.cs to be reachable as a partial class, e.g. add this line at the bottom of
     /// Program.cs in the API project:  public partial class Program { }
     /// </summary>
-    public class CustomWebApplicationFactory : WebApplicationFactory<Program>, IAsyncLifetime
+    public class CustomWebApplicationFactory : WebApplicationFactory<TheCharityPL.Program>, IAsyncLifetime
     {
         // Keeping this connection open for the factory's lifetime is what keeps the in-memory DB alive
         // between requests — SQLite's ":memory:" db is destroyed the instant the connection closes.

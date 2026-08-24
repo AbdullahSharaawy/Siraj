@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TheCharityBLL.DTOs.UserResponseDTOs
+namespace TheCharityBLL.DTOs.UserRequestDTOs
 {
-    public class CreateUserResponseDto
+    public class CreateUserRequestDto
     {
         [Required(ErrorMessage = "Username is required")]
         [StringLength(256, MinimumLength = 3, ErrorMessage = "Username must be between 3 and 256 characters")]

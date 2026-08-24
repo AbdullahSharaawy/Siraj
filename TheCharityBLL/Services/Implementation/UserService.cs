@@ -146,7 +146,7 @@ namespace TheCharityBLL.Services.Repository
             if (string.IsNullOrWhiteSpace(changePasswordDTO.NewPassword))
                 throw new ArgumentException("New password cannot be null or empty", nameof(changePasswordDTO.NewPassword));
 
-            if (changePasswordDTO.NewPassword.Equals(changePasswordDTO.ConfirmPassword))
+            if (!changePasswordDTO.NewPassword.Equals(changePasswordDTO.ConfirmPassword))
                 throw new ArgumentException("New password and confirmation password do not match");
 
             try
@@ -277,10 +277,7 @@ namespace TheCharityBLL.Services.Repository
                     user.EditAddress(updateUserDTO.Address);
                 }
 
-                // Update other properties directly
-                if (!string.IsNullOrWhiteSpace(updateUserDTO.Email))
-                    user.Email = updateUserDTO.Email;
-
+               
                 if (!string.IsNullOrWhiteSpace(updateUserDTO.PhoneNumber))
                     user.PhoneNumber = updateUserDTO.PhoneNumber;
 

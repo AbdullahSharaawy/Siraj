@@ -174,8 +174,8 @@ namespace TheCharityBLL.Services.Implementation
         {
             if (string.IsNullOrEmpty(userId)) return false;
 
-            // ONLY SuperAdmin can delete campaigns
-            return await IsSuperAdminAsync(userId);
+            // Same as CanManageCampaign - Admins and SubAdmins can update status
+            return await CanManageCampaignAsync(userId, campaignId);
         }
 
         public async Task<bool> CanViewCampaignDetailsAsync(string userId, int campaignId)

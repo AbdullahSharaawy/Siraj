@@ -23,7 +23,7 @@ namespace TheCharityDAL.Entities
             this.DonatedItemId = donatedItemId;
         }
         public void EditImage(string? path) {
-            if (!path.IsNullOrEmpty()) {
+            if (!string.IsNullOrEmpty(path)) {
                 this.Path = path;
                 this.UpdatedOn = DateTime.Now;
             }

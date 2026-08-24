@@ -7,6 +7,7 @@
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
+	<PreserveCompilationContext>true</PreserveCompilationContext>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,11 +22,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TheCharityBLL\TheCharityBLL.csproj" />
     <ProjectReference Include="..\TheCharityDAL\TheCharityDAL.csproj" />
+    <ProjectReference Include="..\TheCharityPL\TheCharityPL.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
-
+	
 </Project>
