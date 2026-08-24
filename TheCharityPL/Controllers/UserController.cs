@@ -5,6 +5,7 @@ using System.Security.Claims;
 using TheCharityBLL.Authorization.Attributes;
 using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.UserDTOs;
+using TheCharityBLL.DTOs.UserRequestDTOs;
 using TheCharityBLL.DTOs.UserResponseDTOs;
 using TheCharityBLL.Services.Abstraction;
 
@@ -47,7 +48,7 @@ namespace TheCharityPL.Controllers
         // ─── GET api/user ────────────────────────────────────────────────────────────
 
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetAll([FromQuery] bool showDeleted = false)
         {
             try
@@ -92,6 +93,7 @@ namespace TheCharityPL.Controllers
         // ─── GET api/user/{id} ───────────────────────────────────────────────────────
 
         [HttpGet("{id}")]
+        [IsSuperAdmin]
         public async Task<IActionResult> GetById(string id)
         {
             try
@@ -145,7 +147,7 @@ namespace TheCharityPL.Controllers
 
         [HttpPost("register")]
         [AllowAnonymous]
-        public async Task<IActionResult> Register([FromBody] CreateUserResponseDto ResponseDto)
+        public async Task<IActionResult> Register([FromBody] CreateUserRequestDto ResponseDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new ServiceResponse<ModelStateDictionary> { Data = ModelState, Success = false, Message = "your credentials is invalid" });
@@ -200,7 +202,7 @@ namespace TheCharityPL.Controllers
 
         [HttpPost("login")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] LoginResponseDto ResponseDto)
+        public async Task<IActionResult> Login([FromBody] LoginRequestDto ResponseDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new ServiceResponse<ModelStateDictionary> { Data = ModelState, Success = false, Message = "your credentials is invalid" });
@@ -277,7 +279,7 @@ namespace TheCharityPL.Controllers
 
         [HttpGet("confirm-email")]
         [AllowAnonymous]
-        private async Task<IActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] string encodedToken)
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] string encodedToken)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(encodedToken))
                 return BadRequest(new ServiceResponse{Success = false, Message = "Email and token are required." });
@@ -335,7 +337,7 @@ namespace TheCharityPL.Controllers
 
         [HttpPost("reset-password")]
         [AllowAnonymous]
-        private async Task<IActionResult> ResetPassword([FromBody] ResetPasswordResponseDto model)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordResponseDto model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new ServiceResponse<ModelStateDictionary> { Data = ModelState, Success = false, Message = "your credentials is invalid" });
@@ -371,19 +373,18 @@ namespace TheCharityPL.Controllers
         /// update user info method by user id
         /// </summary>
         
-        // ─── PUT api/user/{id} ───────────────────────────────────────────────────────
+        // ─── PUT api/user/ ───────────────────────────────────────────────────────
 
-        [HttpPut("{id}")]
-        [AllowAnonymous]
-        public async Task<IActionResult> Update(string id, [FromBody] EditUserResponseDto ResponseDto)
+        [HttpPut]
+     
+        public async Task<IActionResult> Update( [FromBody] EditUserRequestDto RequestDto)
         {
-            if (id != ResponseDto.Id)
-                return BadRequest(new ServiceResponse{Success = false, Message = "ID mismatch." });
-
+            
             if (!ModelState.IsValid)
                 return BadRequest(new ServiceResponse<ModelStateDictionary> { Data = ModelState, Success = false, Message = "your credentials is invalid" });
 
-
+            string id=GetCurrentUserId()!;
+           
             try
             {
                 _logger.LogInformation("Updating user ID: {UserId}", id);
@@ -394,19 +395,16 @@ namespace TheCharityPL.Controllers
 
                 var existingUsers = await _userService.GetAllUsersAsync();
 
-                if (existingUsers.Any(u => u.UserName == ResponseDto.UserName && u.Id != id))
+                if (existingUsers.Any(u => u.UserName == RequestDto.UserName && u.Id != id))
                     return Conflict(new ServiceResponse{Success = false, Message = "This username is already taken." });
 
-                if (existingUsers.Any(u => u.Email == ResponseDto.Email && u.Id != id))
-                    return Conflict(new ServiceResponse { Success = false, Message = "This email is already registered." });
-
+               
                 var updateUserDTO = new UpdateUserDTO
                 {
                     Id = id,
-                    UserName = ResponseDto.UserName,
-                    Email = ResponseDto.Email,
-                    PhoneNumber = ResponseDto.PhoneNumber,
-                    Address = ResponseDto.Address
+                    UserName = RequestDto.UserName,
+                    PhoneNumber = RequestDto.PhoneNumber,
+                    Address = RequestDto.Address
                 };
 
                 var result = await _userService.UpdateUserAsync(updateUserDTO);
@@ -414,7 +412,7 @@ namespace TheCharityPL.Controllers
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User updated successfully with ID: {UserId}", id);
-                    return Ok(new ServiceResponse { Success = true, Message = $"User '{ResponseDto.UserName}' updated successfully." });
+                    return Ok(new ServiceResponse { Success = true, Message = $"User '{RequestDto.UserName}' updated successfully." });
                 }
 
                 return BadRequest(new ServiceResponse<IEnumerable<string>>{Success=false,Message="your credentials is invalid", Data = result.Errors.Select(e => e.Description) });
@@ -428,18 +426,18 @@ namespace TheCharityPL.Controllers
         /// <summary>
         /// change password method by user id
         /// </summary>
-        // ─── PUT api/user/{id}/change-password ───────────────────────────────────────
+        // ─── PUT api/user/change-password ────────────────────────────────────────────
 
-        [HttpPut("{id}/change-password")]
-        [AllowAnonymous]
-        public async Task<IActionResult> ChangePassword(string id, [FromBody] ChangePasswordResponseDto ResponseDto)
+        [HttpPut("change-password")]
+
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequestDto ResponseDto)
         {
-            if (id != ResponseDto.UserId)
-                return BadRequest(new ServiceResponse{Success = false, Message = "ID mismatch." });
-
             if (!ModelState.IsValid)
                 return BadRequest(new ServiceResponse<ModelStateDictionary> { Data = ModelState, Success = false, Message = "your credentials is invalid" });
 
+            var id = GetCurrentUserId();
+            if (string.IsNullOrWhiteSpace(id))
+                return Unauthorized(new ServiceResponse { Success = false, Message = "User identity was not found." });
 
             try
             {
@@ -481,7 +479,7 @@ namespace TheCharityPL.Controllers
         // ─── DELETE api/user/{id} ────────────────────────────────────────────────────
 
         [HttpDelete("{id}")]
-        [AllowAnonymous]
+        [IsSuperAdmin]
         public async Task<IActionResult> Delete(string id)
         {
             try
@@ -575,7 +573,7 @@ namespace TheCharityPL.Controllers
                 if (result.Data.Succeeded)
                 {
                     _logger.LogInformation($"Role '{request.Role}' assigned to user {userId}");
-                    return Ok(new ServiceResponse { Success = false, Message = $"Role '{request.Role}' assigned successfully." });
+                    return Ok(new ServiceResponse { Success = true, Message = $"Role '{request.Role}' assigned successfully." });
                 }
 
                 return BadRequest(new ServiceResponse<IEnumerable<string>> {Data= result.Data.Errors.Select(e => e.Description) });
