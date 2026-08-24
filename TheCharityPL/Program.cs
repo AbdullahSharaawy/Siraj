@@ -1,4 +1,5 @@
 using Hangfire;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -10,7 +11,7 @@ namespace TheCharityPL
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Configuration.AddEnvironmentVariables();
@@ -91,7 +92,18 @@ namespace TheCharityPL
                 options.ServerName = $"TheCharity-API-{Environment.MachineName}";
             });
 
+          
+
             var app = builder.Build();
+            // register SuperAdmin role if it doesn't exist
+            using (var scope = app.Services.CreateScope())
+            {
+                var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                if (!await roleManager.RoleExistsAsync("SuperAdmin"))
+                {
+                    await roleManager.CreateAsync(new IdentityRole("SuperAdmin"));
+                }
+            }
 
             // Configure Hangfire dashboard (secured - Super Admin only)
             app.UseHangfireDashboard("/hangfire", new DashboardOptions
@@ -127,6 +139,9 @@ namespace TheCharityPL
             app.MapGet("/", () => Results.Redirect("/swagger"));
 
             app.MapControllers();
+
+
+         
 
             app.Run();
         }
