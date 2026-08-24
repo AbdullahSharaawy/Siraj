@@ -5,13 +5,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TheCharityBLL.DTOs.UserResponseDTOs
+namespace TheCharityBLL.DTOs.UserRequestDTOs
 {
-    public class ChangePasswordResponseDto
+    public class ChangePasswordRequestDto
     {
-        public string? UserId { get; set; }
-        public string? UserName { get; set; }
-
         [Required(ErrorMessage = "Current password is required")]
         [DataType(DataType.Password)]
         [Display(Name = "Current Password")]

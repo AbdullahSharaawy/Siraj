@@ -5,22 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TheCharityBLL.DTOs.UserResponseDTOs
+namespace TheCharityBLL.DTOs.UserRequestDTOs
 {
-    public class EditUserResponseDto
+    public class EditUserRequestDto
     {
-        public string? Id { get; set; }
 
-        [Required(ErrorMessage = "Username is required")]
+
+        
         [StringLength(256, MinimumLength = 3, ErrorMessage = "Username must be between 3 and 256 characters")]
         [Display(Name = "Username")]
         public string? UserName { get; set; }
-
-        [Required(ErrorMessage = "Email is required")]
-        [EmailAddress(ErrorMessage = "Invalid email address")]
-        [StringLength(256, ErrorMessage = "Email cannot exceed 256 characters")]
-        [Display(Name = "Email")]
-        public string? Email { get; set; }
 
         [Display(Name = "Phone Number")]
         [Phone(ErrorMessage = "Invalid phone number")]
@@ -29,5 +23,12 @@ namespace TheCharityBLL.DTOs.UserResponseDTOs
         [Display(Name = "Address")]
         [StringLength(500, ErrorMessage = "Address cannot exceed 500 characters")]
         public string? Address { get; set; }
+        [Display(Name = "Full Name")]
+       
+        public string? FullName { get; set; }
+
+
+
+
     }
 }
