@@ -77,7 +77,7 @@ namespace TheCharityPL.Controllers
         /// Delete campaign (soft delete)
         /// </summary>
         [HttpDelete("{id:int}")]
-        [IsSuperAdmin] // ← ONLY SuperAdmin
+        [CanManageCampaign] 
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _campaignService.DeleteCampaignAsync(id);
