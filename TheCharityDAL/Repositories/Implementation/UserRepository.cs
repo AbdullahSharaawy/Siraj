@@ -139,12 +139,13 @@ namespace TheCharityDAL.Repositories.Implementation
 
         public async Task<IdentityResult> RestoreUserAsync(string id)
         {
-            var user = await GetUserByIdAsync(id);
+            var user = await _userManager.Users
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(u => u.Id == id);
             if (user != null)
             {
                 user.Restore();
-                await _userManager.UpdateAsync(user);
-                return IdentityResult.Success;
+                return await _userManager.UpdateAsync(user);
             }
             return IdentityResult.Failed(new IdentityError { Description = "User not found" });
         }
