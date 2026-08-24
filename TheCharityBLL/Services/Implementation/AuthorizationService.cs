@@ -11,15 +11,21 @@ namespace TheCharityBLL.Services.Implementation
         private readonly IUserRepository _userRepository;
         private readonly ICampaignRepository _campaignRepository;
         private readonly IDonatedItemsRepository _donatedItemsRepository;
+        private readonly IOrganizationRepository _organizationRepository;
+        private readonly IDonationRepository _donationRepository;
 
         public AuthorizationService(
             IUserRepository userRepository,
             ICampaignRepository campaignRepository,
-            IDonatedItemsRepository donatedItemsRepository)
+            IDonatedItemsRepository donatedItemsRepository,
+            IOrganizationRepository organizationRepository,
+            IDonationRepository donationRepository)
         {
             _userRepository = userRepository;
             _campaignRepository = campaignRepository;
             _donatedItemsRepository = donatedItemsRepository;
+            _organizationRepository = organizationRepository;
+            _donationRepository = donationRepository;
         }
 
         // ===== Helper Methods =====
@@ -33,6 +39,12 @@ namespace TheCharityBLL.Services.Implementation
         public async Task<int?> GetOrganizationIdFromCampaignAsync(int campaignId)
         {
             return await _campaignRepository.GetCampaignCreatorOrganizationIdAsync(campaignId);
+        }
+
+        public async Task<int?> GetOrganizationIdFromPaymentInfoAsync(int paymentInfoId)
+        {
+            var organization = await _organizationRepository.GetOrganizationByPaymentInfoIdAsync(paymentInfoId);
+            return organization?.Id;
         }
 
         // ===== SuperAdmin Checks =====
@@ -95,6 +107,17 @@ namespace TheCharityBLL.Services.Implementation
             return await _userRepository.IsOrganizationAdminOrSubAdminAsync(userId, organizationId);
         }
 
+        public async Task<bool> CanCreateDonationForCampaignAsync(string userId, int campaignId)
+        {
+            if (string.IsNullOrEmpty(userId)) return false;
+            if (await IsSuperAdminAsync(userId)) return true;
+
+            var organizationId = await GetOrganizationIdFromCampaignAsync(campaignId);
+            if (!organizationId.HasValue) return false;
+
+            return await _userRepository.IsOrganizationAdminAsync(userId, organizationId.Value);
+        }
+
         public async Task<bool> IsOrganizationAdminAsync(string userId, int organizationId)
         {
             if (string.IsNullOrEmpty(userId)) return false;
@@ -128,6 +151,17 @@ namespace TheCharityBLL.Services.Implementation
 
             // Check if user is Admin or SubAdmin of the organization
             return await _userRepository.IsOrganizationAdminOrSubAdminAsync(userId, organizationId.Value);
+        }
+
+        public async Task<bool> CanManageDonationAsync(string userId, int donationId)
+        {
+            if (string.IsNullOrEmpty(userId)) return false;
+            if (await IsSuperAdminAsync(userId)) return true;
+
+            var donation = await _donationRepository.GetDonationByIdAsync(donationId);
+            if (donation == null) return false;
+
+            return await CanManageCampaignAsync(userId, donation.CampaignId);
         }
 
         public async Task<bool> CanUpdateCampaignStatusAsync(string userId, int campaignId)

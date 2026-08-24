@@ -13,12 +13,14 @@ namespace TheCharityBLL.Services.Abstraction
         Task<bool> CanUpdatePaymentInfoAsync(string userId, int organizationId);
         Task<bool> CanManageSubAdminsAsync(string userId, int organizationId);
         Task<bool> CanCreateCampaignForOrganizationAsync(string userId, int organizationId);
+        Task<bool> CanCreateDonationForCampaignAsync(string userId, int campaignId);
         Task<bool> IsOrganizationAdminAsync(string userId, int organizationId);
         Task<bool> IsOrganizationSubAdminAsync(string userId, int organizationId);
         Task<bool> IsOrganizationAdminOrSubAdminAsync(string userId, int organizationId);
 
         // ===== Campaign Permission Checks =====
         Task<bool> CanManageCampaignAsync(string userId, int campaignId);
+        Task<bool> CanManageDonationAsync(string userId, int donationId);
         Task<bool> CanUpdateCampaignStatusAsync(string userId, int campaignId);
         Task<bool> CanDeleteCampaignAsync(string userId, int campaignId);
         Task<bool> CanViewCampaignDetailsAsync(string userId, int campaignId);
@@ -47,5 +49,6 @@ namespace TheCharityBLL.Services.Abstraction
         // ===== Utility =====
         Task<string?> GetUserIdFromPrincipalAsync(ClaimsPrincipal principal);
         Task<int?> GetOrganizationIdFromCampaignAsync(int campaignId);
+        Task<int?> GetOrganizationIdFromPaymentInfoAsync(int paymentInfoId);
     }
 }

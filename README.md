@@ -332,3 +332,133 @@ The API is intended to support a frontend application and external integrations 
 - Campaigns can be either solo or shared, and shared campaigns can link to multiple organizations.
 - Payment processing is handled by Paymob, with external callback verification.
 - The frontend consumes the API and performs actions using the documented endpoints.
+
+
+
+## Role Summary
+
+The system has three role levels:
+
+### 1. SuperAdmin
+
+A **system-level role** stored in ASP.NET Identity:
+
+```csharp
+_userManager.IsInRoleAsync(user, "SuperAdmin")
+```
+
+**Permissions:**
+
+- Manage any organization
+- Assign, remove, or transfer organization admins
+- Add or remove sub-admins
+- Assign or remove system roles
+- Manage any campaign
+- Delete campaigns
+- Manage payment information for any organization
+- Manage donated items across organizations
+- Manage shared-campaign invitations
+- Perform system-wide operations
+
+SuperAdmin is not limited to a specific organization.
+
+---
+
+### 2. Organization Admin
+
+An **organization-level role** stored in `OrganizationRole`:
+
+```csharp
+OrganizationRoleType.Admin
+```
+
+The user must have an active role record for the organization:
+
+```csharp
+OrganizationId == organizationId
+UserId == userId
+Role == OrganizationRoleType.Admin
+IsDeleted == false
+```
+
+**Permissions:**
+
+- Manage their own organization
+- View organization administration data
+- Update organization payment information
+- Add or remove sub-admins
+- Create and manage campaigns belonging to their organization
+- Update campaign status
+- Manage donated items belonging to their organization
+- Manage shared-campaign invitations for their organization
+
+**Restrictions:**
+
+- Cannot manage other organizations
+- Cannot assign or transfer the primary organization admin
+- Cannot delete campaigns
+- Cannot perform SuperAdmin-only system operations
+
+---
+
+### 3. SubAdmin
+
+An **organization-level role** stored in `OrganizationRole`:
+
+```csharp
+OrganizationRoleType.SubAdmin
+```
+
+**Permissions:**
+
+- Create campaigns for their organization
+- Manage campaigns belonging to their organization
+- Update campaign status
+- Manage donated items belonging to their organization
+- Manage shared-campaign invitations
+- View some organization-related information
+
+**Restrictions:**
+
+- Cannot update payment information
+- Cannot add or remove sub-admins
+- Cannot assign, remove, or transfer the organization admin
+- Cannot manage other organizations
+- Cannot delete campaigns
+- Cannot perform SuperAdmin-only operations
+
+---
+
+## Permission Matrix
+
+| Permission | SuperAdmin | Organization Admin | SubAdmin |
+|---|---:|---:|---:|
+| Manage any organization | Yes | No | No |
+| Manage own organization | Yes | Yes | Limited |
+| Assign organization admin | Yes | No | No |
+| Transfer organization admin | Yes | No | No |
+| Add/remove sub-admins | Yes | Yes | No |
+| Update payment information | Yes | Yes | No |
+| Create campaigns | Yes | Yes | Yes |
+| Manage campaigns | Yes | Yes | Yes |
+| Update campaign status | Yes | Yes | Yes |
+| Delete campaigns | Yes | No | No |
+| Manage donated items | Yes | Own organization | Own organization |
+| Manage shared-campaign invites | Yes | Own organization | Own organization |
+| Assign system roles | Yes | No | No |
+
+## Important Implementation Note
+
+Although `Organization` contains:
+
+```csharp
+AdminUserId
+```
+
+the current authorization logic determines whether someone is an organization admin by checking:
+
+```csharp
+OrganizationRole.Role == OrganizationRoleType.Admin
+```
+
+Therefore, setting `AdminUserId` alone may not grant organization-admin permissions. The user may also need an active `OrganizationRole` record with the `Admin` role.

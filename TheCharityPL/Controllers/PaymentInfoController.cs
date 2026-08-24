@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using TheCharityBLL.Authorization.Attributes;
 using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.PaymentInfoDTOs;
 using TheCharityBLL.Services.Abstraction.Payment;
@@ -8,6 +10,7 @@ namespace TheCharityPL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PaymentInfoController : ControllerBase
     {
         private readonly IPaymentInfoService _paymentInfoService;
@@ -27,6 +30,7 @@ namespace TheCharityPL.Controllers
         // ─── GET api/paymentinfo/by-organization/{organizationId} ───────────────────
 
         [HttpGet("by-organization/{organizationId}")]
+        [CanUpdatePaymentInfo]
         public async Task<IActionResult> GetByOrganizationId(int organizationId)
         {
             try
@@ -60,6 +64,7 @@ namespace TheCharityPL.Controllers
         // ─── GET api/paymentinfo/{paymentInfoId} ────────────────────────────────────
 
         [HttpGet("{paymentInfoId}")]
+        [CanUpdatePaymentInfo]
         public async Task<IActionResult> GetById(int paymentInfoId)
         {
             try
@@ -93,6 +98,7 @@ namespace TheCharityPL.Controllers
         // ─── POST api/paymentinfo/{organizationId} ───────────────────────────────────
 
         [HttpPost]
+        [CanCreatePaymentInfo]
        
         public async Task<IActionResult> Create([FromBody] CreatePaymentInfoDto dto)
         {
@@ -126,6 +132,7 @@ namespace TheCharityPL.Controllers
         // ─── PUT api/paymentinfo/{paymentInfoId} ────────────────────────────────────
 
         [HttpPut("{paymentInfoId}")]
+        [CanUpdatePaymentInfo]
      
         public async Task<IActionResult> Update(int paymentInfoId, [FromBody] UpdatePaymentInfoDto dto)
         {
@@ -167,6 +174,7 @@ namespace TheCharityPL.Controllers
         // ─── DELETE api/paymentinfo/{paymentInfoId} ──────────────────────────────────
 
         [HttpDelete("{paymentInfoId}")]
+        [CanUpdatePaymentInfo]
      
         public async Task<IActionResult> Delete(int paymentInfoId)
         {
@@ -206,6 +214,7 @@ namespace TheCharityPL.Controllers
         // ─── POST api/paymentinfo/restore/{paymentInfoId} ────────────────────────────
 
         [HttpPost("restore/{paymentInfoId}")]
+        [CanUpdatePaymentInfo]
        
         public async Task<IActionResult> Restore(int paymentInfoId)
         {
@@ -244,6 +253,7 @@ namespace TheCharityPL.Controllers
         // ─── GET api/paymentinfo/has/{organizationId} ────────────────────────────────
 
         [HttpGet("has/{organizationId}")]
+        [CanUpdatePaymentInfo]
         public async Task<IActionResult> HasPaymentInfo(int organizationId)
         {
             try
@@ -271,6 +281,7 @@ namespace TheCharityPL.Controllers
         // ─── GET api/paymentinfo/validate/{organizationId} ───────────────────────────
 
         [HttpGet("validate/{organizationId}")]
+        [CanUpdatePaymentInfo]
         public async Task<IActionResult> ValidatePaymentInfo(int organizationId)
         {
             try
