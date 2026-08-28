@@ -184,9 +184,9 @@ namespace TheCharityDAL.Repositories.Implementation
         public async Task<IEnumerable<SharedCampaign>> GetSharedCampaignsByOrganizationIdAsync(int organizationId)
         {
             return await _context.SharedCampaigns
-                .Where(c => c.Organizations != null &&
-                           c.Organizations.Any(o => o.Id == organizationId) &&
+                .Where(c => c.Organizations.Any(o => o.Id == organizationId) &&
                            (c.IsDeleted == false))
+                
                 .Include(c => c.Organizations)
                 .ToListAsync();
         }
