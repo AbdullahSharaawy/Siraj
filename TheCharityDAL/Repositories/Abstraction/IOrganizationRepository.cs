@@ -11,7 +11,7 @@ namespace TheCharityDAL.Repositories.Abstraction
         Task<Organization> AddOrganizationAsync(Organization organization);
         Task<Organization> UpdateOrganizationAsync(Organization organization);
         Task DeleteOrganizationAsync(int id);
-        Task RestoreOrganizationAsync(int id);
+        Task<bool> RestoreOrganizationAsync(int id);
 
         // ===== Organization Filtering & Search =====
         Task<Organization?> GetOrganizationByNameAsync(string name);
@@ -31,7 +31,7 @@ namespace TheCharityDAL.Repositories.Abstraction
         Task<OrganizationContactMethod> AddContactMethodAsync(OrganizationContactMethod contactMethod);
         Task<OrganizationContactMethod> UpdateContactMethodAsync(OrganizationContactMethod contactMethod);
         Task DeleteContactMethodAsync(int contactMethodId);
-        Task RestoreContactMethodAsync(int contactMethodId);
+        Task<bool> RestoreContactMethodAsync(int contactMethodId);
         Task<IEnumerable<OrganizationContactMethod>> GetContactMethodsByTypeAsync(int organizationId, ContactType type);
 
         // ===== Payment Info Management =====
@@ -40,7 +40,7 @@ namespace TheCharityDAL.Repositories.Abstraction
         Task<PaymentInfo> AddPaymentInfoAsync(PaymentInfo paymentInfo);
         Task<PaymentInfo> UpdatePaymentInfoAsync(PaymentInfo paymentInfo);
         Task DeletePaymentInfoAsync(int paymentInfoId);
-        Task RestorePaymentInfoAsync(int paymentInfoId);
+        Task<bool> RestorePaymentInfoAsync(int paymentInfoId);
         Task<bool> HasPaymentInfoAsync(int organizationId);
 
         // ===== Organization Performance =====

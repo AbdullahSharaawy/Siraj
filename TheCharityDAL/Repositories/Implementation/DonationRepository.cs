@@ -65,7 +65,7 @@ namespace TheCharityDAL.Repositories.Implementation
 
         public async Task RestoreDonationAsync(int id)
         {
-            var donation = await _context.Donations
+            var donation = await _context.Donations.IgnoreQueryFilters()
                 .Where(d => d.Id == id && d.IsDeleted == true)
                 .FirstOrDefaultAsync();
 

@@ -68,7 +68,10 @@ namespace TheCharityPL.Controllers
         [CanManageCampaign] // ← SuperAdmin + OrganizationAdmin + SubAdmin
         public async Task<IActionResult> Update(int id, [FromBody] UpdateCampaignDto dto)
         {
-            dto.Id = id;
+            if (id != dto.Id)
+            {
+                return BadRequest("The ID in the URL must match the ID in the request body.");
+            }
             var result = await _campaignService.UpdateCampaignAsync(dto);
             return HandleResponse(result, notFoundOnFailure: true);
         }
@@ -192,7 +195,10 @@ namespace TheCharityPL.Controllers
         [CanManageCampaign] // ← SuperAdmin + OrganizationAdmin + SubAdmin
         public async Task<IActionResult> UpdateSolo(int id, [FromBody] UpdateSoloCampaignDto dto)
         {
-            dto.Id = id;
+            if (id != dto.Id)
+            {
+                return BadRequest("The ID in the URL must match the ID in the request body.");
+            }
             var result = await _campaignService.UpdateSoloCampaignAsync(dto);
             return HandleResponse(result, notFoundOnFailure: true);
         }

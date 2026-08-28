@@ -220,6 +220,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         [HttpPost("contact-methods")]
         [CanManageOrganization]
+
         public async Task<IActionResult> CreateContactMethod(CreateOrgContactMethodDto dto)
         {
             var result = await _organizationService.CreateContactMethod(dto);
@@ -251,7 +252,7 @@ namespace TheCharityPL.Controllers
         /// <summary>
         /// Restore deleted contact method
         /// </summary>
-        [HttpPost("contact-methods/restore/{contactId}")]
+        [HttpGet("contact-methods/restore/{contactId}")]
         [CanManageOrganization]
         public async Task<IActionResult> RestoreContactMethod(int contactId)
         {

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using TheCharityDAL.Database;
 using TheCharityDAL.Entities;
 using TheCharityDAL.Enums;
@@ -63,17 +64,18 @@ namespace TheCharityDAL.Repositories.Implementation
             }
         }
 
-        public async Task RestoreOrganizationAsync(int id)
+        public async Task<bool> RestoreOrganizationAsync(int id)
         {
-            var organization = await _context.Organizations
-                .Where(o => o.Id == id && o.IsDeleted == true)
-                .FirstOrDefaultAsync();
-
-            if (organization != null)
+            var org = await _context.Organizations
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(o => o.Id == id && o.IsDeleted==true);
+              
+            if (org != null)
             {
-                organization.Restore();
-                await _context.SaveChangesAsync();
+                org.Restore();
+                return await _context.SaveChangesAsync()>0;
             }
+            return false;
         }
 
         // ===== Organization Filtering & Search =====
@@ -133,10 +135,15 @@ namespace TheCharityDAL.Repositories.Implementation
 
         public async Task<int> GetActiveOrganizationsCountAsync()
         {
-            return await _context.Organizations
-                .Where(o => (o.IsDeleted == false) &&
-                           (o.Campaigns != null && o.Campaigns.Any(c => c.Status == CampaignStatus.Active)))
-                .CountAsync();
+            var organizations = await _context.Organizations
+                .Where(o => !o.IsDeleted)
+                .Include(o => o.SoloCampaigns)
+                .Include(o => o.SharedCampaigns)
+                .ToListAsync(); // Fetches organizations and campaigns into memory safely
+
+            // Now safely use your [NotMapped] Campaigns property in memory
+            return organizations.Count(o => o.Campaigns != null &&
+                                            o.Campaigns.Any(c => !c.IsDeleted && c.Status == CampaignStatus.Active));
         }
 
         // ===== Organization Contact Methods =====
@@ -180,17 +187,18 @@ namespace TheCharityDAL.Repositories.Implementation
             }
         }
 
-        public async Task RestoreContactMethodAsync(int contactMethodId)
+        public async Task<bool> RestoreContactMethodAsync(int contactMethodId)
         {
-            var contactMethod = await _context.OrganizationContactMethods
+            var contactMethod = await _context.OrganizationContactMethods.IgnoreQueryFilters()
                 .Where(cm => cm.Id == contactMethodId && cm.IsDeleted == true)
                 .FirstOrDefaultAsync();
 
             if (contactMethod != null)
             {
                 contactMethod.Restore();
-                await _context.SaveChangesAsync();
+              return  await _context.SaveChangesAsync()>0;
             }
+            return false;
         }
 
         public async Task<IEnumerable<OrganizationContactMethod>> GetContactMethodsByTypeAsync(int organizationId, ContactType type)
@@ -248,17 +256,19 @@ namespace TheCharityDAL.Repositories.Implementation
             }
         }
 
-        public async Task RestorePaymentInfoAsync(int paymentInfoId)
+        public async Task<bool> RestorePaymentInfoAsync(int paymentInfoId)
         {
-            var paymentInfo = await _context.PaymentsInfo
+
+            var paymentInfo = await _context.PaymentsInfo.IgnoreQueryFilters()
                 .Where(p => p.Id == paymentInfoId && p.IsDeleted == true)
                 .FirstOrDefaultAsync();
 
             if (paymentInfo != null)
             {
                 paymentInfo.Restore();
-                await _context.SaveChangesAsync();
+               return await _context.SaveChangesAsync()>0;
             }
+            return false;
         }
 
         public async Task<bool> HasPaymentInfoAsync(int organizationId)
@@ -304,7 +314,8 @@ namespace TheCharityDAL.Repositories.Implementation
                 .Where(o => o.Id == id && (o.IsDeleted == false))
                 .Include(o => o.ContactMethods.Where(cm => cm.IsDeleted == false))
                 .Include(o => o.PaymentInfo)
-                .Include(o => o.Campaigns.Where(c => c.IsDeleted == false))
+                .Include(o => o.SoloCampaigns.Where(c => c.IsDeleted == false))    
+                .Include(o => o.SharedCampaigns.Where(c => c.IsDeleted == false))
                 .FirstOrDefaultAsync();
         }
 
@@ -323,10 +334,14 @@ namespace TheCharityDAL.Repositories.Implementation
         // ===== Advanced Queries =====
         public async Task<IEnumerable<Organization>> GetOrganizationsWithoutCampaignsAsync()
         {
-            return await _context.Organizations
-                .Where(o => (o.IsDeleted == false) &&
-                           (o.Campaigns == null || !o.Campaigns.Any()))
-                .ToListAsync();
+            var organizations = await _context.Organizations
+         .Where(o => !o.IsDeleted)
+         .Include(o => o.SoloCampaigns)
+         .Include(o => o.SharedCampaigns)
+         .ToListAsync();
+            return organizations.Where(o => (o.SoloCampaigns == null || !o.SoloCampaigns.Any(c => !c.IsDeleted)) &&
+                                                (o.SharedCampaigns == null || !o.SharedCampaigns.Any(c => !c.IsDeleted)));
+
         }
 
         public async Task<IEnumerable<Organization>> GetOrganizationsWithoutPaymentInfoAsync()
