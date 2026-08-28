@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using FakeItEasy;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TheCharityBLL.DTOs.PaymentDTOs;
+using TheCharityBLL.Services.Abstraction.Payment;
 using TheCharityDAL.Database;
 
 namespace TaskManagement.Tests.IntegrationTests
@@ -15,6 +19,8 @@ namespace TaskManagement.Tests.IntegrationTests
     /// </summary>
     public class CustomWebApplicationFactory : WebApplicationFactory<TheCharityPL.Program>, IAsyncLifetime
     {
+        public const string TestPaymobHmacKey = "test-hmac-secret-key-for-integration";
+
         // Keeping this connection open for the factory's lifetime is what keeps the in-memory DB alive
         // between requests — SQLite's ":memory:" db is destroyed the instant the connection closes.
         private readonly SqliteConnection _connection = new("DataSource=:memory:");
@@ -22,6 +28,13 @@ namespace TaskManagement.Tests.IntegrationTests
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("Development");
+            builder.ConfigureAppConfiguration((_, config) =>
+            {
+                config.AddInMemoryCollection(new Dictionary<string, string?>
+                {
+                    ["Paymob:HmacKey"] = TestPaymobHmacKey
+                });
+            });
             builder.ConfigureServices(services =>
             {
                 // Remove whatever DbContextOptions<TaskManagementDbContext> registration Program.cs added
@@ -32,6 +45,19 @@ namespace TaskManagement.Tests.IntegrationTests
 
                 services.AddDbContext<TheCharityDbContext>(options =>
                     options.UseSqlite(_connection));
+
+                var paymobDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IPaymobService));
+                if (paymobDescriptor != null)
+                    services.Remove(paymobDescriptor);
+
+                var fakePaymob = A.Fake<IPaymobService>();
+                A.CallTo(() => fakePaymob.CreatePayment(
+                        A<decimal>._,
+                        A<PaymentOrderMetadata?>._,
+                        A<BillingData?>._,
+                        A<string>._))
+                    .Returns("https://accept.paymob.com/api/acceptance/iframes/test");
+                services.AddSingleton(fakePaymob);
 
                 // Build the schema once per test class
                 using var scope = services.BuildServiceProvider().CreateScope();
