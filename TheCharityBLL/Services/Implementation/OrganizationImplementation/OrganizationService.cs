@@ -1,4 +1,5 @@
-﻿using TheCharityBLL.DTOs;
+﻿using Microsoft.Extensions.Logging;
+using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.OrganizationContactMethodDTOs;
 using TheCharityBLL.DTOs.OrganizationDTOs;
 using TheCharityBLL.DTOs.OrganizationRoleDTOs;
@@ -9,6 +10,7 @@ using TheCharityBLL.Services.Abstraction;
 using TheCharityBLL.Services.Abstraction.OrganizationAbstraction;
 using TheCharityDAL.Enums;
 using TheCharityDAL.Repositories.Abstraction;
+using TheCharityDAL.Repositories.Implementation;
 
 namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 {
@@ -17,13 +19,15 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
         private readonly IOrganizationRepository _repository;
         private readonly IAuthorizationService _authorizationService;
         private readonly IUserService _userService;
+        private readonly ILogger<OrganizationService> _logger;
         private readonly OrganizationMapper _mapper;
-        public OrganizationService(IOrganizationRepository repository, IAuthorizationService authorizationService, IUserService userService)
+        public OrganizationService(IOrganizationRepository repository, IAuthorizationService authorizationService, IUserService userService, ILogger<OrganizationService> logger)
         {
             _repository = repository;
             _mapper = new OrganizationMapper();
             _authorizationService = authorizationService;
             _userService = userService;
+            _logger = logger;
         }
         public async Task<ServiceResponse<OrgContactMethodResponseDto>> CreateContactMethod(CreateOrgContactMethodDto contactMethod)
         {
@@ -644,38 +648,55 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<bool>> RestoreContactMethod(int contactMethodId)
         {
-            if (await _repository.GetContactMethodByIdAsync(contactMethodId) == null)
+            try
             {
-                return new ServiceResponse<bool>
+                _logger.LogInformation("Restoring contact method  with ID: {id}", contactMethodId);
+                bool result = await _repository.RestoreContactMethodAsync(contactMethodId);
+
+                if (result)
                 {
-                    Success = false,
-                    Message = $"Contact method with ID {contactMethodId} not found.",
-                };
+                    _logger.LogInformation("contact method of organization restored successfully with ID: {id}", contactMethodId);
+                    return new ServiceResponse<bool> { Success = result, Data = result, Message = $"contact method of organization restored successfully with ID: {contactMethodId}" };
+
+                }
+                
+                else
+                    _logger.LogWarning("contact method of organization restoration failed for ID: {id}", contactMethodId);
+
+                return new ServiceResponse<bool> { Success = result, Data = result, Message = $"contact method of organization restoration failed for ID: {contactMethodId}" };
             }
-            await _repository.RestoreContactMethodAsync(contactMethodId);
-            return new ServiceResponse<bool>
+            catch (Exception ex)
             {
-                Success = true,
-                Message = "Contact method restored successfully.",
-            };
+                _logger.LogError(ex, "Error restoring contact method of organization with ID: { id}", contactMethodId) ;
+                throw;
+            }
         }
 
         public async Task<ServiceResponse<bool>> RestoreOrganization(int id)
         {
-            if (!await _repository.OrganizationExistsAsync(id))
+           
+            try
             {
-                return new ServiceResponse<bool>
+                _logger.LogInformation("Restoring organization with ID: {id}", id);
+                bool result = await _repository.RestoreOrganizationAsync(id);
+
+                if (result)
                 {
-                    Success = false,
-                    Message = $"Organization with ID {id} not found.",
-                };
+                    _logger.LogInformation("organization restored successfully with ID: {id}", id);
+                    return new ServiceResponse<bool> { Success = result, Data = result, Message = $"organization restored successfully with ID: {id}" };
+
+                }
+
+                else
+                    _logger.LogWarning("organization restoration failed for ID: {id}", id);
+
+                return new ServiceResponse<bool> { Success = result, Data = result, Message = $"organization restoration failed for ID: {id}" };
             }
-            await _repository.RestoreOrganizationAsync(id);
-            return new ServiceResponse<bool>
+            catch (Exception ex)
             {
-                Success = true,
-                Message = "Organization restored successfully"
-            };
+                _logger.LogError(ex, "Error restoring organization with ID: { id}", id);
+                throw;
+            }
         }
 
         //public async Task<ServiceResponse<bool>> RestorePaymentInfo(int paymentInfoId)
