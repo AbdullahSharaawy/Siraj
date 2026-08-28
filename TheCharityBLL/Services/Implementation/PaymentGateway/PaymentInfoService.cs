@@ -198,22 +198,31 @@ namespace TheCharityBLL.Services.Implementation.PaymentGateway
         }
 
         // PaymentInfoService.cs
+
         public async Task<ServiceResponse<bool>> RestorePaymentInfoAsync(int paymentInfoId)
         {
-            _logger.LogInformation("Restoring payment info with ID {PaymentInfoId}.", paymentInfoId);
-
-            var exists = await _organizationRepository.GetPaymentInfoByIdAsync(paymentInfoId); // not useful here
-            if (exists == null)
+            try
             {
-                _logger.LogInformation("payment info with ID {PaymentInfoId} doesn`t exists.", paymentInfoId);
+                _logger.LogInformation("Restoring payment information with ID: {id}", paymentInfoId);
+                bool result = await _organizationRepository.RestorePaymentInfoAsync(paymentInfoId);
 
-                return new ServiceResponse<bool> { Data=false,Success=false,Message= $"payment info with ID {paymentInfoId} doesn`t exists." };
+                if (result)
+                {
+                    _logger.LogInformation("payment information restored successfully with ID: {id}", paymentInfoId);
+                    return new ServiceResponse<bool> { Success = result, Data = result, Message = $"payment information restored successfully with ID: {paymentInfoId}" };
+
+                }
+
+                else
+                    _logger.LogWarning("payment information restoration failed for ID: {id}", paymentInfoId);
+
+                return new ServiceResponse<bool> { Success = result, Data = result, Message = $"payment information restoration failed for ID: {paymentInfoId}" };
             }
-
-            await _organizationRepository.RestorePaymentInfoAsync(paymentInfoId);
-
-            _logger.LogInformation("Payment info with ID {PaymentInfoId} restored successfully.", paymentInfoId);
-            return new ServiceResponse<bool> { Data=true,Success=true,Message= $"Payment info with ID {paymentInfoId} restored successfully." };
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error restoring payment information with ID: { id}", paymentInfoId);
+                throw;
+            }
         }
 
         // ===== Utilities =====
