@@ -95,7 +95,7 @@ namespace TheCharityPL.Controllers
         /// <summary>
         /// store payment info ( paymob api keys ) in db, related to specific organization   
         /// </summary>
-        // ─── POST api/paymentinfo/{organizationId} ───────────────────────────────────
+        // ─── POST api/paymentinfo ───────────────────────────────────
 
         [HttpPost]
         [CanCreatePaymentInfo]
@@ -213,7 +213,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // ─── POST api/paymentinfo/restore/{paymentInfoId} ────────────────────────────
 
-        [HttpPost("restore/{paymentInfoId}")]
+        [HttpGet("restore/{paymentInfoId}")]
         [CanUpdatePaymentInfo]
        
         public async Task<IActionResult> Restore(int paymentInfoId)
