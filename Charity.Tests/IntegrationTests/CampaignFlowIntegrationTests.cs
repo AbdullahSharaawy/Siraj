@@ -103,7 +103,7 @@ namespace Charity.Tests.IntegrationTests
                 {
                     Id = sharedId,
                     Title = "Shared Relief Updated",
-                    Target = 25000
+                    Target = 20000
                 });
             updateShared.StatusCode.Should().Be(HttpStatusCode.OK);
         }
