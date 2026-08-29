@@ -11,6 +11,7 @@ using TheCharityDAL.Enums;
 
 namespace TheCharityPL.Controllers
 {
+    [NonController]
     [Route("api/[controller]")]
     [ApiController]
     public class DonatedItemController : ControllerBase
