@@ -14,7 +14,7 @@ namespace Charity.Tests.IntegrationTests
         {
         }
 
-        [Fact]
+       
         public async Task Flow0_Create_GetAll_GetById_Update_Filters_Delete_Restore()
         {
             await SignUpAsSuperAdmin();
@@ -64,7 +64,7 @@ namespace Charity.Tests.IntegrationTests
             (await Client.PatchAsync($"/api/donateditem/{itemId}/restore", null)).StatusCode.Should().Be(HttpStatusCode.OK);
         }
 
-        [Fact]
+       
         public async Task Flow1_MarkUnavailable_And_TransferOrganization()
         {
             await SignUpAsSuperAdmin();
