@@ -1,0 +1,88 @@
+name: TheCharity CI/CD for Monster ASP.NET
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  PROJECT_PATH: './TheCharityPL/TheCharityPL.csproj'
+  PUBLISH_DIR: './publish'
+
+jobs:
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore TheCharity.sln
+
+      - name: Build solution
+        run: dotnet build TheCharity.sln --configuration Release --no-restore
+
+      - name: Run tests
+        run: |
+          dotnet test Charity.Tests/Charity.Tests.csproj \
+            --configuration Release \
+            --no-build \
+            --logger "trx;LogFileName=test-results.trx" \
+            --results-directory TestResults
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: TestResults
+
+  deploy:
+    name: Deploy to Monster ASP.NET
+    needs: build-and-test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Publish ASP.NET application
+        run: |
+          dotnet publish "${{ env.PROJECT_PATH }}" \
+            --configuration Release \
+            --output "${{ env.PUBLISH_DIR }}" \
+            --no-restore
+
+      - name: Archive publish output
+        run: zip -r TheCharity.zip ./publish
+
+      - name: Deploy via FTP to Monster ASP.NET
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.MONSTER_FTP_HOST }}
+          username: ${{ secrets.MONSTER_FTP_USERNAME }}
+          password: ${{ secrets.MONSTER_FTP_PASSWORD }}
+          local-dir: ./publish/
+          server-dir: ${{ secrets.MONSTER_FTP_REMOTE_DIR }}/
+          dangerous-clean-slate: false
+          state-name: .ftp-deploy-sync-state.json
