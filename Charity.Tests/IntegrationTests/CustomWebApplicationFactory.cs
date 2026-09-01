@@ -32,6 +32,7 @@ namespace TaskManagement.Tests.IntegrationTests
             {
                 config.AddInMemoryCollection(new Dictionary<string, string?>
                 {
+                    ["ConnectionStrings:DefaultConnection"] = "Server=.;Database=TestDb;Integrated Security=true;",
                     ["Paymob:HmacKey"] = TestPaymobHmacKey
                 });
             });
