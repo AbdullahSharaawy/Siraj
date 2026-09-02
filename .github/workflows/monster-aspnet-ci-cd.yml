@@ -65,6 +65,15 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Generate appsettings.Production.json
+        run: |
+          cat > TheCharityPL/appsettings.Production.json << EOF
+          {
+            "ConnectionStrings": {
+              "DefaultConnection": "${{ secrets.PRODUCTION_DB_CONNECTION_STRING }}"
+            }
+          }
+          EOF
 
       - name: Publish ASP.NET application
         run: |
