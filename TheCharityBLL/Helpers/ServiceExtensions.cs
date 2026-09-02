@@ -63,7 +63,8 @@ namespace TheCharityBLL.Helpers
         }
         public static void TheCharityEnhancedConnectionString(this IServiceCollection services, IConfiguration configuration, string stringName = "defaultConnection")
         {
-            var connectionString = configuration.GetConnectionString(stringName);
+            var connectionString = configuration.GetConnectionString("DefaultConnection") 
+    ?? throw new Exception("DefaultConnection connection string is missing");
             services.AddDbContext<TheCharityDbContext>(options =>
                 options.UseSqlServer(
                     connectionString,

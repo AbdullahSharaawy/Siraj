@@ -28,13 +28,19 @@ namespace TaskManagement.Tests.IntegrationTests
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("Development");
-            builder.ConfigureAppConfiguration((_, config) =>
+            builder.ConfigureAppConfiguration((context, config) =>
             {
-                config.AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    ["ConnectionStrings:DefaultConnection"] = "Server=.;Database=TestDb;Integrated Security=true;",
-                    ["Paymob:HmacKey"] = TestPaymobHmacKey
-                });
+                // Clear existing providers and rebuild to ensure our values take precedence
+                config.Sources.Clear();
+                config
+                    .SetBasePath(AppContext.BaseDirectory)
+                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+                    .AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: false)
+                    .AddInMemoryCollection(new Dictionary<string, string?>
+                    {
+                        ["ConnectionStrings:DefaultConnection"] = "Data Source=:memory:",
+                        ["Paymob:HmacKey"] = TestPaymobHmacKey
+                    });
             });
             builder.ConfigureServices(services =>
             {

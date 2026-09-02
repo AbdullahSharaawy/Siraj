@@ -65,6 +65,15 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+      - name: Generate appsettings.Production.json
+        run: |
+          cat > TheCharityPL/appsettings.Production.json << EOF
+          {
+            "ConnectionStrings": {
+              "DefaultConnection": "${{ secrets.PRODUCTION_DB_CONNECTION_STRING }}"
+            }
+          }
+          EOF
 
       - name: Publish ASP.NET application
         run: |
@@ -86,3 +95,7 @@ jobs:
           server-dir: ${{ secrets.MONSTER_FTP_REMOTE_DIR }}/
           dangerous-clean-slate: false
           state-name: .ftp-deploy-sync-state.json
+      - name: Run Integration Tests
+        run: dotnet test Charity.Tests/Charity.Tests.csproj
+        env:
+          ConnectionStrings__DefaultConnection: "Server=.;Database=TheCharityTestDb;Integrated Security=true;"
