@@ -50,7 +50,6 @@ jobs:
         with:
           name: test-results
           path: TestResults
-
   deploy:
     name: Deploy to Monster ASP.NET
     needs: build-and-test
@@ -65,6 +64,7 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+
       - name: Generate appsettings.Production.json
         run: |
           cat > TheCharityPL/appsettings.Production.json << EOF
@@ -95,7 +95,4 @@ jobs:
           server-dir: ${{ secrets.MONSTER_FTP_REMOTE_DIR }}/
           dangerous-clean-slate: false
           state-name: .ftp-deploy-sync-state.json
-      - name: Run Integration Tests
-        run: dotnet test Charity.Tests/Charity.Tests.csproj
-        env:
-          ConnectionStrings__DefaultConnection: "Server=.;Database=TheCharityTestDb;Integrated Security=true;"
+ 
