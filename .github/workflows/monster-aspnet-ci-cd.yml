@@ -60,6 +60,16 @@ jobs:
             --configuration Release \
             --output "${{ env.PUBLISH_DIR }}" \
             --no-restore
+      - name: Install SqlServer PowerShell module
+        shell: pwsh
+        run: Install-Module -Name SqlServer -Force -Scope CurrentUser -AllowClobber
+
+      - name: Apply database migrations
+        shell: pwsh
+        env:
+          PRODUCTION_DB_CONNECTION_STRING: ${{ secrets.PRODUCTION_DB_CONNECTION_STRING }}
+        run: |
+          Invoke-Sqlcmd -ConnectionString $env:PRODUCTION_DB_CONNECTION_STRING -InputFile "./database/migrate.sql"
 
       - name: Archive publish output
         run: zip -r TheCharity.zip ./publish
