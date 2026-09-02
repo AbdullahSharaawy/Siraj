@@ -30,12 +30,9 @@ namespace TaskManagement.Tests.IntegrationTests
             builder.UseEnvironment("Development");
             builder.ConfigureAppConfiguration((context, config) =>
             {
-                // Clear existing providers and rebuild to ensure our values take precedence
-                config.Sources.Clear();
+               
                 config
                     .SetBasePath(AppContext.BaseDirectory)
-                    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
-                    .AddJsonFile($"appsettings.{context.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: false)
                     .AddInMemoryCollection(new Dictionary<string, string?>
                     {
                         ["ConnectionStrings:DefaultConnection"] = "Data Source=:memory:",
