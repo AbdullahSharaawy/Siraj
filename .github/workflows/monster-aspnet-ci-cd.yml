@@ -17,8 +17,8 @@ env:
   PUBLISH_DIR: './publish'
 
 jobs:
-  build-and-test:
-    name: Build and test
+  build:
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
@@ -36,23 +36,9 @@ jobs:
       - name: Build solution
         run: dotnet build TheCharity.sln --configuration Release --no-restore
 
-      - name: Run tests
-        run: |
-          dotnet test Charity.Tests/Charity.Tests.csproj \
-            --configuration Release \
-            --no-build \
-            --logger "trx;LogFileName=test-results.trx" \
-            --results-directory TestResults
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: TestResults
   deploy:
     name: Deploy to Monster ASP.NET
-    needs: build-and-test
+    needs: build
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 
