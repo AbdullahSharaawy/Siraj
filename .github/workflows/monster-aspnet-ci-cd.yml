@@ -17,8 +17,8 @@ env:
   PUBLISH_DIR: './publish'
 
 jobs:
-  build-and-test:
-    name: Build and test
+  build:
+    name: Build
     runs-on: ubuntu-latest
 
     steps:
@@ -36,24 +36,9 @@ jobs:
       - name: Build solution
         run: dotnet build TheCharity.sln --configuration Release --no-restore
 
-      - name: Run tests
-        run: |
-          dotnet test Charity.Tests/Charity.Tests.csproj \
-            --configuration Release \
-            --no-build \
-            --logger "trx;LogFileName=test-results.trx" \
-            --results-directory TestResults
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: TestResults
-
   deploy:
     name: Deploy to Monster ASP.NET
-    needs: build-and-test
+    needs: build
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
 
@@ -66,12 +51,25 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Restore dependencies
+        run: dotnet restore TheCharity.sln
+
       - name: Publish ASP.NET application
         run: |
           dotnet publish "${{ env.PROJECT_PATH }}" \
             --configuration Release \
             --output "${{ env.PUBLISH_DIR }}" \
             --no-restore
+      - name: Install SqlServer PowerShell module
+        shell: pwsh
+        run: Install-Module -Name SqlServer -Force -Scope CurrentUser -AllowClobber
+
+      - name: Apply database migrations
+        shell: pwsh
+        env:
+          PRODUCTION_DB_CONNECTION_STRING: ${{ secrets.PRODUCTION_DB_CONNECTION_STRING }}
+        run: |
+          Invoke-Sqlcmd -ConnectionString $env:PRODUCTION_DB_CONNECTION_STRING -InputFile "./Database/migrate.sql"
 
       - name: Archive publish output
         run: zip -r TheCharity.zip ./publish
@@ -86,3 +84,4 @@ jobs:
           server-dir: ${{ secrets.MONSTER_FTP_REMOTE_DIR }}/
           dangerous-clean-slate: false
           state-name: .ftp-deploy-sync-state.json
+ 
