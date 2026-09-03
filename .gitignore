@@ -366,9 +366,7 @@ FodyWeavers.xsd
 **/Migrations/
 
 # ASP.NET Core appsettings (do not commit secrets)
-/TheCharityPL/appsettings.json
+
 /TheCharityPL/appsettings.Development.json
 /TheCharityPL/appsettings.Production.json
 appsettings.Development.json
-appsettings.Production.json
-!TheCharityPL/appsettings.Development.template.json
