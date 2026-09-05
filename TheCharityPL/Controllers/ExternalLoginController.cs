@@ -90,16 +90,7 @@ namespace TheCharityPL.Controllers
             // Sign out of the external cookie
             await HttpContext.SignOutAsync("ExternalCookie");
 
-            return Ok(new ServiceResponse<Dictionary<string, string>>
-            {
-                Data = new Dictionary<string, string>
-                {
-                    ["token"] = token,
-                    ["returnUrl"] = returnUrl
-                },
-                Success = true,
-                Message = "login successfully."
-            });
+            return Redirect($"{returnUrl}?token={token}");
         }
 
        
