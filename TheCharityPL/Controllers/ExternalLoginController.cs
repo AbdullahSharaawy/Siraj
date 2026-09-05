@@ -16,9 +16,11 @@ namespace TheCharityPL.Controllers
     public class ExternalLoginController : ControllerBase
     {
         private IUserService _userService;
-        public ExternalLoginController(IUserService userService)
+        private readonly IConfiguration _configuration;
+        public ExternalLoginController(IUserService userService, IConfiguration configuration)
         {
-            _userService = userService; 
+            _userService = userService;
+            _configuration = configuration;
         }
         /// <summary>
         /// login using external provider (Google, Facebook, etc.)
@@ -90,7 +92,26 @@ namespace TheCharityPL.Controllers
             // Sign out of the external cookie
             await HttpContext.SignOutAsync("ExternalCookie");
 
-            return Redirect($"{returnUrl}?token={token}");
+            // 1. Read the list from appsettings.json
+            var allowedFrontends = _configuration.GetSection("AllowedFrontends").Get<List<string>>();
+
+            // 2. Fallback to an empty list if the section is missing to avoid null reference errors
+            if (allowedFrontends == null || !allowedFrontends.Any())
+            {
+                return BadRequest("Frontend configuration is missing.");
+            }
+
+            // 3. Validate the returnUrl against the allowed list
+            bool isTrustedUrl = allowedFrontends.Any(url => returnUrl.StartsWith(url));
+
+            if (isTrustedUrl)
+            {
+                return Redirect($"{returnUrl}?token={token}");
+            }
+            else
+            {
+                return BadRequest("Invalid return URL");
+            }
         }
 
        
