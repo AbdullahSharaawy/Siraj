@@ -741,7 +741,7 @@ namespace TheCharityPL.Controllers
         {
             var frontendUrl = _configuration["FrontendUrl"];
             var encodedToken = Uri.EscapeDataString(token);
-            return $"{frontendUrl}/{path}?email={email}&encodedToken={encodedToken}&returnUrl={returnUrl}";
+            return $"{frontendUrl}{path}?email={email}&encodedToken={encodedToken}&returnUrl={returnUrl}";
         }
     }
 }
