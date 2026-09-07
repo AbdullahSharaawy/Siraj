@@ -739,9 +739,13 @@ namespace TheCharityPL.Controllers
 
         private string BuildLink(string path, string email, string token,string returnUrl)
         {
-            var frontendUrl = _configuration["FrontendUrl"];
+            // This removes any accidental slashes at the end of your config URL
+            var frontendUrl = _configuration["FrontendUrl"]?.TrimEnd('/');
+
+            // This removes any accidental slashes at the start of your path
+            var cleanPath = path.TrimStart('/');
             var encodedToken = Uri.EscapeDataString(token);
-            return $"{frontendUrl}{path}?email={email}&encodedToken={encodedToken}&returnUrl={returnUrl}";
+            return $"{frontendUrl}/{path}?email={email}&encodedToken={encodedToken}&returnUrl={returnUrl}";
         }
     }
 }
