@@ -103,7 +103,7 @@ namespace Charity.Tests.IntegrationTests
 
             var resetPasswordResponse = await _client.PostAsJsonAsync(
                 "/api/user/reset-password",
-                new ResetPasswordResponseDto
+                new ResetPasswordRequestDto
                 {
                     Email = user!.Email,
                     Password = "123456Ash",
