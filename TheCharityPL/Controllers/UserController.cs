@@ -180,7 +180,8 @@ namespace TheCharityPL.Controllers
                 if (result.Data.Succeeded)
                 {
                     var token = await _userService.GenerateEmailConfirmationTokenAsync(createUserDTO.Email);
-                    var confirmationLink = BuildLink("api/User/confirm-email", createUserDTO.Email, token,ResponseDto.returnUrl);
+                    var BackendUrl = _configuration["BackendUrl"]?.TrimEnd('/');
+                    var confirmationLink = BuildLink($"{BackendUrl}/api/User/confirm-email", createUserDTO.Email, token,ResponseDto.returnUrl);
                     await _emailService.SendEmailConfirmationAsync(createUserDTO.Email, confirmationLink);
 
                     return Ok(new ServiceResponse{Success=true, Message = "Registration successful. Please check your email to confirm your account." });
@@ -263,7 +264,10 @@ namespace TheCharityPL.Controllers
                     return BadRequest(new ServiceResponse{Success = false, Message = "Email is already confirmed." });
 
                 var token = await _userService.GenerateEmailConfirmationTokenAsync(resendEmailConfirmRequest.Email);
-                var confirmationLink = BuildLink("api/User/confirm-email", resendEmailConfirmRequest.Email, token,resendEmailConfirmRequest.returnUrl);
+               
+                var BackendUrl = _configuration["BackendUrl"]?.TrimEnd('/');
+
+                var confirmationLink = BuildLink($"{BackendUrl}/api/User/confirm-email", resendEmailConfirmRequest.Email, token,resendEmailConfirmRequest.returnUrl);
                 await _emailService.SendEmailConfirmationAsync(resendEmailConfirmRequest.Email, confirmationLink);
 
                 return Ok(new ServiceResponse{Success = true, Message = "If the email exists, a confirmation link has been sent." });
@@ -293,13 +297,7 @@ namespace TheCharityPL.Controllers
                 return BadRequest("Frontend configuration is missing.");
             }
 
-            // 3. Validate the returnUrl against the allowed list
-            bool isTrustedUrl = allowedFrontends.Any(url => targetUrl.StartsWith(url));
-            if (!isTrustedUrl)
-            {
-                return BadRequest(new ServiceResponse { Success = false, Message = "returnUrl are required." });
-
-            }
+           
             try
             {
                 var result = await _userService.ConfirmEmailAsync(email, encodedToken);
@@ -336,7 +334,8 @@ namespace TheCharityPL.Controllers
                 if (user != null)
                 {
                     var token = await _userService.GeneratePasswordResetTokenAsync(user.Id);
-                    var resetLink = BuildLink("reset-password", forgetPasswordRequestDto.Email, token,forgetPasswordRequestDto.ReturnUrl);
+                    var FrontendUrl = _configuration["FrontendUrl"]?.TrimEnd('/');
+                    var resetLink = BuildLink($"{FrontendUrl}/reset-password", forgetPasswordRequestDto.Email, token);
                     await _emailService.SendPasswordResetAsync(forgetPasswordRequestDto.Email, resetLink);
                 }
 
@@ -353,7 +352,7 @@ namespace TheCharityPL.Controllers
 
         [HttpPost("reset-password")]
         [AllowAnonymous]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordResponseDto model)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new ServiceResponse<ModelStateDictionary> { Data = ModelState, Success = false, Message = "your credentials is invalid" });
@@ -739,13 +738,13 @@ namespace TheCharityPL.Controllers
 
         private string BuildLink(string path, string email, string token,string returnUrl)
         {
-            // This removes any accidental slashes at the end of your config URL
-            var frontendUrl = _configuration["FrontendUrl"]?.TrimEnd('/');
-
-            // This removes any accidental slashes at the start of your path
-            var cleanPath = path.TrimStart('/');
             var encodedToken = Uri.EscapeDataString(token);
-            return $"{frontendUrl}/{path}?email={email}&encodedToken={encodedToken}&returnUrl={returnUrl}";
+            return $"{path}?email={email}&encodedToken={encodedToken}&returnUrl={returnUrl}";
+        }
+        private string BuildLink(string path, string email, string token)
+        {
+            var encodedToken = Uri.EscapeDataString(token);
+            return $"{path}?email={email}&encodedToken={encodedToken}";
         }
     }
 }
