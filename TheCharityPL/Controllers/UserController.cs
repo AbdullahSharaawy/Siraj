@@ -180,7 +180,8 @@ namespace TheCharityPL.Controllers
                 if (result.Data.Succeeded)
                 {
                     var token = await _userService.GenerateEmailConfirmationTokenAsync(createUserDTO.Email);
-                    var confirmationLink = BuildFrontendLink("api/User/confirm-email", createUserDTO.Email, token);
+                    var BackendUrl = _configuration["BackendUrl"]?.TrimEnd('/');
+                    var confirmationLink = BuildLink($"{BackendUrl}/api/User/confirm-email", createUserDTO.Email, token,ResponseDto.returnUrl);
                     await _emailService.SendEmailConfirmationAsync(createUserDTO.Email, confirmationLink);
 
                     return Ok(new ServiceResponse{Success=true, Message = "Registration successful. Please check your email to confirm your account." });
@@ -248,23 +249,26 @@ namespace TheCharityPL.Controllers
 
         [HttpPost("resend-confirmation")]
         [AllowAnonymous]
-        public async Task<IActionResult> ResendEmailConfirmation([FromBody] string email)
+        public async Task<IActionResult> ResendEmailConfirmation([FromBody] ResendEmailConfirmRequest resendEmailConfirmRequest)
         {
-            if (string.IsNullOrEmpty(email))
+            if (string.IsNullOrEmpty(resendEmailConfirmRequest.Email))
                 return BadRequest(new ServiceResponse{Success = false, Message = "Email is required." });
 
             try
             {
-                var user = await _userService.GetUserByEmailAsync(email);
+                var user = await _userService.GetUserByEmailAsync(resendEmailConfirmRequest.Email);
                 if (user == null)
                     return NotFound(new ServiceResponse{Success = false, Message = "User not found." });
 
                 if (user.EmailConfirmed)
                     return BadRequest(new ServiceResponse{Success = false, Message = "Email is already confirmed." });
 
-                var token = await _userService.GenerateEmailConfirmationTokenAsync(email);
-                var confirmationLink = BuildFrontendLink("api/User/confirm-email", email, token);
-                await _emailService.SendEmailConfirmationAsync(email, confirmationLink);
+                var token = await _userService.GenerateEmailConfirmationTokenAsync(resendEmailConfirmRequest.Email);
+               
+                var BackendUrl = _configuration["BackendUrl"]?.TrimEnd('/');
+
+                var confirmationLink = BuildLink($"{BackendUrl}/api/User/confirm-email", resendEmailConfirmRequest.Email, token,resendEmailConfirmRequest.returnUrl);
+                await _emailService.SendEmailConfirmationAsync(resendEmailConfirmRequest.Email, confirmationLink);
 
                 return Ok(new ServiceResponse{Success = true, Message = "If the email exists, a confirmation link has been sent." });
             }
@@ -279,17 +283,27 @@ namespace TheCharityPL.Controllers
 
         [HttpGet("confirm-email")]
         [AllowAnonymous]
-        public async Task<IActionResult> ConfirmEmail([FromQuery] string email, [FromQuery] string encodedToken)
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string returnUrl,[FromQuery] string email, [FromQuery] string encodedToken)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(encodedToken))
                 return BadRequest(new ServiceResponse{Success = false, Message = "Email and token are required." });
+            
+            var targetUrl = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
+            var allowedFrontends = _configuration.GetSection("AllowedFrontends").Get<List<string>>();
 
+            // 2. Fallback to an empty list if the section is missing to avoid null reference errors
+            if (allowedFrontends == null || !allowedFrontends.Any())
+            {
+                return BadRequest("Frontend configuration is missing.");
+            }
+
+           
             try
             {
                 var result = await _userService.ConfirmEmailAsync(email, encodedToken);
 
                 if (result.Succeeded)
-                    return Ok(new ServiceResponse{Success = true, Message = "Email confirmed successfully." });
+                    return Redirect($"{targetUrl}?success=true");
 
                 return BadRequest(new ServiceResponse<IEnumerable<string>>{Success=false, Message = "Email confirmation failed.", Data = result.Errors.Select(e => e.Description) });
             }
@@ -307,21 +321,22 @@ namespace TheCharityPL.Controllers
 
         [HttpPost("forgot-password")]
         [AllowAnonymous]
-        public async Task<IActionResult> ForgotPassword([FromBody] string email)
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgetPasswordRequestDto forgetPasswordRequestDto)
         {
-            if (string.IsNullOrEmpty(email))
+            if (string.IsNullOrEmpty(forgetPasswordRequestDto.Email))
                 return BadRequest(new ServiceResponse { Success = false, Message = "Email is required." });
 
             try
             {
-                var user = await _userService.GetUserByEmailAsync(email);
+                var user = await _userService.GetUserByEmailAsync(forgetPasswordRequestDto.Email);
 
                 // Always return Ok to avoid revealing whether the email exists
                 if (user != null)
                 {
                     var token = await _userService.GeneratePasswordResetTokenAsync(user.Id);
-                    var resetLink = BuildFrontendLink("reset-password", email, token);
-                    await _emailService.SendPasswordResetAsync(email, resetLink);
+                    var FrontendUrl = _configuration["FrontendUrl"]?.TrimEnd('/');
+                    var resetLink = BuildLink($"{FrontendUrl}/reset-password", forgetPasswordRequestDto.Email, token);
+                    await _emailService.SendPasswordResetAsync(forgetPasswordRequestDto.Email, resetLink);
                 }
 
                 return Ok(new ServiceResponse { Success = true, Message = "If your email is registered, you will receive a password reset link shortly." });
@@ -337,7 +352,7 @@ namespace TheCharityPL.Controllers
 
         [HttpPost("reset-password")]
         [AllowAnonymous]
-        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordResponseDto model)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequestDto model)
         {
             if (!ModelState.IsValid)
                 return BadRequest(new ServiceResponse<ModelStateDictionary> { Data = ModelState, Success = false, Message = "your credentials is invalid" });
@@ -721,11 +736,15 @@ namespace TheCharityPL.Controllers
 
         // ─── Private Helpers ─────────────────────────────────────────────────────────
 
-        private string BuildFrontendLink(string path, string email, string token)
+        private string BuildLink(string path, string email, string token,string returnUrl)
         {
-            var frontendUrl = _configuration["FrontendUrl"];
             var encodedToken = Uri.EscapeDataString(token);
-            return $"{frontendUrl}/{path}?email={email}&encodedToken={encodedToken}";
+            return $"{path}?email={email}&encodedToken={encodedToken}&returnUrl={returnUrl}";
+        }
+        private string BuildLink(string path, string email, string token)
+        {
+            var encodedToken = Uri.EscapeDataString(token);
+            return $"{path}?email={email}&encodedToken={encodedToken}";
         }
     }
 }

@@ -4,12 +4,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace TheCharityBLL.DTOs.UserResponseDTOs
+namespace TheCharityBLL.DTOs.UserRequestDTOs
 {
-    public class ResetPasswordResponseDto
+    public class ResetPasswordRequestDto
     {
         public string? Email { get; set; }
         public string? Password { get; set; }
         public string? Token { get; set; }
+
     }
 }
