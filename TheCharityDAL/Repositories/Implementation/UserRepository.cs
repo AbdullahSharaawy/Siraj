@@ -211,6 +211,7 @@ namespace TheCharityDAL.Repositories.Implementation
                 throw new Exception("User not found");
 
             await _userManager.AddLoginAsync(trackedUser, loginInfo);
+            await _userManager.ConfirmEmailAsync(trackedUser, await _userManager.GenerateEmailConfirmationTokenAsync(trackedUser));
         }
         public async Task ResetAccessFailedCountAsync(User user)
             => await _userManager.ResetAccessFailedCountAsync(user);
