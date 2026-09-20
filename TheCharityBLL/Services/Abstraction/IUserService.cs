@@ -9,7 +9,7 @@ namespace TheCharityBLL.Services.Abstraction
     public interface IUserService
     {
         // Queries
-        Task<IEnumerable<UserResponseDTO>> GetAllUsersAsync();
+        Task<IEnumerable<UserResponseDTO>> GetAllUsersAsync(bool showDeleted = false);
         Task<UserResponseDTO?> GetUserByIdAsync(string userId);
         Task<UserResponseDTO?> GetUserByEmailAsync(string email);
         Task<ServiceResponse<bool>> UserExistsAsync(string userId);

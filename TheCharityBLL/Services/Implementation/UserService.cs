@@ -92,12 +92,12 @@ namespace TheCharityBLL.Services.Repository
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-        public async Task< IEnumerable<UserResponseDTO>> GetAllUsersAsync()
+        public async Task< IEnumerable<UserResponseDTO>> GetAllUsersAsync(bool showDeleted = false)
         {
             try
             {
                 _logger.LogInformation("Getting all users");
-                var users = await _userRepository.GetAllUsersAsync();
+                var users = await _userRepository.GetAllUsersAsync(showDeleted);
                 return _mapper.Map<IEnumerable<UserResponseDTO>>(users);
             }
             catch (Exception ex)

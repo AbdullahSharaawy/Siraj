@@ -17,7 +17,7 @@ namespace TheCharityBLL.Services.Abstraction.OrganizationAbstraction
         Task<ServiceResponse<OrganizationResponseDto>> UpdateOrganization(int id, UpdateOrganizationDto organization);
         Task<ServiceResponse<bool>> DeleteOrganization(int id);
         Task<ServiceResponse<bool>> RestoreOrganization(int id);
-
+        Task<ServiceResponse<bool>> IsUserOrganizationAdminAsync(string userId);
         Task<ServiceResponse<OrganizationResponseDto>> GetOrganizationByName(string name);
         Task<ServiceResponse<IEnumerable<OrganizationResponseDto>>> SearchOrganizations(string searchTerm);
         Task<ServiceResponse<IEnumerable<OrganizationResponseDto>>> GetDeletedOrganizations();
