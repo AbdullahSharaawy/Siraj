@@ -61,7 +61,7 @@ namespace Charity.Tests.IntegrationTests
             var postfix = Guid.NewGuid().ToString("N");
             var email = $"user{postfix}@gmail.com";
             var userName = $"user{postfix}";
-
+            var returnUrl = "/";
             var createdAccountResponse = await Client.PostAsJsonAsync("/api/user/register", new CreateUserRequestDto
             {
                 Email = email,
@@ -70,7 +70,8 @@ namespace Charity.Tests.IntegrationTests
                 PhoneNumber = "010275412",
                 Address = "giza",
                 Password = DefaultPassword,
-                ConfirmPassword = DefaultPassword
+                ConfirmPassword = DefaultPassword,
+                returnUrl = returnUrl
             });
             createdAccountResponse.StatusCode.Should().Be(HttpStatusCode.OK);
             var createdAccountResult = await createdAccountResponse.Content
