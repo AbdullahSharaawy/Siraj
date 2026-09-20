@@ -9,6 +9,7 @@ namespace TheCharityDAL.Entities
         public int Id { get; private set; }
         public string? Name { get; private set; }
         public string? Address { get; private set; }
+        public string? Description { get; private set; }
         public int? PaymentId { get; private set; }
         public string? AdminUserId { get; private set; }
 
@@ -29,11 +30,12 @@ namespace TheCharityDAL.Entities
         public DateTime? DeletedOn { get; private set; }
         public DateTime? RegistrationDate { get; private set; } = DateTime.UtcNow;
         public DateTime? UpdatedOn { get; private set; }
-        public Organization(string? name, string? address)
+        public Organization(string? name, string? address, string? description)
         {
             this.Name = name;
             this.Address = address;
             this.PaymentId = null;
+            Description = description;
         }
         public void EditName(string? name)
         {
@@ -48,6 +50,14 @@ namespace TheCharityDAL.Entities
             if (!string.IsNullOrEmpty(address))
             {
                 this.Address = address;
+                this.UpdatedOn = DateTime.UtcNow;
+            }
+        }
+        public void EditDescription(string? description)
+        {
+            if (!string.IsNullOrEmpty(description))
+            {
+                this.Description = description;
                 this.UpdatedOn = DateTime.UtcNow;
             }
         }
