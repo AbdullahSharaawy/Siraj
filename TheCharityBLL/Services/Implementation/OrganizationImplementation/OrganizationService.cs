@@ -810,6 +810,10 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
             {
                 existingOrganization.EditAddress(organization.Address);
             }
+            if (!string.IsNullOrWhiteSpace(organization.Description))
+            {
+                existingOrganization.EditDescription(organization.Description);
+            }
             var updateOrganization = await _repository.UpdateOrganizationAsync(existingOrganization);
             var organizationDto = _mapper.MapToOrganizationResponseDto(updateOrganization);
             return new ServiceResponse<OrganizationResponseDto>
@@ -1046,6 +1050,30 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                 {
                     Success = false,
                     Message = $"Error checking sub-admin status: {ex.Message}"
+                };
+            }
+        }
+
+        public async Task<ServiceResponse<bool>> IsUserOrganizationAdminAsync( string userId)
+        {
+            try
+            {
+               
+                var isOrganizationAdmin = await _repository.IsUserOrganizationAdminAsync(userId);
+
+                return new ServiceResponse<bool>
+                {
+                    Success = true,
+                    Data = isOrganizationAdmin,
+                    Message = isOrganizationAdmin ? "User is a organization-admin." : "User is not a organization-admin."
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<bool>
+                {
+                    Success = false,
+                    Message = $"Error checking organization-admin status: {ex.Message}"
                 };
             }
         }

@@ -12,6 +12,7 @@ namespace TheCharityDAL.Repositories.Abstraction
         Task<Organization> UpdateOrganizationAsync(Organization organization);
         Task DeleteOrganizationAsync(int id);
         Task<bool> RestoreOrganizationAsync(int id);
+        public  Task<bool> IsUserOrganizationAdminAsync(string userId);
 
         // ===== Organization Filtering & Search =====
         Task<Organization?> GetOrganizationByNameAsync(string name);

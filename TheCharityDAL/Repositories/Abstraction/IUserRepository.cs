@@ -17,7 +17,7 @@ namespace TheCharityDAL.Repositories.Abstraction
         Task<User?> GetUserByIdAsync(string id);
         Task<User?> GetUserByEmailAsync(string email);
         Task<User?> FindByNameOrEmailAsync(string usernameOrEmail);
-        Task<IEnumerable<User>?> GetAllUsersAsync();
+        Task<IEnumerable<User>?> GetAllUsersAsync(bool includeDeleted = false);
         Task<bool> UserExistsAsync(string userId);
         Task<bool> IsUserDeletedAsync(string userId);
         public Task<IList<UserLoginInfo>> GetLoginsAsync(User user);
