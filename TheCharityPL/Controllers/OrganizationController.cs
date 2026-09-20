@@ -511,5 +511,17 @@ namespace TheCharityPL.Controllers
             var result = await _organizationService.IsUserSubAdminAsync(orgId, userId);
             return result.Success ? Ok(result) : BadRequest(result);
         }
+        /// <summary>
+        /// Check if a user is a organization-admin of an organization
+        /// </summary>
+        [HttpGet("organization-admins/{userId}/check")]
+         
+        public async Task<IActionResult> IsUserOrganizationAdmin( string userId)
+        {
+            var result = await _organizationService.IsUserOrganizationAdminAsync( userId);
+            return result.Success ? Ok(result) : BadRequest(result);
+        }
+
     }
+
 }

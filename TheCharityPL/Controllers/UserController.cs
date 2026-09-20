@@ -55,7 +55,7 @@ namespace TheCharityPL.Controllers
             {
                 _logger.LogInformation("Loading all users");
 
-                var users = await _userService.GetAllUsersAsync();
+                var users = await _userService.GetAllUsersAsync(showDeleted);
 
                 if (!showDeleted)
                     users = users.Where(u => !u.IsDeleted);
@@ -69,7 +69,8 @@ namespace TheCharityPL.Controllers
                     PhoneNumber = u.PhoneNumber,
                     IsDeleted = u.IsDeleted,
                     RegistrationDate = u.RegistrationDate,
-                    EmailConfirmed = u.EmailConfirmed
+                    EmailConfirmed = u.EmailConfirmed,
+                    Address = u.Address,
                 }).OrderByDescending(u => u.RegistrationDate).ToList();
 
                 var api_response=new ServiceResponse<List<UserListResponseDto>> 
@@ -107,28 +108,10 @@ namespace TheCharityPL.Controllers
                     return NotFound(new ServiceResponse { Success = false, Message = $"User with ID '{id}' not found." });
                 }
 
-                var ResponseDto = new UserDetailResponseDto
+                
+                var api_response= new ServiceResponse<UserResponseDTO>
                 {
-                    Id = user.Id,
-                    UserName = user.UserName,
-                    FullName = user.FullName,
-                    Email = user.Email,
-                    PhoneNumber = user.PhoneNumber,
-                    Address = user.Address,
-                    IsDeleted = user.IsDeleted,
-                    DeletedOn = user.DeletedOn,
-                    RegistrationDate = user.RegistrationDate,
-                    UpdatedOn = user.UpdatedOn,
-                    EmailConfirmed = user.EmailConfirmed,
-                    PhoneNumberConfirmed = user.PhoneNumberConfirmed,
-                    TwoFactorEnabled = user.TwoFactorEnabled,
-                    LockoutEnabled = user.LockoutEnabled,
-                    LockoutEnd = user.LockoutEnd,
-                    AccessFailedCount = user.AccessFailedCount
-                };
-                var api_response= new ServiceResponse<UserDetailResponseDto>
-                {
-                    Data = ResponseDto,
+                    Data = user,
                     Success = true,
                     Message = "User details loaded successfully."
                 };

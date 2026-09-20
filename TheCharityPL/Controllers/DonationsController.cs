@@ -203,7 +203,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         // GET api/donations/stats/total-amount
         [HttpGet("stats/total-amount")]
-        [IsSuperAdmin]
+        [AllowAnonymous]
         public async Task<IActionResult> GetTotalAmount()
             => Ok(await _service.GetTotalDonationsAmountAsync());
         /// <summary>
