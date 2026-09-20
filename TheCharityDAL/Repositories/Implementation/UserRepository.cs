@@ -81,10 +81,23 @@ namespace TheCharityDAL.Repositories.Implementation
             return await _userManager.UpdateAsync(user);
         }
 
-        public async Task<IEnumerable<User>?> GetAllUsersAsync()
+        public async Task<IEnumerable<User>?> GetAllUsersAsync(bool showDeleted = false)
         {
-            return await _userManager.Users
-                .ToListAsync();
+            var query = _userManager.Users.AsQueryable();
+
+            if (showDeleted)
+            {
+                // This bypasses the hidden Global Query Filter in your DbContext
+                query = query.IgnoreQueryFilters();
+            }
+            else
+            {
+                // Explicitly filters out deleted users (redundant if you have a global filter, but safe to keep)
+                query = query.Where(u => !u.IsDeleted);
+            }
+
+            return await query.ToListAsync();
+
         }
 
         public async Task<User?> GetUserByIdAsync(string id)

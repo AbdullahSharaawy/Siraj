@@ -18,11 +18,18 @@ namespace TheCharityDAL.Repositories.Implementation
         // ===== CRUD Operations for Abstract Campaign =====
         public async Task<IEnumerable<Campaign>> GetAllCampaignsAsync(bool includeDeleted = false)
         {
-            if (includeDeleted)
-                return await _context.Campaigns.ToListAsync();
+            IQueryable<Campaign> query = _context.Campaigns.AsQueryable();
 
-            return await _context.Campaigns
-                .Where(c => c.IsDeleted == false)
+            if (!includeDeleted)
+            {
+                query = query.Where(c => !c.IsDeleted);
+            }
+
+            return await query
+                // Eager-load Organization for SoloCampaign
+                .Include(c => (c as SoloCampaign).Organization)
+                // Eager-load Organizations collection for SharedCampaign
+                .Include(c => (c as SharedCampaign).Organizations)
                 .ToListAsync();
         }
 
@@ -169,7 +176,10 @@ namespace TheCharityDAL.Repositories.Implementation
             return await _context.Campaigns
                 .IgnoreQueryFilters()
                 .Where(c => c.IsDeleted == true)
+                 .Include(c => (c as SoloCampaign).Organization)
+                .Include(c => (c as SharedCampaign).Organizations)
                 .ToListAsync();
+        
         }
 
         public async Task<IEnumerable<SoloCampaign>> GetSoloCampaignsByOrganizationIdAsync(int organizationId)

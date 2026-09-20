@@ -105,7 +105,7 @@ namespace TheCharityDAL.Repositories.Implementation
 
         public async Task<IEnumerable<Organization>> GetDeletedOrganizationsAsync()
         {
-            return await _context.Organizations
+            return await _context.Organizations.IgnoreQueryFilters()
                 .Where(o => o.IsDeleted == true)
                 .ToListAsync();
         }
@@ -316,6 +316,7 @@ namespace TheCharityDAL.Repositories.Implementation
                 .Include(o => o.PaymentInfo)
                 .Include(o => o.SoloCampaigns.Where(c => c.IsDeleted == false))    
                 .Include(o => o.SharedCampaigns.Where(c => c.IsDeleted == false))
+                .Include(o=>o.AdminUser)
                 .FirstOrDefaultAsync();
         }
 
@@ -570,6 +571,14 @@ namespace TheCharityDAL.Repositories.Implementation
                               !r.IsDeleted);
         }
 
+        public async Task<bool> IsUserOrganizationAdminAsync( string userId)
+        {
+            return await _context.OrganizationRoles
+                .AnyAsync(r => 
+                              r.UserId == userId &&
+                              r.Role == OrganizationRoleType.Admin &&
+                              !r.IsDeleted);
+        }
         public async Task<IEnumerable<OrganizationRole>> GetOrganizationRolesAsync(int organizationId)
         {
             return await _context.OrganizationRoles
