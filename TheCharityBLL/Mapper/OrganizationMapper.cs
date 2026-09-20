@@ -31,7 +31,7 @@ namespace TheCharityBLL.Mapper
                 IsDeleted = organization.IsDeleted,
                 RegistrationDate = organization.RegistrationDate.Value,
                 UpdatedOn = organization.UpdatedOn,
-
+                Description=organization.Description,
                 // ===== Map Admin properties =====
                 AdminUserId = organization.AdminUserId,
                 AdminUserName = organization.AdminUser?.UserName ?? organization.AdminUser?.Email ?? string.Empty,
@@ -64,6 +64,7 @@ namespace TheCharityBLL.Mapper
                 Name = organization.Name,
                 Address = organization.Address,
                 PaymentId = organization.PaymentId,
+                Description=organization.Description,
                 IsDeleted = organization.IsDeleted,
                 RegistrationDate = organization.RegistrationDate.Value,
                 UpdatedOn = organization.UpdatedOn,

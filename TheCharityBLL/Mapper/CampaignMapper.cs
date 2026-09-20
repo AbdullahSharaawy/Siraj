@@ -14,7 +14,7 @@ namespace TheCharityBLL.Mapper
         {
             if (campaign == null) return null!;
 
-            return new CampaignResponseDto
+            var dto= new CampaignResponseDto
             {
                 Id = campaign.Id,
                 OrganizationId = campaign.OrganizationId ?? 0,
@@ -33,6 +33,25 @@ namespace TheCharityBLL.Mapper
                     ? (int)Math.Ceiling((campaign.Deadline.Value - DateTime.Now).TotalDays)
                     : null
             };
+            switch (campaign)
+            {
+                case SoloCampaign solo:
+                    if (solo.Organization != null)
+                    {
+                        dto.OrganizationNames.Add(solo.Organization.Name);
+                    }
+                    break;
+
+                case SharedCampaign shared:
+                    if (shared.Organizations != null && shared.Organizations.Any())
+                    {
+                        dto.OrganizationNames.AddRange(
+                            shared.Organizations.Select(o => o.Name)
+                        );
+                    }
+                    break;
+            }
+            return dto;
         }
 
         public IEnumerable<CampaignResponseDto> MapToResponseDtos(IEnumerable<Campaign> campaigns)
