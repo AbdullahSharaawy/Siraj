@@ -17,6 +17,8 @@ namespace TheCharityBLL.DTOs.OrganizationDTOs
         /// <example>Cairo, Egypt</example>
         [MaxLength(500, ErrorMessage = "Address cannot exceed 500 characters.")]
         public string? Address { get; set; }
+        public string? Description { get; set; }
+
 
     }
 }

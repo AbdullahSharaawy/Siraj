@@ -16,5 +16,6 @@ namespace TheCharityBLL.DTOs.UserResponseDTOs
         public bool IsDeleted { get; set; }
         public DateTime? RegistrationDate { get; set; }
         public bool EmailConfirmed { get; set; }
+       public string? Address { get; set; }
     }
 }

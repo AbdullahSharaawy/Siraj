@@ -13,6 +13,7 @@ namespace TheCharityBLL.DTOs.OrganizationDTOs
 
         /// <example>Cairo, Egypt</example>
         public string? Address { get; set; }
+        public string? Description { get; set; }
 
         public PaymentInfoResponseDto? PaymentInfo { get; set; }
 
