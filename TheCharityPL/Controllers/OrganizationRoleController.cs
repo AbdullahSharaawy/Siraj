@@ -37,14 +37,7 @@ namespace TheCharityPL.Controllers
                 return BadRequest(result);
             return Ok(result);
         }
-        [HttpPut("{organizationId}/organizations/{userId}/users")]
-        public async Task<IActionResult> UpdateOrganizationRole(UpdateOrganizationRoleDto OrganizationRole,string userId, int organizationId)
-        {
-            var result = await _OrganizationRoleService.UpdateAsync(OrganizationRole, userId,organizationId);
-            if (!result.Success)
-                return BadRequest(result);
-            return Ok(result);
-        }
+        
         [HttpGet("{organizationId}/organizations/{userId}/users")]
         public async Task<IActionResult> GetOrganizationRole(string userId, int organizationId)
         {

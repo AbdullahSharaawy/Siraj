@@ -15,7 +15,6 @@ namespace TheCharityBLL.Services.Abstraction.OrganizationAbstraction
         Task<ServiceResponse<OrganizationRoleResponseDto?>> GetByIdAsync(string userId, int OrganizationId);
         Task<ServiceResponse<IEnumerable<OrganizationRoleResponseDto>>> GetAllAsync(QueryParameters query);
         Task<ServiceResponse<OrganizationRoleResponseDto?>> AddOrganizationRoleAsync(CreateOrganizationRoleDto OrganizationRole);
-        Task<ServiceResponse<OrganizationRoleResponseDto?>> UpdateAsync(UpdateOrganizationRoleDto OrganizationRole, string userId, int OrganizationId);
         Task<ServiceResponse<bool>> DeleteAsync(string userId, int organizationId);
     }
 }

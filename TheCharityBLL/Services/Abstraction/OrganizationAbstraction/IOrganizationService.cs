@@ -73,8 +73,9 @@ namespace TheCharityBLL.Services.Abstraction.OrganizationAbstraction
 
         // ===== Organization Admin Management =====
         Task<ServiceResponse<OrganizationResponseDto>> AssignOrganizationAdminAsync(int organizationId, string adminUserId);
-        Task<ServiceResponse<OrganizationResponseDto>> RemoveOrganizationAdminAsync(int organizationId);
-        Task<ServiceResponse<OrganizationResponseDto>> TransferOrganizationAdminAsync(int organizationId, string newAdminUserId);
-        Task<ServiceResponse<UserResponseDTO?>> GetOrganizationAdminAsync(int organizationId);
+        public  Task<ServiceResponse<List<UserResponseDTO>?>> GetOrganizationAdminAsync(int organizationId);
+
+
+
     }
 }

@@ -86,6 +86,7 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<IDonationRepository, DonationRepository>();
             services.AddScoped<IOrganizationRepository, OrganizationRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IOrganizationRoleRepository, OrganizationRoleRepository>();
             // Services Injection
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<ICampaignNotificationService, CampaignNotificationService>();
@@ -97,6 +98,8 @@ namespace TheCharityBLL.Helpers
             services.AddScoped<IPaymobService,PaymobService>();
             services.AddScoped<IPaymentInfoService, PaymentInfoService>();
             services.AddScoped<IUserService, UserService>();
+            // In Program.cs
+            services.AddScoped<IOrganizationRoleService, OrganizationRoleService>();
             // Email Job Services
             services.AddScoped<AutoExpireCampaignsJob>();
             services.AddScoped<CampaignDeadlineReminderJob>();

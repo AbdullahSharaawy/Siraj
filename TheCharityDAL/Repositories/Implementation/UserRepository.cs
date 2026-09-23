@@ -284,8 +284,9 @@ namespace TheCharityDAL.Repositories.Implementation
         public async Task<IEnumerable<Organization>> GetOrganizationsUserManagesAsync(string userId)
         {
             // User is admin of organizations
-            var adminOrgs = await _context.Organizations
-                .Where(o => o.AdminUserId == userId && !o.IsDeleted)
+            var adminOrgs = await _context.OrganizationRoles
+                .Where(o => o.UserId == userId && !o.IsDeleted && o.Role==OrganizationRoleType.Admin)
+                .Select(o => o.Organization)
                 .ToListAsync();
 
             // User is sub-admin of organizations
@@ -319,20 +320,20 @@ namespace TheCharityDAL.Repositories.Implementation
 
         public async Task<IEnumerable<Organization>> GetAllOrganizationsUserHasAccessToAsync(string userId)
         {
-            var adminOrgs = await _context.Organizations
-                .Where(o => o.AdminUserId == userId && !o.IsDeleted)
+            var adminOrgs = await _context.OrganizationRoles
+                .Where(o => o.UserId == userId && !o.IsDeleted && o.Role==OrganizationRoleType.SubAdmin)
+                .Select(o => o.Organization)
                 .ToListAsync();
 
-            var subAdminOrgIds = await _context.OrganizationRoles
+            var subAdminOrgs = await _context.OrganizationRoles
                 .Where(r => r.UserId == userId &&
                            r.Role == OrganizationRoleType.SubAdmin &&
                            !r.IsDeleted)
-                .Select(r => r.OrganizationId)
+                .Select(r => r.Organization)
+
                 .ToListAsync();
 
-            var subAdminOrgs = await _context.Organizations
-                .Where(o => subAdminOrgIds.Contains(o.Id) && !o.IsDeleted)
-                .ToListAsync();
+           
 
             // Add organizations user has donated to (as member)
             var donatedOrgIds = await _context.Donations
@@ -358,8 +359,8 @@ namespace TheCharityDAL.Repositories.Implementation
                 return true;
 
             // Check if user is OrganizationAdmin (OrganizationRole Entity)
-            var isAdmin = await _context.Organizations
-                .AnyAsync(o => o.AdminUserId == userId && !o.IsDeleted);
+            var isAdmin = await _context.OrganizationRoles
+                .AnyAsync(o => o.UserId == userId && !o.IsDeleted);
 
             // Check if user is SubAdmin (OrganizationRole Entity)
             var isSubAdmin = await _context.OrganizationRoles

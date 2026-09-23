@@ -16,5 +16,6 @@ namespace TheCharityBLL.DTOs.CampaignDTOs
         public double? Target { get; set; }
         /// <example>Solo</example>
         public CampaignType? Type { get; set; }
+        public DateTime? Deadline { get; set; }
     }
 }

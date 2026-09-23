@@ -16,9 +16,11 @@ namespace TheCharityPL.Controllers
     public class OrganizationController : ControllerBase
     {
         private readonly IOrganizationService _organizationService;
-        public OrganizationController(IOrganizationService organizationService)
+       
+        public OrganizationController(IOrganizationService organizationService, IOrganizationRoleService organizationRoleService)
         {
             _organizationService = organizationService;
+          
         }
 
         //organization
@@ -431,28 +433,7 @@ namespace TheCharityPL.Controllers
             return result.Success ? Ok(result) : BadRequest(result);
         }
 
-        /// <summary>
-        /// Remove organization admin (SuperAdmin only)
-        /// </summary>
-        [HttpDelete("{orgId}/admin")]
-        [IsSuperAdmin]
-        public async Task<IActionResult> RemoveOrganizationAdmin(int orgId)
-        {
-            var result = await _organizationService.RemoveOrganizationAdminAsync(orgId);
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
-
-        /// <summary>
-        /// Transfer organization admin to another user (SuperAdmin only)
-        /// </summary>
-        [HttpPost("{orgId}/admin/transfer")]
-        [IsSuperAdmin]
-        public async Task<IActionResult> TransferOrganizationAdmin(int orgId, [FromBody] AssignAdminRequest request)
-        {
-            var result = await _organizationService.TransferOrganizationAdminAsync(orgId, request.UserId);
-            return result.Success ? Ok(result) : BadRequest(result);
-        }
-
+    
         /// <summary>
         /// Get organization admin
         /// </summary>

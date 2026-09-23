@@ -82,7 +82,8 @@ namespace TheCharityBLL.Mapper
                 RegistrationDate = campaign.RegistrationDate,
                 UpdatedOn = campaign.UpdatedOn,
                 OrganizationId = campaign.OrganizationId,
-                OrganizationName = campaign.Organization?.Name ?? string.Empty
+                OrganizationName = campaign.Organization?.Name ?? string.Empty,
+                Deadline = campaign.Deadline,
             };
         }
 

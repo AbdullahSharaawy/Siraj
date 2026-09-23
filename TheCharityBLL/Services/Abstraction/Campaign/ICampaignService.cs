@@ -18,7 +18,7 @@ namespace TheCharityBLL.Services.Abstraction.Campaign
         Task<ServiceResponse<SoloCampaignResponseDto>> GetSoloCampaignByIdAsync(int id);
         Task<ServiceResponse<int>> CreateSoloCampaignAsync(CreateSoloCampaignDto createDto);
         Task<ServiceResponse<bool>> UpdateSoloCampaignAsync(UpdateSoloCampaignDto updateDto);
-        Task<ServiceResponse<IEnumerable<SoloCampaignResponseDto>>> GetSoloCampaignsByOrganizationIdAsync(int organizationId);
+        Task<ServiceResponse<IEnumerable<SoloCampaignResponseDto>>> GetSoloCampaignsByOrganizationIdAsync(int organizationId, bool includeDeleted);
         Task<ServiceResponse<IEnumerable<SoloCampaignResponseDto>>> GetSoloCampaignsByStatusAsync(CampaignStatus status);
 
         // ===== Shared Campaign Operations =====
@@ -26,7 +26,7 @@ namespace TheCharityBLL.Services.Abstraction.Campaign
         Task<ServiceResponse<SharedCampaignResponseDto>> GetSharedCampaignByIdAsync(int id);
         Task<ServiceResponse<int>> CreateSharedCampaignAsync(CreateSharedCampaignDto createDto);
         Task<ServiceResponse<bool>> UpdateSharedCampaignAsync(UpdateSharedCampaignDto updateDto);
-        Task<ServiceResponse<IEnumerable<SharedCampaignResponseDto>>> GetSharedCampaignsByOrganizationIdAsync(int organizationId);
+        Task<ServiceResponse<IEnumerable<SharedCampaignResponseDto>>> GetSharedCampaignsByOrganizationIdAsync(int organizationId,bool includeDeleted);
         Task<ServiceResponse<IEnumerable<SharedCampaignResponseDto>>> GetSharedCampaignsByStatusAsync(CampaignStatus status);
 
         // ===== Shared Campaign Organization Management =====

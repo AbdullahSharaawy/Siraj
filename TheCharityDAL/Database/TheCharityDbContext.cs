@@ -59,19 +59,20 @@ namespace TheCharityDAL.Database
                 .HasForeignKey(a => a.DonatedItemId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // 5. Organization - AdminUser relationship
-            builder.Entity<Organization>()
-                .HasOne(o => o.AdminUser)
-                .WithMany()  // No inverse navigation property
-                .HasForeignKey(o => o.AdminUserId)
-                .OnDelete(DeleteBehavior.Restrict); // Prevent accidental admin deletion
 
             // 6. OrganizationRole - User relationship
             builder.Entity<OrganizationRole>()
                 .HasOne(r => r.User)
-                .WithMany()
+                .WithMany(o => o.OrganizationRole)
                 .HasForeignKey(r => r.UserId)
+         
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<OrganizationRole>()
+             .HasOne(r => r.Organization)
+             .WithMany(o => o.OrganizationRoles)
+             .HasForeignKey(r => r.OrganizationId)
+             .OnDelete(DeleteBehavior.Restrict);
 
             // 7. SharedCampaign - CreatorOrganization relationship
             builder.Entity<SharedCampaign>()

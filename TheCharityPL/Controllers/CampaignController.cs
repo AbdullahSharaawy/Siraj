@@ -42,7 +42,7 @@ namespace TheCharityPL.Controllers
         /// <summary>
         /// Get campaign by ID
         /// </summary>
-        [HttpGet("{id:int}")]
+        [HttpGet("deleted")]
         [AllowAnonymous]
         public async Task<IActionResult> GetById(int id)
         {
@@ -130,7 +130,7 @@ namespace TheCharityPL.Controllers
         /// </summary>
         /// <param name="id">Campaign ID</param>
         /// <param name="newDeadline">New deadline date</param>
-        [HttpPatch("{id:int}/extend-deadline")]
+        [HttpPatch("deleted/extend-deadline")]
         [CanManageCampaign] // ← SuperAdmin + OrganizationAdmin + SubAdmin
         public async Task<IActionResult> ExtendDeadline(int id, [FromQuery] DateTime newDeadline)
         {
@@ -167,7 +167,7 @@ namespace TheCharityPL.Controllers
         /// <summary>
         /// Get solo campaign by ID
         /// </summary>
-        [HttpGet("solo/{id:int}")]
+        [HttpGet("solo/deleted")]
         [AllowAnonymous]
         public async Task<IActionResult> GetSoloById(int id)
         {
@@ -191,7 +191,7 @@ namespace TheCharityPL.Controllers
         /// <summary>
         /// Update solo campaign
         /// </summary>
-        [HttpPut("solo/{id:int}")]
+        [HttpPut("solo/deleted")]
         [CanManageCampaign] // ← SuperAdmin + OrganizationAdmin + SubAdmin
         public async Task<IActionResult> UpdateSolo(int id, [FromBody] UpdateSoloCampaignDto dto)
         {
@@ -208,9 +208,9 @@ namespace TheCharityPL.Controllers
         /// </summary>
         [HttpGet("solo/by-organization/{organizationId:int}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetSoloByOrganization(int organizationId)
+        public async Task<IActionResult> GetSoloByOrganization(int organizationId, [FromQuery] bool showDeleted)
         {
-            var result = await _campaignService.GetSoloCampaignsByOrganizationIdAsync(organizationId);
+            var result = await _campaignService.GetSoloCampaignsByOrganizationIdAsync(organizationId,showDeleted);
             return HandleResponse(result);
         }
 
@@ -232,7 +232,7 @@ namespace TheCharityPL.Controllers
         /// <summary>
         /// Get shared campaign by ID
         /// </summary>
-        [HttpGet("shared/{id:int}")]
+        [HttpGet("shared/deleted")]
         [AllowAnonymous]
         public async Task<IActionResult> GetSharedById(int id)
         {
@@ -256,7 +256,7 @@ namespace TheCharityPL.Controllers
         /// <summary>
         /// Update shared campaign
         /// </summary>
-        [HttpPut("shared/{id:int}")]
+        [HttpPut("shared/deleted")]
         [CanManageCampaign] // ← SuperAdmin + OrganizationAdmin + SubAdmin
         public async Task<IActionResult> UpdateShared(int id, [FromBody] UpdateSharedCampaignDto dto)
         {
@@ -270,9 +270,9 @@ namespace TheCharityPL.Controllers
         /// </summary>
         [HttpGet("shared/by-organization/{organizationId:int}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetSharedByOrganization(int organizationId)
+        public async Task<IActionResult> GetSharedByOrganization(int organizationId, [FromQuery] bool showDeleted)
         {
-            var result = await _campaignService.GetSharedCampaignsByOrganizationIdAsync(organizationId);
+            var result = await _campaignService.GetSharedCampaignsByOrganizationIdAsync(organizationId,showDeleted);
             return HandleResponse(result);
         }
 

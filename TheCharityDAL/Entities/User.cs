@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TheCharityDAL.Entities
 {
@@ -12,7 +13,9 @@ namespace TheCharityDAL.Entities
         public DateTime? RegistrationDate { get; private set; } = DateTime.Now;
         public DateTime? UpdatedOn { get; private set; }
         public string? Address { get; private set; }
-      
+        public int? OrganizationRoleId { get; private set; }
+        [ForeignKey(nameof(OrganizationRoleId))]
+        public ICollection<OrganizationRole>? OrganizationRole { get;  set; } = new List<OrganizationRole>();
         public User() { }
         public User(string? userName,string? FullName, string? email, string? imgPath,string? Phone,string? Address )
         {
@@ -32,6 +35,7 @@ namespace TheCharityDAL.Entities
                 this.UpdatedOn = DateTime.Now;
             }
         }
+       
         public void EditImage(string? imgPath)
         {
             if (!string.IsNullOrEmpty(imgPath))

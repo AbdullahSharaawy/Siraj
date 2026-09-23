@@ -30,7 +30,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
 
 
-            OrganizationRole result = await _OrganizationRoleRepository.AddOrganizationRoleAsync(mappedEntity);
+            OrganizationRole result = await _OrganizationRoleRepository.AddOrganizationRoleAsync(mappedEntity.OrganizationId, mappedEntity.UserId,mappedEntity.Role);
 
             if (result == null)
             {
@@ -123,42 +123,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
             };
         }
 
-        public async Task<ServiceResponse<OrganizationRoleResponseDto>> UpdateAsync(UpdateOrganizationRoleDto OrganizationRole, string userId, int OrganizationId)
-        {
-            OrganizationRole currentOrganizationRole = await _OrganizationRoleRepository.GetByIdAsync(userId, OrganizationId);
-            if (currentOrganizationRole == null)
-            {
-                return new ServiceResponse<OrganizationRoleResponseDto>
-                {
-                    Data = null,
-                    Message = "OrganizationRole not found.",
-                    Success = false
-                };
-            }
-            new UpdateOrganizationRole().MapToOrganizationRole(OrganizationRole, currentOrganizationRole);
-            currentOrganizationRole.UpdatedOn = DateTime.UtcNow;
-
-            OrganizationRole result = await _OrganizationRoleRepository.UpdateAsync(currentOrganizationRole);
-            if (result == null)
-            {
-                return new ServiceResponse<OrganizationRoleResponseDto>
-                {
-                    Data = null,
-                    Message = "Failed to update the OrganizationRole.",
-                    Success = false
-                };
-            }
-
-
-            return new ServiceResponse<OrganizationRoleResponseDto>
-            {
-                Data = new OrganizationRoleResponse().MapToOrganizationRoleResponseDto(result),
-                Message = "The OrganizationRole was updated successfully.",
-                Success = true
-            };
-        }
-
-
+       
 
 
     }

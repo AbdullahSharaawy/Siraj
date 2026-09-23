@@ -11,6 +11,7 @@ namespace TheCharityBLL.Services.Implementation
     {
         private readonly IEmailService _emailService;
         private readonly IOrganizationRepository _organizationRepository;
+        private readonly IOrganizationRoleRepository _organizationRoleRepository;
         private readonly IUserRepository _userRepository;
         private readonly ICampaignRepository _campaignRepository;
         private readonly ILogger<CampaignNotificationService> _logger;
@@ -20,13 +21,15 @@ namespace TheCharityBLL.Services.Implementation
             IOrganizationRepository organizationRepository,
             IUserRepository userRepository,
             ICampaignRepository campaignRepository,
-            ILogger<CampaignNotificationService> logger)
+            ILogger<CampaignNotificationService> logger,
+            IOrganizationRoleRepository organizationRoleRepository)
         {
             _emailService = emailService;
             _organizationRepository = organizationRepository;
             _userRepository = userRepository;
             _campaignRepository = campaignRepository;
             _logger = logger;
+            _organizationRoleRepository = organizationRoleRepository;
         }
 
         /// <summary>
@@ -49,10 +52,14 @@ namespace TheCharityBLL.Services.Implementation
             if (!organizationId.HasValue) return recipients;
 
             // 2. Get Organization Admin
-            var admin = await _organizationRepository.GetOrganizationAdminAsync(organizationId.Value);
-            if (admin != null && !string.IsNullOrEmpty(admin.Email))
+            var admins = await _organizationRoleRepository.GetOrganizationAdminsAsync(organizationId.Value);
+           foreach(var admin in admins)
             {
-                recipients.Add(admin.Email);
+                if (admin != null && !string.IsNullOrEmpty(admin.Email))
+                {
+                    recipients.Add(admin.Email);
+                }
+
             }
 
             // 3. Get Organization Sub-Admins

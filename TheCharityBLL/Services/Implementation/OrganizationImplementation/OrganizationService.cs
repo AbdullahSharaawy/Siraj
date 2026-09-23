@@ -6,6 +6,7 @@ using TheCharityBLL.DTOs.OrganizationRoleDTOs;
 using TheCharityBLL.DTOs.PaymentInfoDTOs;
 using TheCharityBLL.DTOs.UserDTOs;
 using TheCharityBLL.Mapper;
+using TheCharityBLL.Mapper.UserMapper;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityBLL.Services.Abstraction.OrganizationAbstraction;
 using TheCharityDAL.Enums;
@@ -16,22 +17,24 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 {
     public class OrganizationService : IOrganizationService
     {
-        private readonly IOrganizationRepository _repository;
+        private readonly IOrganizationRepository organizationRepository;
+        private readonly IOrganizationRoleRepository _organizationRoleRepository;
         private readonly IAuthorizationService _authorizationService;
         private readonly IUserService _userService;
         private readonly ILogger<OrganizationService> _logger;
         private readonly OrganizationMapper _mapper;
-        public OrganizationService(IOrganizationRepository repository, IAuthorizationService authorizationService, IUserService userService, ILogger<OrganizationService> logger)
+        public OrganizationService(IOrganizationRepository repository, IAuthorizationService authorizationService, IUserService userService, ILogger<OrganizationService> logger, IOrganizationRoleRepository organizationRoleRepository)
         {
-            _repository = repository;
+            organizationRepository = repository;
             _mapper = new OrganizationMapper();
             _authorizationService = authorizationService;
             _userService = userService;
             _logger = logger;
+            _organizationRoleRepository = organizationRoleRepository;
         }
         public async Task<ServiceResponse<OrgContactMethodResponseDto>> CreateContactMethod(CreateOrgContactMethodDto contactMethod)
         {
-            if (!await _repository.OrganizationExistsAsync(contactMethod.CompanyId))
+            if (!await organizationRepository.OrganizationExistsAsync(contactMethod.CompanyId))
             {
                 return new ServiceResponse<OrgContactMethodResponseDto>
                 {
@@ -39,7 +42,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                     Message = $"Organization with ID {contactMethod.CompanyId} not found."
                 };
             }
-            if (await _repository.ContactMethodExistsAsync(contactMethod.CompanyId, contactMethod.Type, contactMethod.Value))
+            if (await organizationRepository.ContactMethodExistsAsync(contactMethod.CompanyId, contactMethod.Type, contactMethod.Value))
             {
                 return new ServiceResponse<OrgContactMethodResponseDto>
                 {
@@ -48,7 +51,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                 };
             }
             var organizationContact = _mapper.MapToOrganizationContactMethod(contactMethod);
-            var createdContactMethod = await _repository.AddContactMethodAsync(organizationContact);
+            var createdContactMethod = await organizationRepository.AddContactMethodAsync(organizationContact);
             var contactMethodResponseDto = _mapper.MapToOrganizationContactMethodResponseDto(createdContactMethod);
             return new ServiceResponse<OrgContactMethodResponseDto>
             {
@@ -60,7 +63,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<OrganizationResponseDto>> CreateOrganization(CreateOrganizationDto organizationDto)
         {
-            if (await _repository.OrganizationNameExistsAsync(organizationDto.Name))
+            if (await organizationRepository.OrganizationNameExistsAsync(organizationDto.Name))
             {
                 return new ServiceResponse<OrganizationResponseDto>
                 {
@@ -69,7 +72,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                 };
             }
             var organization = _mapper.MapToOrganization(organizationDto);
-            var createdOrganization = await _repository.AddOrganizationAsync(organization);
+            var createdOrganization = await organizationRepository.AddOrganizationAsync(organization);
             var organizationResponceDto = _mapper.MapToOrganizationResponseDto(createdOrganization);
             return new ServiceResponse<OrganizationResponseDto>
             {
@@ -81,7 +84,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         //public async Task<ServiceResponse<PaymentInfoResponseDto>> CreatePaymentInfo(CreatePaymentInfoDto paymentInfo)
         //{
-        //    if (!await _repository.OrganizationExistsAsync(paymentInfo.OrganizationId))
+        //    if (!await organizationRepository.OrganizationExistsAsync(paymentInfo.OrganizationId))
         //    {
         //        return new ServiceResponse<PaymentInfoResponseDto>
         //        {
@@ -90,7 +93,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
         //        };
         //    }
 
-        //    if (await _repository.HasPaymentInfoAsync(paymentInfo.OrganizationId))
+        //    if (await organizationRepository.HasPaymentInfoAsync(paymentInfo.OrganizationId))
         //    {
         //        return new ServiceResponse<PaymentInfoResponseDto>
         //        {
@@ -99,7 +102,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
         //        };
         //    }
         //    var payment = _mapper.MapToPaymentInfo(paymentInfo);
-        //    var createPayment = await _repository.AddPaymentInfoAsync(payment);
+        //    var createPayment = await organizationRepository.AddPaymentInfoAsync(payment);
         //    var paymentDto = _mapper.MapToPaymentInfoResponseDto(createPayment);
         //    return new ServiceResponse<PaymentInfoResponseDto>
         //    {
@@ -111,7 +114,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<bool>> DeleteContactMethod(int contactMethodId)
         {
-            if (await _repository.GetContactMethodByIdAsync(contactMethodId) == null)
+            if (await organizationRepository.GetContactMethodByIdAsync(contactMethodId) == null)
             {
                 return new ServiceResponse<bool>
                 {
@@ -119,7 +122,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                     Message = $"Contact method with ID {contactMethodId} not found.",
                 };
             }
-            await _repository.DeleteContactMethodAsync(contactMethodId);
+            await organizationRepository.DeleteContactMethodAsync(contactMethodId);
             return new ServiceResponse<bool>
             {
                 Success = true,
@@ -129,7 +132,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<bool>> DeleteOrganization(int id)
         {
-            if (!await _repository.OrganizationExistsAsync(id))
+            if (!await organizationRepository.OrganizationExistsAsync(id))
             {
                 return new ServiceResponse<bool>
                 {
@@ -137,7 +140,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                     Message = $"Organization with ID {id} not found.",
                 };
             }
-            await _repository.DeleteOrganizationAsync(id);
+            await organizationRepository.DeleteOrganizationAsync(id);
             return new ServiceResponse<bool>
             {
                 Success = true,
@@ -148,7 +151,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         //public async Task<ServiceResponse<bool>> DeletePaymentInfo(int paymentInfoId)
         //{
-        //    var paymentInfo = await _repository.GetPaymentInfoByIdAsync(paymentInfoId);
+        //    var paymentInfo = await organizationRepository.GetPaymentInfoByIdAsync(paymentInfoId);
         //    if (paymentInfo == null)
         //    {
         //        return new ServiceResponse<bool>
@@ -158,7 +161,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
         //        };
         //    }
 
-        //    await _repository.DeletePaymentInfoAsync(paymentInfoId);
+        //    await organizationRepository.DeletePaymentInfoAsync(paymentInfoId);
         //    return new ServiceResponse<bool>
         //    {
         //        Success = true,
@@ -168,7 +171,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<int>> GetActiveOrganizationsCount()
         {
-            var activeCount = await _repository.GetActiveOrganizationsCountAsync();
+            var activeCount = await organizationRepository.GetActiveOrganizationsCountAsync();
             return new ServiceResponse<int>
             {
                 Success = true,
@@ -179,7 +182,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<IEnumerable<OrganizationResponseDto>>> GetAllOrganizations(bool includeDeleted = false)
         {
-            var organizations = await _repository.GetAllOrganizationsAsync(includeDeleted);
+            var organizations = await organizationRepository.GetAllOrganizationsAsync(includeDeleted);
             var organizationDtos = _mapper.MapToOrganizationResponseDtos(organizations);
             return new ServiceResponse<IEnumerable<OrganizationResponseDto>>
             {
@@ -191,7 +194,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<OrgContactMethodResponseDto>> GetContactMethodById(int contactMethodId)
         {
-            var contactMethod = await _repository.GetContactMethodByIdAsync(contactMethodId);
+            var contactMethod = await organizationRepository.GetContactMethodByIdAsync(contactMethodId);
             if (contactMethod == null)
             {
                 return new ServiceResponse<OrgContactMethodResponseDto>
@@ -211,7 +214,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<int>> GetContactMethodCountByType(int organizationId, ContactType type)
         {
-            if (!await _repository.OrganizationExistsAsync(organizationId))
+            if (!await organizationRepository.OrganizationExistsAsync(organizationId))
             {
                 return new ServiceResponse<int>
                 {
@@ -219,7 +222,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                     Message = $"Organization with ID {organizationId} not found.",
                 };
             }
-            var count = await _repository.GetContactMethodCountByTypeAsync(organizationId, type);
+            var count = await organizationRepository.GetContactMethodCountByTypeAsync(organizationId, type);
             return new ServiceResponse<int>
             {
                 Success = true,
@@ -230,7 +233,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<IEnumerable<OrgContactMethodResponseDto>>> GetContactMethodsByType(int organizationId, ContactType type)
         {
-            if (!await _repository.OrganizationExistsAsync(organizationId))
+            if (!await organizationRepository.OrganizationExistsAsync(organizationId))
             {
                 return new ServiceResponse<IEnumerable<OrgContactMethodResponseDto>>
                 {
@@ -238,7 +241,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                     Message = $"Organization with ID {organizationId} not found.",
                 };
             }
-            var contactMethods = await _repository.GetContactMethodsByTypeAsync(organizationId, type);
+            var contactMethods = await organizationRepository.GetContactMethodsByTypeAsync(organizationId, type);
             if (!contactMethods.Any())
             {
                 return new ServiceResponse<IEnumerable<OrgContactMethodResponseDto>>
@@ -259,7 +262,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<IEnumerable<OrganizationResponseDto>>> GetDeletedOrganizations()
         {
-            var deletedOrganizations = await _repository.GetDeletedOrganizationsAsync();
+            var deletedOrganizations = await organizationRepository.GetDeletedOrganizationsAsync();
             var organizationDtos = _mapper.MapToOrganizationResponseDtos(deletedOrganizations);
             return new ServiceResponse<IEnumerable<OrganizationResponseDto>>
             {
@@ -271,7 +274,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<OrganizationResponseDto>> GetOrganizationById(int id)
         {
-            var organization = await _repository.GetOrganizationByIdAsync(id);
+            var organization = await organizationRepository.GetOrganizationByIdAsync(id);
             if (organization == null)
             {
                 return new ServiceResponse<OrganizationResponseDto>
@@ -299,7 +302,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                     Message = "Organization name cannot be empty."
                 };
             }
-            var organization = await _repository.GetOrganizationByNameAsync(name);
+            var organization = await organizationRepository.GetOrganizationByNameAsync(name);
             if (organization == null)
             {
                 return new ServiceResponse<OrganizationResponseDto>
@@ -319,7 +322,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<IEnumerable<OrgContactMethodResponseDto>>> GetOrganizationContactMethods(int organizationId)
         {
-            if (!await _repository.OrganizationExistsAsync(organizationId))
+            if (!await organizationRepository.OrganizationExistsAsync(organizationId))
             {
                 return new ServiceResponse<IEnumerable<OrgContactMethodResponseDto>>
                 {
@@ -327,7 +330,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                     Message = $"Organization with ID {organizationId} not found.",
                 };
             }
-            var contactMethods = await _repository.GetOrganizationContactMethodsAsync(organizationId);
+            var contactMethods = await organizationRepository.GetOrganizationContactMethodsAsync(organizationId);
             if (!contactMethods.Any())
             {
                 return new ServiceResponse<IEnumerable<OrgContactMethodResponseDto>>
@@ -348,7 +351,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<Dictionary<int, DateTime>>> GetOrganizationLastPaymentUpdate()
         {
-            var result = await _repository.GetOrganizationLastPaymentUpdateAsync();
+            var result = await organizationRepository.GetOrganizationLastPaymentUpdateAsync();
 
             return new ServiceResponse<Dictionary<int, DateTime>>
             {
@@ -360,7 +363,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<IEnumerable<OrganizationResponseDto>>> GetOrganizationsByAddress(string address)
         {
-            var organizations = await _repository.GetOrganizationsByAddressAsync(address);
+            var organizations = await organizationRepository.GetOrganizationsByAddressAsync(address);
             if (!organizations.Any())
             {
                 return new ServiceResponse<IEnumerable<OrganizationResponseDto>>
@@ -389,7 +392,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                     Message = "Please enter valid camings count"
                 };
             }
-            var organizations = await _repository.GetOrganizationsByCampaignCountAsync(minCampaigns);
+            var organizations = await organizationRepository.GetOrganizationsByCampaignCountAsync(minCampaigns);
             var organizationDtos = _mapper.MapToOrganizationResponseDtos(organizations);
             return new ServiceResponse<IEnumerable<OrganizationResponseDto>>
             {
@@ -401,7 +404,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<IEnumerable<OrganizationResponseDto>>> GetOrganizationsByContactType(ContactType type)
         {
-            var organizations = await _repository.GetOrganizationsByContactTypeAsync(type);
+            var organizations = await organizationRepository.GetOrganizationsByContactTypeAsync(type);
             if (!organizations.Any())
             {
                 return new ServiceResponse<IEnumerable<OrganizationResponseDto>>
@@ -422,7 +425,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<IEnumerable<OrganizationDropDownListDto>>> GetOrganizationsDropDown()
         {
-            var organizations = await _repository.GetOrganizationsDropDownAsync();
+            var organizations = await organizationRepository.GetOrganizationsDropDownAsync();
             var organizationDtos = _mapper.MapToOrganizationDropDownListDtos(organizations);
             return new ServiceResponse<IEnumerable<OrganizationDropDownListDto>>
             {
@@ -434,7 +437,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<IEnumerable<OrganizationResponseDto>>> GetOrganizationsWithActiveCampaigns()
         {
-            var organizations = await _repository.GetOrganizationsWithActiveCampaignsAsync();
+            var organizations = await organizationRepository.GetOrganizationsWithActiveCampaignsAsync();
             if (!organizations.Any())
             {
                 return new ServiceResponse<IEnumerable<OrganizationResponseDto>>
@@ -455,7 +458,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<IEnumerable<OrganizationResponseDto>>> GetOrganizationsWithCompletedCampaigns()
         {
-            var organizations = await _repository.GetOrganizationsWithCompletedCampaignsAsync();
+            var organizations = await organizationRepository.GetOrganizationsWithCompletedCampaignsAsync();
             if (!organizations.Any())
             {
                 return new ServiceResponse<IEnumerable<OrganizationResponseDto>>
@@ -476,7 +479,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<IEnumerable<OrganizationResponseDto>>> GetOrganizationsWithoutCampaigns()
         {
-            var organizations = await _repository.GetOrganizationsWithoutCampaignsAsync();
+            var organizations = await organizationRepository.GetOrganizationsWithoutCampaignsAsync();
             if (!organizations.Any())
             {
                 return new ServiceResponse<IEnumerable<OrganizationResponseDto>>
@@ -497,7 +500,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<IEnumerable<OrganizationResponseDto>>> GetOrganizationsWithoutPaymentInfo()
         {
-            var organizations = await _repository.GetOrganizationsWithoutPaymentInfoAsync();
+            var organizations = await organizationRepository.GetOrganizationsWithoutPaymentInfoAsync();
             if (!organizations.Any())
             {
                 return new ServiceResponse<IEnumerable<OrganizationResponseDto>>
@@ -518,7 +521,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<IEnumerable<OrganizationResponseDto>>> GetOrganizationsWithValidPaymentInfo()
         {
-            var organizations = await _repository.GetOrganizationsWithValidPaymentInfoAsync();
+            var organizations = await organizationRepository.GetOrganizationsWithValidPaymentInfoAsync();
             if (!organizations.Any())
             {
                 return new ServiceResponse<IEnumerable<OrganizationResponseDto>>
@@ -539,7 +542,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<OrganizationDetailsDto>> GetOrganizationDetails(int id)
         {
-            var organization = await _repository.GetOrganizationWithDetailsAsync(id);
+            var organization = await organizationRepository.GetOrganizationWithDetailsAsync(id);
             if (organization == null)
             {
                 return new ServiceResponse<OrganizationDetailsDto>
@@ -559,7 +562,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<PaymentInfoResponseDto>> GetPaymentInfoById(int paymentInfoId)
         {
-            var paymentInfo = await _repository.GetPaymentInfoByIdAsync(paymentInfoId);
+            var paymentInfo = await organizationRepository.GetPaymentInfoByIdAsync(paymentInfoId);
             if (paymentInfo == null)
             {
                 return new ServiceResponse<PaymentInfoResponseDto>
@@ -579,7 +582,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         //public async Task<ServiceResponse<PaymentInfoResponseDto>> GetPaymentInfoByOrganizationId(int organizationId)
         //{
-        //    if (!await _repository.OrganizationExistsAsync(organizationId))
+        //    if (!await organizationRepository.OrganizationExistsAsync(organizationId))
         //    {
         //        return new ServiceResponse<PaymentInfoResponseDto>
         //        {
@@ -587,7 +590,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
         //            Message = $"Organization with ID {organizationId} not found."
         //        };
         //    }
-        //    var payment = await _repository.GetPaymentInfoByOrganizationIdAsync(organizationId);
+        //    var payment = await organizationRepository.GetPaymentInfoByOrganizationIdAsync(organizationId);
         //    if (payment == null)
         //    {
         //        return new ServiceResponse<PaymentInfoResponseDto>
@@ -615,7 +618,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                     Message = "Please enter valid day"
                 };
             }
-            var organizations = await _repository.GetRecentlyRegisteredOrganizationsAsync(days);
+            var organizations = await organizationRepository.GetRecentlyRegisteredOrganizationsAsync(days);
             if (!organizations.Any())
             {
                 return new ServiceResponse<IEnumerable<OrganizationResponseDto>>
@@ -636,7 +639,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<int>> GetTotalOrganizationsCount()
         {
-            var totalCount = await _repository.GetTotalOrganizationsCountAsync();
+            var totalCount = await organizationRepository.GetTotalOrganizationsCountAsync();
             return new ServiceResponse<int>
             {
                 Success = true,
@@ -651,7 +654,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
             try
             {
                 _logger.LogInformation("Restoring contact method  with ID: {id}", contactMethodId);
-                bool result = await _repository.RestoreContactMethodAsync(contactMethodId);
+                bool result = await organizationRepository.RestoreContactMethodAsync(contactMethodId);
 
                 if (result)
                 {
@@ -678,7 +681,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
             try
             {
                 _logger.LogInformation("Restoring organization with ID: {id}", id);
-                bool result = await _repository.RestoreOrganizationAsync(id);
+                bool result = await organizationRepository.RestoreOrganizationAsync(id);
 
                 if (result)
                 {
@@ -701,7 +704,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         //public async Task<ServiceResponse<bool>> RestorePaymentInfo(int paymentInfoId)
         //{
-        //    if (await _repository.GetPaymentInfoByIdAsync(paymentInfoId) == null)
+        //    if (await organizationRepository.GetPaymentInfoByIdAsync(paymentInfoId) == null)
         //    {
         //        return new ServiceResponse<bool>
         //        {
@@ -710,7 +713,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
         //        };
         //    }
 
-        //    await _repository.RestorePaymentInfoAsync(paymentInfoId);
+        //    await organizationRepository.RestorePaymentInfoAsync(paymentInfoId);
         //    return new ServiceResponse<bool>
         //    {
         //        Success = true,
@@ -728,7 +731,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                     Message = "Search term cannot be empty."
                 };
             }
-            var organizations = await _repository.SearchOrganizationsAsync(searchTerm);
+            var organizations = await organizationRepository.SearchOrganizationsAsync(searchTerm);
             if (!organizations.Any())
             {
                 return new ServiceResponse<IEnumerable<OrganizationResponseDto>>
@@ -749,7 +752,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<OrgContactMethodResponseDto>> UpdateContactMethod(int id, UpdateOrgContactMethodDto contactMethod)
         {
-            var existcontactMethod = await _repository.GetContactMethodByIdAsync(id);
+            var existcontactMethod = await organizationRepository.GetContactMethodByIdAsync(id);
             if (existcontactMethod == null)
             {
                 return new ServiceResponse<OrgContactMethodResponseDto>
@@ -760,7 +763,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
             }
             if (existcontactMethod.Value != contactMethod.Value || existcontactMethod.Type != contactMethod.Type)
             {
-                if (await _repository.ContactMethodExistsAsync((int)existcontactMethod.CompanyId, (ContactType)contactMethod.Type, contactMethod.Value))
+                if (await organizationRepository.ContactMethodExistsAsync((int)existcontactMethod.CompanyId, (ContactType)contactMethod.Type, contactMethod.Value))
                 {
                     return new ServiceResponse<OrgContactMethodResponseDto>
                     {
@@ -773,7 +776,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
             existcontactMethod.EditValue(contactMethod.Value);
             existcontactMethod.EditType(contactMethod.Type);
-            var update = await _repository.UpdateContactMethodAsync(existcontactMethod);
+            var update = await organizationRepository.UpdateContactMethodAsync(existcontactMethod);
             var conatctDto = _mapper.MapToOrganizationContactMethodResponseDto(update);
             return new ServiceResponse<OrgContactMethodResponseDto>
             {
@@ -785,7 +788,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         public async Task<ServiceResponse<OrganizationResponseDto>> UpdateOrganization(int id, UpdateOrganizationDto organization)
         {
-            var existingOrganization = await _repository.GetOrganizationByIdAsync(id);
+            var existingOrganization = await organizationRepository.GetOrganizationByIdAsync(id);
             if (existingOrganization == null)
             {
                 return new ServiceResponse<OrganizationResponseDto>
@@ -796,7 +799,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
             }
             if (!string.IsNullOrWhiteSpace(organization.Name) && existingOrganization.Name != organization.Name)
             {
-                if (await _repository.OrganizationNameExistsAsync(organization.Name))
+                if (await organizationRepository.OrganizationNameExistsAsync(organization.Name))
                 {
                     return new ServiceResponse<OrganizationResponseDto>
                     {
@@ -814,7 +817,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
             {
                 existingOrganization.EditDescription(organization.Description);
             }
-            var updateOrganization = await _repository.UpdateOrganizationAsync(existingOrganization);
+            var updateOrganization = await organizationRepository.UpdateOrganizationAsync(existingOrganization);
             var organizationDto = _mapper.MapToOrganizationResponseDto(updateOrganization);
             return new ServiceResponse<OrganizationResponseDto>
             {
@@ -826,7 +829,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         //public async Task<ServiceResponse<PaymentInfoResponseDto>> UpdatePaymentInfo(int id,UpdatePaymentInfoDto paymentInfo)
         //{
-        //    var existingPayment = await _repository.GetPaymentInfoByIdAsync(id);
+        //    var existingPayment = await organizationRepository.GetPaymentInfoByIdAsync(id);
         //    if (existingPayment == null)
         //    {
         //        return new ServiceResponse<PaymentInfoResponseDto>
@@ -847,7 +850,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
         //    if (!string.IsNullOrEmpty(paymentInfo.HmacKey))
         //        existingPayment.EditHmacKey(paymentInfo.HmacKey);
 
-        //    var updatedPayment = await _repository.UpdatePaymentInfoAsync(existingPayment);
+        //    var updatedPayment = await organizationRepository.UpdatePaymentInfoAsync(existingPayment);
 
         //    var paymentDto = _mapper.MapToPaymentInfoResponseDto(updatedPayment);
 
@@ -865,7 +868,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
             try
             {
                 // Check if organization exists
-                var organization = await _repository.GetOrganizationByIdAsync(organizationId);
+                var organization = await organizationRepository.GetOrganizationByIdAsync(organizationId);
                 if (organization == null)
                 {
                     return new ServiceResponse<OrganizationRoleResponseDto>
@@ -898,7 +901,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                 }
 
                 // Add sub-admin role
-                var role = await _repository.AddSubAdminAsync(organizationId, userId);
+                var role = await _organizationRoleRepository.AddOrganizationRoleAsync(organizationId, userId,OrganizationRoleType.SubAdmin);
 
                 var response = new OrganizationRoleResponseDto
                 {
@@ -933,7 +936,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
             try
             {
                 // Check if organization exists
-                var organization = await _repository.GetOrganizationByIdAsync(organizationId);
+                var organization = await organizationRepository.GetOrganizationByIdAsync(organizationId);
                 if (organization == null)
                 {
                     return new ServiceResponse<bool>
@@ -944,7 +947,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                 }
 
                 // Check if user is actually a sub-admin
-                var isSubAdmin = await _repository.IsUserSubAdminAsync(organizationId, userId);
+                var isSubAdmin = await _organizationRoleRepository.IsUserSubAdminAsync(organizationId, userId);
                 if (!isSubAdmin)
                 {
                     return new ServiceResponse<bool>
@@ -955,7 +958,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                 }
 
                 // Remove sub-admin role
-                await _repository.RemoveSubAdminAsync(organizationId, userId);
+                await _organizationRoleRepository.DeleteAsync(userId,organizationId);
 
                 return new ServiceResponse<bool>
                 {
@@ -979,7 +982,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
             try
             {
                 // Check if organization exists
-                var organization = await _repository.GetOrganizationByIdAsync(organizationId);
+                var organization = await organizationRepository.GetOrganizationByIdAsync(organizationId);
                 if (organization == null)
                 {
                     return new ServiceResponse<IEnumerable<UserResponseDTO>>
@@ -989,7 +992,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                     };
                 }
 
-                var users = await _repository.GetOrganizationSubAdminsAsync(organizationId);
+                var users = await organizationRepository.GetOrganizationSubAdminsAsync(organizationId);
 
                 var response = users.Select(u => new UserResponseDTO
                 {
@@ -1025,7 +1028,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
             try
             {
                 // Check if organization exists
-                var organization = await _repository.GetOrganizationByIdAsync(organizationId);
+                var organization = await organizationRepository.GetOrganizationByIdAsync(organizationId);
                 if (organization == null)
                 {
                     return new ServiceResponse<bool>
@@ -1035,7 +1038,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                     };
                 }
 
-                var isSubAdmin = await _repository.IsUserSubAdminAsync(organizationId, userId);
+                var isSubAdmin = await _organizationRoleRepository.IsUserSubAdminAsync(organizationId, userId);
 
                 return new ServiceResponse<bool>
                 {
@@ -1059,7 +1062,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
             try
             {
                
-                var isOrganizationAdmin = await _repository.IsUserOrganizationAdminAsync(userId);
+                var isOrganizationAdmin = await _organizationRoleRepository.IsUserOrganizationAdminAsync(userId);
 
                 return new ServiceResponse<bool>
                 {
@@ -1085,7 +1088,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
             try
             {
                 // Check if organization exists
-                var organization = await _repository.GetOrganizationByIdAsync(organizationId);
+                var organization = await organizationRepository.GetOrganizationByIdAsync(organizationId);
                 if (organization == null)
                 {
                     return new ServiceResponse<OrganizationResponseDto>
@@ -1107,20 +1110,18 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                 }
 
                 // Check if user is already a sub-admin and remove that role first
-                var isSubAdmin = await _repository.IsUserSubAdminAsync(organizationId, adminUserId);
+                var isSubAdmin = await _organizationRoleRepository.IsUserSubAdminAsync(organizationId, adminUserId);
                 if (isSubAdmin)
                 {
-                    await _repository.RemoveSubAdminAsync(organizationId, adminUserId);
+                    await _organizationRoleRepository.DeleteAsync(adminUserId,organizationId);
                 }
 
                 // Assign as admin
-                var updatedOrg = await _repository.AssignOrganizationAdminAsync(organizationId, adminUserId);
-                var response = _mapper.MapToOrganizationResponseDto(updatedOrg);
-
+                await _organizationRoleRepository.AddOrganizationRoleAsync(organizationId, adminUserId,OrganizationRoleType.Admin);
+               
                 return new ServiceResponse<OrganizationResponseDto>
                 {
                     Success = true,
-                    Data = response,
                     Message = "Organization admin assigned successfully."
                 };
             }
@@ -1134,135 +1135,38 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
             }
         }
 
-        public async Task<ServiceResponse<OrganizationResponseDto>> RemoveOrganizationAdminAsync(int organizationId)
+       
+      
+        public async Task<ServiceResponse<List<UserResponseDTO>?>> GetOrganizationAdminAsync(int organizationId)
         {
             try
             {
                 // Check if organization exists
-                var organization = await _repository.GetOrganizationByIdAsync(organizationId);
+                var organization = await organizationRepository.GetOrganizationByIdAsync(organizationId);
                 if (organization == null)
                 {
-                    return new ServiceResponse<OrganizationResponseDto>
+                    return new ServiceResponse<List<UserResponseDTO>?>
                     {
                         Success = false,
                         Message = $"Organization with ID {organizationId} not found."
                     };
                 }
 
-                var updatedOrg = await _repository.RemoveOrganizationAdminAsync(organizationId);
-                var response = _mapper.MapToOrganizationResponseDto(updatedOrg);
+                var admins = await _organizationRoleRepository.GetOrganizationAdminsAsync(organizationId);
 
-                return new ServiceResponse<OrganizationResponseDto>
+                if (admins == null)
                 {
-                    Success = true,
-                    Data = response,
-                    Message = "Organization admin removed successfully."
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ServiceResponse<OrganizationResponseDto>
-                {
-                    Success = false,
-                    Message = $"Error removing organization admin: {ex.Message}"
-                };
-            }
-        }
-
-        public async Task<ServiceResponse<OrganizationResponseDto>> TransferOrganizationAdminAsync(int organizationId, string newAdminUserId)
-        {
-            try
-            {
-                // Check if organization exists
-                var organization = await _repository.GetOrganizationByIdAsync(organizationId);
-                if (organization == null)
-                {
-                    return new ServiceResponse<OrganizationResponseDto>
-                    {
-                        Success = false,
-                        Message = $"Organization with ID {organizationId} not found."
-                    };
-                }
-
-                // Check if user exists
-                var user = await _userService.GetUserByIdAsync(newAdminUserId);
-                if (user == null)
-                {
-                    return new ServiceResponse<OrganizationResponseDto>
-                    {
-                        Success = false,
-                        Message = $"User with ID {newAdminUserId} not found."
-                    };
-                }
-
-                // Check if user is already a sub-admin and remove that role first
-                var isSubAdmin = await _repository.IsUserSubAdminAsync(organizationId, newAdminUserId);
-                if (isSubAdmin)
-                {
-                    await _repository.RemoveSubAdminAsync(organizationId, newAdminUserId);
-                }
-
-                // Transfer admin
-                var updatedOrg = await _repository.TransferOrganizationAdminAsync(organizationId, newAdminUserId);
-                var response = _mapper.MapToOrganizationResponseDto(updatedOrg);
-
-                return new ServiceResponse<OrganizationResponseDto>
-                {
-                    Success = true,
-                    Data = response,
-                    Message = "Organization admin transferred successfully."
-                };
-            }
-            catch (Exception ex)
-            {
-                return new ServiceResponse<OrganizationResponseDto>
-                {
-                    Success = false,
-                    Message = $"Error transferring organization admin: {ex.Message}"
-                };
-            }
-        }
-
-        public async Task<ServiceResponse<UserResponseDTO?>> GetOrganizationAdminAsync(int organizationId)
-        {
-            try
-            {
-                // Check if organization exists
-                var organization = await _repository.GetOrganizationByIdAsync(organizationId);
-                if (organization == null)
-                {
-                    return new ServiceResponse<UserResponseDTO?>
-                    {
-                        Success = false,
-                        Message = $"Organization with ID {organizationId} not found."
-                    };
-                }
-
-                var admin = await _repository.GetOrganizationAdminAsync(organizationId);
-
-                if (admin == null)
-                {
-                    return new ServiceResponse<UserResponseDTO?>
+                    return new ServiceResponse<List<UserResponseDTO> ?>
                     {
                         Success = true,
                         Data = null,
-                        Message = "No admin assigned to this organization."
+                        Message = "No admins assigned to this organization."
                     };
                 }
 
-                var response = new UserResponseDTO
-                {
-                    Id = admin.Id,
-                    UserName = admin.UserName,
-                    Email = admin.Email,
-                    FullName = admin.FullName,
-                    ImgPath = admin.ImgPath,
-                    IsDeleted = admin.IsDeleted,
-                    PhoneNumber = admin.PhoneNumber,
-                    Address = admin.Address
-                };
+                var response =new UserResponse().MapToUserDtoList(admins.ToList());
 
-                return new ServiceResponse<UserResponseDTO?>
+                return new ServiceResponse<List<UserResponseDTO>?>
                 {
                     Success = true,
                     Data = response,
@@ -1271,12 +1175,14 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
             }
             catch (Exception ex)
             {
-                return new ServiceResponse<UserResponseDTO?>
+                return new ServiceResponse<List<UserResponseDTO>?>
                 {
                     Success = false,
                     Message = $"Error retrieving organization admin: {ex.Message}"
                 };
             }
         }
+
+        
     }
 }

@@ -63,6 +63,14 @@ namespace TheCharityDAL.Entities
                 this.UpdatedOn = DateTime.Now;
             }
         }
+        public void EditDeadLine(DateTime? deadLine)
+        {
+            if (deadLine.HasValue)
+            {
+                this.Deadline = deadLine;
+                this.UpdatedOn = DateTime.Now;
+            }
+        }
         public void UpdateMoneyAchieved(double? achieved)
         {
             if (achieved.HasValue)

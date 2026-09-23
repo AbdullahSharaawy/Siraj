@@ -2,6 +2,7 @@
 using TheCharityBLL.DTOs.OrganizationContactMethodDTOs;
 using TheCharityBLL.DTOs.OrganizationDTOs;
 using TheCharityBLL.DTOs.PaymentInfoDTOs;
+using TheCharityBLL.DTOs.UserDTOs;
 using TheCharityDAL.Entities;
 
 namespace TheCharityBLL.Mapper
@@ -33,10 +34,16 @@ namespace TheCharityBLL.Mapper
                 UpdatedOn = organization.UpdatedOn,
                 Description=organization.Description,
                 // ===== Map Admin properties =====
-                AdminUserId = organization.AdminUserId,
-                AdminUserName = organization.AdminUser?.UserName ?? organization.AdminUser?.Email ?? string.Empty,
-                AdminUserFullName = organization.AdminUser?.FullName ?? string.Empty,
-                AdminUserEmail = organization.AdminUser?.Email ?? string.Empty,
+                Users = organization.OrganizationRoles.Select(o=>o.User)?
+                    .Where(u => !u.IsDeleted)
+                    .Select(u => new UserResponseDTO
+                    {
+                        Id = u.Id,
+                        UserName = u.UserName,
+                        FullName = u.FullName,
+                        Email = u.Email,
+                        IsDeleted = u.IsDeleted
+                    }).ToList() ?? new List<UserResponseDTO>(),
                 // ===== END =====
 
                 // Map ContactMethods
@@ -70,10 +77,16 @@ namespace TheCharityBLL.Mapper
                 UpdatedOn = organization.UpdatedOn,
 
                 // ===== Map Admin properties =====
-                AdminUserId = organization.AdminUserId,
-                AdminUserName = organization.AdminUser?.UserName ?? organization.AdminUser?.Email ?? string.Empty,
-                AdminUserFullName = organization.AdminUser?.FullName ?? string.Empty,
-                AdminUserEmail = organization.AdminUser?.Email ?? string.Empty,
+                Users = organization.OrganizationRoles.Select(o => o.User)?
+                    .Where(u => !u.IsDeleted)
+                    .Select(u => new UserResponseDTO
+                    {
+                        Id = u.Id,
+                        UserName = u.UserName,
+                        FullName = u.FullName,
+                        Email = u.Email,
+                        IsDeleted = u.IsDeleted
+                    }).ToList() ?? new List<UserResponseDTO>(),
                 // ===== END =====
 
                 // Map ContactMethods

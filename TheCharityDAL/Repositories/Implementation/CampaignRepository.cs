@@ -89,6 +89,7 @@ namespace TheCharityDAL.Repositories.Implementation
 
         public async Task<SoloCampaign?> GetSoloCampaignByIdAsync(int id)
         {
+
             return await _context.SoloCampaigns
                 .Where(c => c.Id == id && (c.IsDeleted == false))
                 .Include(c => c.Organization)
@@ -182,20 +183,26 @@ namespace TheCharityDAL.Repositories.Implementation
         
         }
 
-        public async Task<IEnumerable<SoloCampaign>> GetSoloCampaignsByOrganizationIdAsync(int organizationId)
+        public async Task<IEnumerable<SoloCampaign>> GetSoloCampaignsByOrganizationIdAsync(int organizationId,bool includeDeleted)
         {
-            return await _context.SoloCampaigns
-                .Where(c => c.OrganizationId == organizationId &&
-                           (c.IsDeleted == false))
+            IQueryable<SoloCampaign> query = _context.SoloCampaigns.AsQueryable().IgnoreQueryFilters();
+
+
+            return await query
+                // Eager-load Organization for SoloCampaign
+                .Where(c => c.OrganizationId == organizationId && c.IsDeleted==includeDeleted)
                 .Include(c => c.Organization)
                 .ToListAsync();
+           
         }
 
-        public async Task<IEnumerable<SharedCampaign>> GetSharedCampaignsByOrganizationIdAsync(int organizationId)
+        public async Task<IEnumerable<SharedCampaign>> GetSharedCampaignsByOrganizationIdAsync(int organizationId, bool includeDeleted)
         {
-            return await _context.SharedCampaigns
-                .Where(c => c.Organizations.Any(o => o.Id == organizationId) &&
-                           (c.IsDeleted == false))
+            IQueryable<SharedCampaign> query = _context.SharedCampaigns.AsQueryable().IgnoreQueryFilters();
+
+         
+            return await query
+                .Where(c => c.Organizations.Any(o => o.Id == organizationId) && c.IsDeleted==includeDeleted)
                 
                 .Include(c => c.Organizations)
                 .ToListAsync();

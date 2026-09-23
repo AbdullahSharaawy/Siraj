@@ -290,7 +290,7 @@ namespace TheCharityBLL.Services.Repository
             existingCampaign.EditImage(updateDto.ImgPath);
             existingCampaign.EditTarget(updateDto.Target);
             existingCampaign.EditType(updateDto.Type);
-
+            existingCampaign.EditDeadLine(updateDto.Deadline);
             await _campaignRepository.UpdateSoloCampaignAsync(existingCampaign);
 
             return new ServiceResponse<bool>
@@ -301,7 +301,7 @@ namespace TheCharityBLL.Services.Repository
             };
         }
 
-        public async Task<ServiceResponse<IEnumerable<SoloCampaignResponseDto>>> GetSoloCampaignsByOrganizationIdAsync(int organizationId)
+        public async Task<ServiceResponse<IEnumerable<SoloCampaignResponseDto>>> GetSoloCampaignsByOrganizationIdAsync(int organizationId, bool includeDeleted)
         {
             if (!await _organizationRepository.OrganizationExistsAsync(organizationId))
             {
@@ -312,7 +312,7 @@ namespace TheCharityBLL.Services.Repository
                 };
             }
 
-            var campaigns = await _campaignRepository.GetSoloCampaignsByOrganizationIdAsync(organizationId);
+            var campaigns = await _campaignRepository.GetSoloCampaignsByOrganizationIdAsync(organizationId,includeDeleted);
             var response = _mapper.MapToSoloResponseDtos(campaigns);
 
             return new ServiceResponse<IEnumerable<SoloCampaignResponseDto>>
@@ -452,7 +452,7 @@ namespace TheCharityBLL.Services.Repository
             };
         }
 
-        public async Task<ServiceResponse<IEnumerable<SharedCampaignResponseDto>>> GetSharedCampaignsByOrganizationIdAsync(int organizationId)
+        public async Task<ServiceResponse<IEnumerable<SharedCampaignResponseDto>>> GetSharedCampaignsByOrganizationIdAsync(int organizationId, bool includeDeleted)
         {
             if (!await _organizationRepository.OrganizationExistsAsync(organizationId))
             {
@@ -463,7 +463,7 @@ namespace TheCharityBLL.Services.Repository
                 };
             }
 
-            var campaigns = await _campaignRepository.GetSharedCampaignsByOrganizationIdAsync(organizationId);
+            var campaigns = await _campaignRepository.GetSharedCampaignsByOrganizationIdAsync(organizationId, includeDeleted);
             var response = _mapper.MapToSharedResponseDtos(campaigns);
 
             return new ServiceResponse<IEnumerable<SharedCampaignResponseDto>>

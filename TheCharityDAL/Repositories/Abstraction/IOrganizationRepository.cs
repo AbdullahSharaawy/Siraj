@@ -12,7 +12,7 @@ namespace TheCharityDAL.Repositories.Abstraction
         Task<Organization> UpdateOrganizationAsync(Organization organization);
         Task DeleteOrganizationAsync(int id);
         Task<bool> RestoreOrganizationAsync(int id);
-        public  Task<bool> IsUserOrganizationAdminAsync(string userId);
+        
 
         // ===== Organization Filtering & Search =====
         Task<Organization?> GetOrganizationByNameAsync(string name);
@@ -73,21 +73,10 @@ namespace TheCharityDAL.Repositories.Abstraction
         Task<IEnumerable<Organization>> GetOrganizationsWithValidPaymentInfoAsync();
         Task<Dictionary<int, DateTime>> GetOrganizationLastPaymentUpdateAsync();
 
-        // ===== Admin Management =====
-        Task<Organization> AssignOrganizationAdminAsync(int organizationId, string adminUserId);
-        Task<Organization> RemoveOrganizationAdminAsync(int organizationId);
-        Task<Organization> TransferOrganizationAdminAsync(int organizationId, string newAdminUserId);
-        Task<User?> GetOrganizationAdminAsync(int organizationId);
-
+       
         // ===== SubAdmin Management =====
         Task<IEnumerable<User>> GetOrganizationSubAdminsAsync(int organizationId);
-        Task<OrganizationRole> AddSubAdminAsync(int organizationId, string userId);
-        Task RemoveSubAdminAsync(int organizationId, string userId);
-        Task<bool> IsUserSubAdminAsync(int organizationId, string userId);
-
-        // ===== Organization Role Utilities =====
-        Task<IEnumerable<OrganizationRole>> GetOrganizationRolesAsync(int organizationId);
-        Task<OrganizationRole> AddOrganizationRoleAsync(int organizationId, string userId, OrganizationRoleType role);
-        Task RemoveOrganizationRoleAsync(int organizationId, string userId);
+        
+     
     }
 }
