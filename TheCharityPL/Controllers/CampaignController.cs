@@ -191,7 +191,7 @@ namespace TheCharityPL.Controllers
         /// <summary>
         /// Update solo campaign
         /// </summary>
-        [HttpPut("solo/deleted")]
+        [HttpPut("solo/{id:int}")]
         [CanManageCampaign] // ← SuperAdmin + OrganizationAdmin + SubAdmin
         public async Task<IActionResult> UpdateSolo(int id, [FromBody] UpdateSoloCampaignDto dto)
         {
@@ -256,7 +256,7 @@ namespace TheCharityPL.Controllers
         /// <summary>
         /// Update shared campaign
         /// </summary>
-        [HttpPut("shared/deleted")]
+        [HttpPut("shared/{id:int}")]
         [CanManageCampaign] // ← SuperAdmin + OrganizationAdmin + SubAdmin
         public async Task<IActionResult> UpdateShared(int id, [FromBody] UpdateSharedCampaignDto dto)
         {
