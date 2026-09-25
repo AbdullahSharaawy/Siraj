@@ -456,7 +456,7 @@ namespace TheCharityPL.Controllers
         [CanManageSubAdmins] // SuperAdmin + OrganizationAdmin (NOT SubAdmin)
         public async Task<IActionResult> AddSubAdmin(int orgId, [FromBody] AssignAdminRequest request)
         {
-            var result = await _organizationService.AddSubAdminAsync(orgId, request.UserId);
+            var result = await _organizationService.AddSubAdminAsync(orgId, request.UserName);
             return result.Success ? Ok(result) : BadRequest(result);
         }
 

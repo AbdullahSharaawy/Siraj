@@ -863,7 +863,7 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
 
         //}
 
-        public async Task<ServiceResponse<OrganizationRoleResponseDto>> AddSubAdminAsync(int organizationId, string userId)
+        public async Task<ServiceResponse<OrganizationRoleResponseDto>> AddSubAdminAsync(int organizationId, string userName)
         {
             try
             {
@@ -879,18 +879,22 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                 }
 
                 // Check if user exists
-                var user = await _userService.GetUserByIdAsync(userId);
+                var user = await _userService.GetUserByEmailAsync(userName);
+                if(user == null)
+                    user=await _userService.GetUserByUserNameAsync(userName);
                 if (user == null)
                 {
                     return new ServiceResponse<OrganizationRoleResponseDto>
                     {
                         Success = false,
-                        Message = $"User with ID {userId} not found."
+                        Message = $"User with user name {userName} not found."
                     };
                 }
 
                 // Check if user is already an admin
-                var isAdmin = await _authorizationService.IsOrganizationAdminAsync(userId, organizationId);
+               
+                var isAdmin = await _authorizationService.IsOrganizationAdminAsync(user.Id, organizationId);
+                
                 if (isAdmin)
                 {
                     return new ServiceResponse<OrganizationRoleResponseDto>
@@ -899,9 +903,17 @@ namespace TheCharityBLL.Services.Implementation.OrganizationImplementation
                         Message = "User is already an Organization Admin. Cannot assign as Sub-Admin."
                     };
                 }
-
+                var isSuperAdmin =await  _authorizationService.IsSuperAdminAsync(user.Id);
+                if (isSuperAdmin)
+                {
+                    return new ServiceResponse<OrganizationRoleResponseDto>
+                    {
+                        Success = false,
+                        Message = "User is already an Super Admin. Cannot assign as Sub-Admin."
+                    };
+                }
                 // Add sub-admin role
-                var role = await _organizationRoleRepository.AddOrganizationRoleAsync(organizationId, userId,OrganizationRoleType.SubAdmin);
+                var role = await _organizationRoleRepository.AddOrganizationRoleAsync(organizationId, user.Id,OrganizationRoleType.SubAdmin);
 
                 var response = new OrganizationRoleResponseDto
                 {
