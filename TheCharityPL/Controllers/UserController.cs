@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System.Security.Claims;
@@ -88,15 +88,33 @@ namespace TheCharityPL.Controllers
             }
         }
         /// <summary>
+        /// get current authenticated user profile
+        /// </summary>
+        // ─── GET api/user/profile ───────────────────────────────────────────────────
+        [HttpGet("profile")]
+        public async Task<IActionResult> GetProfile()
+        {
+            var id = GetCurrentUserId();
+            if (string.IsNullOrWhiteSpace(id))
+                return Unauthorized(new ServiceResponse { Success = false, Message = "User identity was not found." });
+
+            return await GetById(id);
+        }
+
+        /// <summary>
         /// get user information by user id 
         /// </summary>
         
         // ─── GET api/user/{id} ───────────────────────────────────────────────────────
 
         [HttpGet("{id}")]
-        [IsSuperAdmin]
         public async Task<IActionResult> GetById(string id)
         {
+            var currentUserId = GetCurrentUserId();
+            var isSuperAdmin = User.IsInRole("SuperAdmin") || User.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value.Equals("SuperAdmin", StringComparison.OrdinalIgnoreCase));
+            if (currentUserId != id && !isSuperAdmin)
+                return Forbid();
+
             try
             {
                 _logger.LogInformation("Loading details for user ID: {UserId}", id);
@@ -108,10 +126,27 @@ namespace TheCharityPL.Controllers
                     return NotFound(new ServiceResponse { Success = false, Message = $"User with ID '{id}' not found." });
                 }
 
-                
-                var api_response= new ServiceResponse<UserResponseDTO>
+                var roles = await _userService.GetUserRolesAsync(id);
+
+                var detailDto = new UserDetailResponseDto
                 {
-                    Data = user,
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    FullName = user.FullName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    Address = user.Address,
+                    IsDeleted = user.IsDeleted,
+                    DeletedOn = user.DeletedOn,
+                    RegistrationDate = user.RegistrationDate,
+                    UpdatedOn = user.UpdatedOn,
+                    EmailConfirmed = user.EmailConfirmed,
+                    Roles = roles?.Data
+                };
+                
+                var api_response = new ServiceResponse<UserDetailResponseDto>
+                {
+                    Data = detailDto,
                     Success = true,
                     Message = "User details loaded successfully."
                 };
@@ -402,7 +437,8 @@ namespace TheCharityPL.Controllers
                     Id = id,
                     UserName = RequestDto.UserName,
                     PhoneNumber = RequestDto.PhoneNumber,
-                    Address = RequestDto.Address
+                    Address = RequestDto.Address,
+                    FullName = RequestDto.FullName
                 };
 
                 var result = await _userService.UpdateUserAsync(updateUserDTO);
