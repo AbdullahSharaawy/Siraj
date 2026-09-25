@@ -441,7 +441,7 @@ namespace TheCharityBLL.Services.Repository
             existingCampaign.EditImage(updateDto.ImgPath);
             existingCampaign.EditTarget(updateDto.Target);
             existingCampaign.EditType(updateDto.Type);
-
+            existingCampaign.EditDeadLine(updateDto.Deadline);
             await _campaignRepository.UpdateSharedCampaignAsync(existingCampaign);
 
             return new ServiceResponse<bool>
