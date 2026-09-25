@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -75,6 +75,7 @@ namespace TheCharityDAL.Repositories.Implementation
         {
             IQueryable<OrganizationRole> OrganizationRoles = _dbContext.OrganizationRoles
           .AsNoTracking()
+          .Where(p => !p.IsDeleted)
           .OrderByDescending(p => p.RegistrationDate);
 
             int totalCount = await OrganizationRoles.CountAsync();
@@ -138,6 +139,13 @@ namespace TheCharityDAL.Repositories.Implementation
         {
             return await _dbContext.OrganizationRoles
                 .Where(r => r.OrganizationId == organizationId && !r.IsDeleted)
+                .Include(r => r.User)
+                .ToListAsync();
+        }
+        public async Task<IEnumerable<OrganizationRole>> GetUserRolesAsync(string userId)
+        {
+            return await _dbContext.OrganizationRoles
+                .Where(r => r.UserId == userId && !r.IsDeleted)
                 .Include(r => r.User)
                 .ToListAsync();
         }

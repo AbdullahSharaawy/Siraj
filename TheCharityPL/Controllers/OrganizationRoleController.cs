@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TheCharityBLL.Authorization.Attributes;
 using TheCharityBLL.DTOs.OrganizationRoleDTOs;
@@ -9,7 +10,7 @@ namespace TheCharityPL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [IsSuperAdmin]
+    [Authorize]
     public class OrganizationRoleController : ControllerBase
     {
        
@@ -30,6 +31,7 @@ namespace TheCharityPL.Controllers
             return Ok(result);
         }
         [HttpPost]
+        [IsSuperAdmin]
         public async Task<IActionResult> CreateOrganizationRole(CreateOrganizationRoleDto OrganizationRole)
         {
             var result = await _OrganizationRoleService.AddOrganizationRoleAsync(OrganizationRole);
@@ -47,6 +49,7 @@ namespace TheCharityPL.Controllers
             return Ok(result);
         }
         [HttpDelete("{organizationId}/organizations/{userId}/users")]
+        [IsSuperAdmin]
         public async Task<IActionResult> DeleteOrganizationRole(string userId, int organizationId)
         {
             var result = await _OrganizationRoleService.DeleteAsync(userId, organizationId);
