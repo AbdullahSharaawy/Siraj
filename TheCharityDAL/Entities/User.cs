@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -32,6 +32,15 @@ namespace TheCharityDAL.Entities
             if (!string.IsNullOrEmpty(userName))
             {
                 this.UserName = userName;
+                this.UpdatedOn = DateTime.Now;
+            }
+        }
+
+        public void EditFullName(string? fullName)
+        {
+            if (!string.IsNullOrEmpty(fullName))
+            {
+                this.FullName = fullName;
                 this.UpdatedOn = DateTime.Now;
             }
         }
