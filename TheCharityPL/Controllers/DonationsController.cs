@@ -1,6 +1,7 @@
-﻿
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TheCharityBLL.Authorization.Attributes;
 using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.DonationDTOs;
@@ -479,9 +480,15 @@ namespace TheCharityPL.Controllers
         
         // GET api/donations/users/userId123/history
         [HttpGet("users/{userId}/history")]
-        [IsSuperAdmin]
         public async Task<IActionResult> GetUserHistory(string userId)
-            => Ok(await _service.GetUserDonationHistoryAsync(userId));
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isSuperAdmin = User.IsInRole("SuperAdmin") || User.Claims.Any(c => c.Type == ClaimTypes.Role && c.Value.Equals("SuperAdmin", StringComparison.OrdinalIgnoreCase));
+            if (currentUserId != userId && !isSuperAdmin)
+                return Forbid();
+
+            return Ok(await _service.GetUserDonationHistoryAsync(userId));
+        }
         /// <summary>
         /// get the date of the last donation made by a specific user, where userId parm: The unique identifier of the user for whom to retrieve the last donation date.
         /// </summary>
