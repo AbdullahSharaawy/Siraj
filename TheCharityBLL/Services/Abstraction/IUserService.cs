@@ -12,11 +12,13 @@ namespace TheCharityBLL.Services.Abstraction
         Task<IEnumerable<UserResponseDTO>> GetAllUsersAsync(bool showDeleted = false);
         Task<UserResponseDTO?> GetUserByIdAsync(string userId);
         Task<UserResponseDTO?> GetUserByEmailAsync(string email);
+        public Task<UserResponseDTO?> GetUserByUserNameAsync(string userName);
         Task<ServiceResponse<bool>> UserExistsAsync(string userId);
         Task<ServiceResponse<bool>> IsUserDeletedAsync(string userId);
         Task<ServiceResponse<string?>> LoginAsync(string usernameOrEmail, string password);
         public  Task<bool> IsExternalLoginLinkedAsync(string providerKey, string loginProvider, UserResponseDTO userDto);
         public Task<string> GenerateJwtTokenAsync(UserResponseDTO UserDTO);
+       
         // CRUD
         Task<ServiceResponse<IdentityResult>> CreateUserAsync(CreateUserDTO createUserDTO);
         Task<IdentityResult> UpdateUserAsync(UpdateUserDTO updateUserDTO);

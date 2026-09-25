@@ -16,11 +16,13 @@ namespace TheCharityDAL.Repositories.Abstraction
         // ===== Lookup =====
         Task<User?> GetUserByIdAsync(string id);
         Task<User?> GetUserByEmailAsync(string email);
+        public Task<User?> GetUserByUserNameAsync(string userName);
         Task<User?> FindByNameOrEmailAsync(string usernameOrEmail);
         Task<IEnumerable<User>?> GetAllUsersAsync(bool includeDeleted = false);
         Task<bool> UserExistsAsync(string userId);
         Task<bool> IsUserDeletedAsync(string userId);
         public Task<IList<UserLoginInfo>> GetLoginsAsync(User user);
+
 
         // ===== Password =====
         Task<bool> CheckPasswordAsync(User user, string password);

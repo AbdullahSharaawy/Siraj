@@ -11,16 +11,18 @@ namespace TheCharityDAL.Repositories.Implementation
     {
         private readonly UserManager<User> _userManager;
         private readonly TheCharityDbContext _context;
-
+        private readonly IOrganizationRoleRepository _organizationRoleRepository;
         private readonly RoleManager<IdentityRole> _roleManager;
         public UserRepository(
              UserManager<User> userManager,
              RoleManager<IdentityRole> roleManager,
-             TheCharityDbContext context)
+             TheCharityDbContext context,
+             IOrganizationRoleRepository organizationRoleRepository)
         {
             _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
             _roleManager = roleManager ?? throw new ArgumentNullException(nameof(roleManager));
             _context = context;
+            _organizationRoleRepository = organizationRoleRepository;
         }
 
         public async Task<IdentityResult> CreateExternalUserAsync(string email)
@@ -104,6 +106,10 @@ namespace TheCharityDAL.Repositories.Implementation
         {
             return await _userManager.Users.FirstOrDefaultAsync(u => u.Id == id);
         }
+        public async Task<User?> GetUserByUserNameAsync(string userName)
+        {
+            return await _userManager.Users.FirstOrDefaultAsync(u => u.UserName == userName);
+        }
 
         public async Task<IList<string>> GetUserRolesAsync(string userId)
         {
@@ -113,7 +119,16 @@ namespace TheCharityDAL.Repositories.Implementation
                 return new List<string>();
             }
 
-            return await _userManager.GetRolesAsync(user);
+            var generalRoles= await _userManager.GetRolesAsync(user);
+            var organizationRoles=await _organizationRoleRepository.GetUserRolesAsync(userId);
+            foreach (var role in organizationRoles)
+            {
+                if (!generalRoles.Contains(role.Role.ToString()))
+                {
+                    generalRoles.Add(role.Role.ToString());
+                }
+            }
+            return generalRoles;
         }
 
         public async Task<bool> IsInRoleAsync(string userId, string role)

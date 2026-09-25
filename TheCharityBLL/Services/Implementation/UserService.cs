@@ -1,8 +1,9 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -190,6 +191,23 @@ namespace TheCharityBLL.Services.Repository
                 throw;
             }
         }
+        public async Task<UserResponseDTO?> GetUserByUserNameAsync(string userName)
+        {
+            if (string.IsNullOrWhiteSpace(userName))
+                throw new ArgumentException("User Name cannot be null or empty", nameof(userName));
+
+            try
+            {
+                _logger.LogInformation("Getting user with user name: {userName}", userName);
+                var user = await _userRepository.GetUserByUserNameAsync(userName);
+                return user != null ? _mapper.Map<UserResponseDTO>(user) : null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting user with userName: {userName}", userName);
+                throw;
+            }
+        }
         public async Task<bool> IsExternalLoginLinkedAsync(string providerKey,string loginProvider,UserResponseDTO userDto)
         {
             var user = _mapper.Map<User>(userDto);
@@ -277,7 +295,11 @@ namespace TheCharityBLL.Services.Repository
                     user.EditAddress(updateUserDTO.Address);
                 }
 
-               
+                if (!string.IsNullOrWhiteSpace(updateUserDTO.FullName))
+                {
+                    user.EditFullName(updateUserDTO.FullName);
+                }
+
                 if (!string.IsNullOrWhiteSpace(updateUserDTO.PhoneNumber))
                     user.PhoneNumber = updateUserDTO.PhoneNumber;
 
@@ -405,7 +427,7 @@ namespace TheCharityBLL.Services.Repository
             var result=await _userRepository.IsInRoleAsync(userId, role);
             return new ServiceResponse<bool> { Success = true, Message = result ? "User is in role." : "User is not in role.", Data = result };
         }
-
+       
 
         public Task<string> GenerateEmailConfirmationTokenAsync(string email)
         {
