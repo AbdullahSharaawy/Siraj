@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +12,7 @@ namespace TheCharityDAL.Repositories.Abstraction
         // ===== Donation CRUD Operations =====
         Task<IEnumerable<Donation>> GetAllDonationsAsync(bool includeDeleted = false);
         Task<Donation?> GetDonationByIdAsync(int id);
+        Task<Donation?> GetDonationByIdWithDeletedAsync(int id);
         Task<Donation> AddDonationAsync(Donation donation);
         Task<Donation> UpdateDonationAsync(Donation donation);
         Task DeleteDonationAsync(int id);
@@ -20,6 +21,8 @@ namespace TheCharityDAL.Repositories.Abstraction
         // ===== Donation Filtering & Search =====
         Task<IEnumerable<Donation>> GetDonationsByUserAsync(string userId);
         Task<IEnumerable<Donation>> GetDonationsByCampaignAsync(int campaignId);
+        Task<IEnumerable<Donation>> GetDonationsByOrganizationAsync(int organizationId, bool includeDeleted = false);
+        Task<IEnumerable<Donation>> GetDonationsByOrganizationsAsync(IEnumerable<int> organizationIds, bool includeDeleted = false);
         Task<IEnumerable<Donation>> GetDonationsByAmountRangeAsync(double minAmount, double maxAmount);
         Task<IEnumerable<Donation>> GetDonationsByDateRangeAsync(DateTime startDate, DateTime endDate);
         Task<IEnumerable<Donation>> GetRecentDonationsAsync(int days = 30);

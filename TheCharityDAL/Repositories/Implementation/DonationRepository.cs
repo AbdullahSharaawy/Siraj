@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using TheCharityDAL.Database;
 using TheCharityDAL.Entities;
 using TheCharityDAL.Repositories.Abstraction;
@@ -34,6 +34,15 @@ namespace TheCharityDAL.Repositories.Implementation
         {
             return await _context.Donations
                 .Where(d => d.Id == id && (d.IsDeleted == false))
+                .Include(d => d.User)
+                .Include(d => d.Campaign)
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<Donation?> GetDonationByIdWithDeletedAsync(int id)
+        {
+            return await _context.Donations.IgnoreQueryFilters()
+                .Where(d => d.Id == id)
                 .Include(d => d.User)
                 .Include(d => d.Campaign)
                 .FirstOrDefaultAsync();
@@ -85,6 +94,46 @@ namespace TheCharityDAL.Repositories.Implementation
                 .Include(d => d.Campaign)
                 .OrderByDescending(d => d.RegistrationDate)
                 .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Donation>> GetDonationsByOrganizationAsync(int organizationId, bool includeDeleted = false)
+        {
+            return await GetDonationsByOrganizationsAsync(new[] { organizationId }, includeDeleted);
+        }
+
+        public async Task<IEnumerable<Donation>> GetDonationsByOrganizationsAsync(IEnumerable<int> organizationIds, bool includeDeleted = false)
+        {
+            var orgIdList = organizationIds.Distinct().ToList();
+            if (!orgIdList.Any())
+                return Enumerable.Empty<Donation>();
+
+            var soloCampaignIds = await _context.SoloCampaigns
+                .Where(c => c.OrganizationId.HasValue && orgIdList.Contains(c.OrganizationId.Value))
+                .Select(c => c.Id)
+                .ToListAsync();
+
+            var sharedCampaignIds = await _context.SharedCampaigns
+                .Where(c => orgIdList.Contains(c.CreatorOrganizationId) || c.Organizations.Any(o => orgIdList.Contains(o.Id)))
+                .Select(c => c.Id)
+                .ToListAsync();
+
+            var allCampaignIds = soloCampaignIds.Concat(sharedCampaignIds).Distinct().ToList();
+            if (!allCampaignIds.Any())
+                return Enumerable.Empty<Donation>();
+
+            var query = _context.Donations
+                .Where(d => allCampaignIds.Contains(d.CampaignId))
+                .Include(d => d.User)
+                .Include(d => d.Campaign)
+                .OrderByDescending(d => d.RegistrationDate)
+                .AsQueryable();
+
+            if (!includeDeleted)
+            {
+                query = query.Where(d => !d.IsDeleted);
+            }
+
+            return await query.ToListAsync();
         }
 
         public async Task<IEnumerable<Donation>> GetDonationsByCampaignAsync(int campaignId)
