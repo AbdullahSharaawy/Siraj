@@ -1,4 +1,4 @@
-﻿
+
 using TheCharityBLL.DTOs;
 
 using TheCharityBLL.DTOs.DonationDTOs;
@@ -107,6 +107,12 @@ namespace TheCharityBLL.Services.Implementation.MoneyDonation
 
         public async Task<ServiceResponse<IEnumerable<DonationResponseDto>>> GetDonationsByCampaignAsync(int campaignId)
             => new ServiceResponse<IEnumerable<DonationResponseDto>> { Data = _mapper.MapToDonationResponseDtos(await _repo.GetDonationsByCampaignAsync(campaignId)), Success = true, Message = $"retrieved donations by id:{campaignId} successfully" };
+
+        public async Task<ServiceResponse<IEnumerable<DonationResponseDto>>> GetDonationsByOrganizationAsync(int organizationId, bool includeDeleted = false)
+            => new ServiceResponse<IEnumerable<DonationResponseDto>> { Data = _mapper.MapToDonationResponseDtos(await _repo.GetDonationsByOrganizationAsync(organizationId, includeDeleted)), Success = true, Message = $"retrieved donations for organization {organizationId} successfully" };
+
+        public async Task<ServiceResponse<IEnumerable<DonationResponseDto>>> GetDonationsByOrganizationsAsync(IEnumerable<int> organizationIds, bool includeDeleted = false)
+            => new ServiceResponse<IEnumerable<DonationResponseDto>> { Data = _mapper.MapToDonationResponseDtos(await _repo.GetDonationsByOrganizationsAsync(organizationIds, includeDeleted)), Success = true, Message = "retrieved donations for organizations successfully" };
 
         public async Task<ServiceResponse<IEnumerable<DonationResponseDto>>> GetDonationsByAmountRangeAsync(double minAmount, double maxAmount)
             => new ServiceResponse<IEnumerable<DonationResponseDto>> { Data = _mapper.MapToDonationResponseDtos(await _repo.GetDonationsByAmountRangeAsync(minAmount, maxAmount)), Success = true, Message = "retrieved donations by amount range successfully." };

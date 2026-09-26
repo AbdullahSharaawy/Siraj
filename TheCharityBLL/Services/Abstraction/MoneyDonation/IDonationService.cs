@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,6 +21,8 @@ namespace TheCharityBLL.Services.Abstraction.MoneyDonation
         // ===== Filtering & Search =====
         Task<ServiceResponse<IEnumerable<DonationResponseDto>>> GetDonationsByUserAsync(string userId);
         Task<ServiceResponse<IEnumerable <DonationResponseDto>>> GetDonationsByCampaignAsync(int campaignId);
+        Task<ServiceResponse<IEnumerable<DonationResponseDto>>> GetDonationsByOrganizationAsync(int organizationId, bool includeDeleted = false);
+        Task<ServiceResponse<IEnumerable<DonationResponseDto>>> GetDonationsByOrganizationsAsync(IEnumerable<int> organizationIds, bool includeDeleted = false);
         Task<ServiceResponse<IEnumerable <DonationResponseDto>>> GetDonationsByAmountRangeAsync(double minAmount, double maxAmount);
         Task<ServiceResponse<IEnumerable <DonationResponseDto>>> GetDonationsByDateRangeAsync(DateTime startDate, DateTime endDate);
         Task<ServiceResponse< IEnumerable<DonationResponseDto>>> GetRecentDonationsAsync(int days = 30);
