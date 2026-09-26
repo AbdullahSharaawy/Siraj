@@ -6,6 +6,8 @@ using TheCharityBLL.Authorization.Attributes;
 using TheCharityBLL.DTOs;
 using TheCharityBLL.DTOs.DonationDTOs;
 using TheCharityBLL.Services.Abstraction.MoneyDonation;
+using TheCharityDAL.Repositories.Abstraction;
+using IAuthorizationService = TheCharityBLL.Services.Abstraction.IAuthorizationService;
 
 namespace TheCharityPL.Controllers
 {
@@ -15,10 +17,17 @@ namespace TheCharityPL.Controllers
     public class DonationsController : ControllerBase
     {
         private readonly IDonationService _service;
+        private readonly IAuthorizationService _authService;
+        private readonly IUserRepository _userRepository;
 
-        public DonationsController(IDonationService service)
+        public DonationsController(
+            IDonationService service,
+            IAuthorizationService authService,
+            IUserRepository userRepository)
         {
             _service = service;
+            _authService = authService;
+            _userRepository = userRepository;
         }
 
         // =====================================================================
@@ -27,13 +36,61 @@ namespace TheCharityPL.Controllers
 
         // GET api/donations
         /// <summary>
-        /// get all donations
+        /// get all donations (SuperAdmin gets all; OrgAdmin and SubAdmin get donations for their organizations)
         /// </summary>
         [HttpGet]
-        [IsSuperAdmin]
-        public async Task<IActionResult> GetAll([FromQuery] bool includeDeleted = false)
+        public async Task<IActionResult> GetAll([FromQuery] bool includeDeleted = false, [FromQuery] int? organizationId = null)
         {
-            var result = await _service.GetAllDonationsAsync(includeDeleted);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var isSuperAdmin = await _authService.IsSuperAdminAsync(User);
+            if (isSuperAdmin)
+            {
+                if (organizationId.HasValue)
+                {
+                    var orgDonations = await _service.GetDonationsByOrganizationAsync(organizationId.Value, includeDeleted);
+                    return Ok(orgDonations);
+                }
+                var allResult = await _service.GetAllDonationsAsync(includeDeleted);
+                return Ok(allResult);
+            }
+
+            if (organizationId.HasValue)
+            {
+                if (!await _userRepository.IsOrganizationAdminOrSubAdminAsync(userId, organizationId.Value))
+                    return Forbid();
+
+                var orgResult = await _service.GetDonationsByOrganizationAsync(organizationId.Value, includeDeleted);
+                return Ok(orgResult);
+            }
+
+            var managedOrgs = (await _userRepository.GetOrganizationsUserManagesAsync(userId)).ToList();
+            if (!managedOrgs.Any())
+                return Forbid();
+
+            var managedOrgIds = managedOrgs.Select(o => o.Id).ToList();
+            var result = await _service.GetDonationsByOrganizationsAsync(managedOrgIds, includeDeleted);
+            return Ok(result);
+        }
+
+        // GET api/donations/by-organization/3
+        /// <summary>
+        /// get donations for a specific organization (accessible by SuperAdmin, OrgAdmin, SubAdmin)
+        /// </summary>
+        [HttpGet("by-organization/{organizationId:int}")]
+        public async Task<IActionResult> GetByOrganization(int organizationId, [FromQuery] bool includeDeleted = false)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var isSuperAdmin = await _authService.IsSuperAdminAsync(User);
+            if (!isSuperAdmin && !await _userRepository.IsOrganizationAdminOrSubAdminAsync(userId, organizationId))
+                return Forbid();
+
+            var result = await _service.GetDonationsByOrganizationAsync(organizationId, includeDeleted);
             return Ok(result);
         }
 
@@ -46,7 +103,7 @@ namespace TheCharityPL.Controllers
         public async Task<IActionResult> GetById(int id)
         {
             var result = await _service.GetDonationByIdAsync(id);
-            return result is null ? NotFound() : Ok(result);
+            return result is null ? NotFound(new ServiceResponse { Success = false, Message = "Donation not found." }) : Ok(result);
         }
         /// <summary>
         /// get specific donation  included his user and campaign by donation id
@@ -57,7 +114,7 @@ namespace TheCharityPL.Controllers
         public async Task<IActionResult> GetWithDetails(int id)
         {
             var result = await _service.GetDonationWithDetailsAsync(id);
-            return result is null ? NotFound() : Ok(result);
+            return result is null ? NotFound(new ServiceResponse { Success = false, Message = "Donation not found." }) : Ok(result);
         }
         /// <summary>
         /// create donation 
@@ -82,8 +139,15 @@ namespace TheCharityPL.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
+            if (dto.CampaignId.HasValue)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (!await _authService.CanManageCampaignAsync(userId!, dto.CampaignId.Value))
+                    return Forbid();
+            }
+
             var updated = await _service.UpdateDonationAsync(id, dto);
-            return updated is null ? NotFound(new ServiceResponse{Success=false,Message="invalid user id." }) : Ok(updated);
+            return updated is null ? NotFound(new ServiceResponse{Success=false,Message="Donation not found." }) : Ok(updated);
         }
         /// <summary>
         /// delete specific donation  
@@ -94,7 +158,7 @@ namespace TheCharityPL.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var success = await _service.DeleteDonationAsync(id);
-            return success ? Ok(new ServiceResponse { Success=true,Message="Deleted Successfully."}) : NotFound(new ServiceResponse { Success = false, Message = "invalid user id." });
+            return success ? Ok(new ServiceResponse { Success=true,Message="Deleted Successfully."}) : NotFound(new ServiceResponse { Success = false, Message = "Donation not found." });
         }
         /// <summary>
         /// restore specific donation  after delete it  
@@ -105,7 +169,7 @@ namespace TheCharityPL.Controllers
         public async Task<IActionResult> Restore(int id)
         {
             var success = await _service.RestoreDonationAsync(id);
-            return success ? Ok(new ServiceResponse { Success = true, Message = "Restored Successfully." }) : NotFound(new ServiceResponse { Success = false, Message = "invalid user id." });
+            return success ? Ok(new ServiceResponse { Success = true, Message = "Restored Successfully." }) : NotFound(new ServiceResponse { Success = false, Message = "Donation not found." });
         }
 
         // =====================================================================
@@ -114,21 +178,75 @@ namespace TheCharityPL.Controllers
 
         // GET api/donations/deleted
         /// <summary>
-        /// display all deleted donations  
+        /// display all deleted donations (SuperAdmin gets all; OrgAdmin/SubAdmin get their organizations' deleted donations)
         /// </summary>
         [HttpGet("deleted")]
-        [IsSuperAdmin]
-        public async Task<IActionResult> GetDeleted()
-            => Ok(await _service.GetDeletedDonationsAsync());
+        public async Task<IActionResult> GetDeleted([FromQuery] int? organizationId = null)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var isSuperAdmin = await _authService.IsSuperAdminAsync(User);
+            if (isSuperAdmin && !organizationId.HasValue)
+                return Ok(await _service.GetDeletedDonationsAsync());
+
+            if (organizationId.HasValue)
+            {
+                if (!isSuperAdmin && !await _userRepository.IsOrganizationAdminOrSubAdminAsync(userId, organizationId.Value))
+                    return Forbid();
+
+                var orgDonations = await _service.GetDonationsByOrganizationAsync(organizationId.Value, includeDeleted: true);
+                var deletedOnly = orgDonations.Data?.Where(d => d.IsDeleted) ?? Enumerable.Empty<DonationResponseDto>();
+                return Ok(new ServiceResponse<IEnumerable<DonationResponseDto>> { Success = true, Data = deletedOnly });
+            }
+
+            var managedOrgs = (await _userRepository.GetOrganizationsUserManagesAsync(userId)).ToList();
+            if (!managedOrgs.Any())
+                return Forbid();
+
+            var managedOrgIds = managedOrgs.Select(o => o.Id).ToList();
+            var allOrgDonations = await _service.GetDonationsByOrganizationsAsync(managedOrgIds, includeDeleted: true);
+            var deletedDonations = allOrgDonations.Data?.Where(d => d.IsDeleted) ?? Enumerable.Empty<DonationResponseDto>();
+            return Ok(new ServiceResponse<IEnumerable<DonationResponseDto>> { Success = true, Data = deletedDonations });
+        }
 
         // GET api/donations/recent?days=30
         /// <summary>
-        /// get recent donations  based on num days , where if days=2,get recent transaction for last two days  (default 30 days)
+        /// get recent donations (SuperAdmin gets all; OrgAdmin/SubAdmin get their organizations' recent donations)
         /// </summary>
         [HttpGet("recent")]
-        [IsSuperAdmin]
-        public async Task<IActionResult> GetRecent([FromQuery] int days = 30)
-            => Ok(await _service.GetRecentDonationsAsync(days));
+        public async Task<IActionResult> GetRecent([FromQuery] int days = 30, [FromQuery] int? organizationId = null)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            var isSuperAdmin = await _authService.IsSuperAdminAsync(User);
+            if (isSuperAdmin && !organizationId.HasValue)
+                return Ok(await _service.GetRecentDonationsAsync(days));
+
+            var thresholdDate = DateTime.Now.AddDays(-days);
+
+            if (organizationId.HasValue)
+            {
+                if (!isSuperAdmin && !await _userRepository.IsOrganizationAdminOrSubAdminAsync(userId, organizationId.Value))
+                    return Forbid();
+
+                var orgDonations = await _service.GetDonationsByOrganizationAsync(organizationId.Value, includeDeleted: false);
+                var recentOnly = orgDonations.Data?.Where(d => d.RegistrationDate >= thresholdDate) ?? Enumerable.Empty<DonationResponseDto>();
+                return Ok(new ServiceResponse<IEnumerable<DonationResponseDto>> { Success = true, Data = recentOnly });
+            }
+
+            var managedOrgs = (await _userRepository.GetOrganizationsUserManagesAsync(userId)).ToList();
+            if (!managedOrgs.Any())
+                return Forbid();
+
+            var managedOrgIds = managedOrgs.Select(o => o.Id).ToList();
+            var allOrgDonations = await _service.GetDonationsByOrganizationsAsync(managedOrgIds, includeDeleted: false);
+            var recentDonations = allOrgDonations.Data?.Where(d => d.RegistrationDate >= thresholdDate) ?? Enumerable.Empty<DonationResponseDto>();
+            return Ok(new ServiceResponse<IEnumerable<DonationResponseDto>> { Success = true, Data = recentDonations });
+        }
         /// <summary>
         /// get donation related to user id 
         /// </summary>
