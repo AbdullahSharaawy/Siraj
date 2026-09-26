@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityDAL.Entities;
@@ -112,10 +112,8 @@ namespace TheCharityBLL.Services.Implementation
             if (string.IsNullOrEmpty(userId)) return false;
             if (await IsSuperAdminAsync(userId)) return true;
 
-            var organizationId = await GetOrganizationIdFromCampaignAsync(campaignId);
-            if (!organizationId.HasValue) return false;
-
-            return await _userRepository.IsOrganizationAdminAsync(userId, organizationId.Value);
+            // OrgAdmin and SubAdmin can create donations for their campaigns
+            return await CanManageCampaignAsync(userId, campaignId);
         }
 
         public async Task<bool> IsOrganizationAdminAsync(string userId, int organizationId)
@@ -145,12 +143,23 @@ namespace TheCharityBLL.Services.Implementation
             // SuperAdmin can manage ANY campaign
             if (await IsSuperAdminAsync(userId)) return true;
 
-            // Get the campaign's organization
+            // Get the campaign's creator organization
             var organizationId = await _campaignRepository.GetCampaignCreatorOrganizationIdAsync(campaignId);
-            if (!organizationId.HasValue) return false;
+            if (organizationId.HasValue && await _userRepository.IsOrganizationAdminOrSubAdminAsync(userId, organizationId.Value))
+                return true;
 
-            // Check if user is Admin or SubAdmin of the organization
-            return await _userRepository.IsOrganizationAdminOrSubAdminAsync(userId, organizationId.Value);
+            // Also check participating organizations if shared campaign
+            var sharedCampaign = await _campaignRepository.GetSharedCampaignByIdAsync(campaignId);
+            if (sharedCampaign?.Organizations != null)
+            {
+                foreach (var org in sharedCampaign.Organizations)
+                {
+                    if (await _userRepository.IsOrganizationAdminOrSubAdminAsync(userId, org.Id))
+                        return true;
+                }
+            }
+
+            return false;
         }
 
         public async Task<bool> CanManageDonationAsync(string userId, int donationId)
@@ -158,7 +167,8 @@ namespace TheCharityBLL.Services.Implementation
             if (string.IsNullOrEmpty(userId)) return false;
             if (await IsSuperAdminAsync(userId)) return true;
 
-            var donation = await _donationRepository.GetDonationByIdAsync(donationId);
+            // Include deleted so soft-deleted donations can be restored by OrgAdmin/SubAdmin
+            var donation = await _donationRepository.GetDonationByIdWithDeletedAsync(donationId);
             if (donation == null) return false;
 
             return await CanManageCampaignAsync(userId, donation.CampaignId);
