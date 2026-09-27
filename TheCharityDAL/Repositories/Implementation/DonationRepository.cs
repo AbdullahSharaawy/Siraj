@@ -38,6 +38,14 @@ namespace TheCharityDAL.Repositories.Implementation
                 .Include(d => d.Campaign)
                 .FirstOrDefaultAsync();
         }
+        public async Task<Donation?> GetDonationByTransactionIdAsync(long id)
+        {
+            return await _context.Donations
+                .Where(d => d.transactionId == id && (d.IsDeleted == false))
+                .Include(d => d.User)
+                .Include(d => d.Campaign)
+                .FirstOrDefaultAsync();
+        }
 
         public async Task<Donation?> GetDonationByIdWithDeletedAsync(int id)
         {

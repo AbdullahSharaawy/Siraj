@@ -12,6 +12,7 @@ namespace TheCharityBLL.DTOs.DonationDTOs
     {
         public int Id { get; set; }
         public double Amount { get; set; }
+        public long? transactionId { get; set; }
         public string UserId { get; set; } = null!;
         public int CampaignId { get; set; }
         public CampaignResponseDto? Campaign { get; set; }

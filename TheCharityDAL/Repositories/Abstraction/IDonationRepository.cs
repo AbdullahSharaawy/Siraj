@@ -19,6 +19,7 @@ namespace TheCharityDAL.Repositories.Abstraction
         Task RestoreDonationAsync(int id);
 
         // ===== Donation Filtering & Search =====
+        Task<Donation?> GetDonationByTransactionIdAsync(long id);
         Task<IEnumerable<Donation>> GetDonationsByUserAsync(string userId);
         Task<IEnumerable<Donation>> GetDonationsByCampaignAsync(int campaignId);
         Task<IEnumerable<Donation>> GetDonationsByOrganizationAsync(int organizationId, bool includeDeleted = false);

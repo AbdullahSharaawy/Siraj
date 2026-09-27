@@ -20,6 +20,7 @@ namespace TheCharityBLL.Services.Abstraction.MoneyDonation
 
         // ===== Filtering & Search =====
         Task<ServiceResponse<IEnumerable<DonationResponseDto>>> GetDonationsByUserAsync(string userId);
+        Task<ServiceResponse<DonationResponseDto?>> GetDonationByTransactionIdAsync(long id);
         Task<ServiceResponse<IEnumerable <DonationResponseDto>>> GetDonationsByCampaignAsync(int campaignId);
         Task<ServiceResponse<IEnumerable<DonationResponseDto>>> GetDonationsByOrganizationAsync(int organizationId, bool includeDeleted = false);
         Task<ServiceResponse<IEnumerable<DonationResponseDto>>> GetDonationsByOrganizationsAsync(IEnumerable<int> organizationIds, bool includeDeleted = false);

@@ -6,6 +6,7 @@ namespace TheCharityDAL.Entities
     {
         public int Id { get; private set; }
         public double? Amount { get; private set; }
+        public long? transactionId { get; private set; }
         public string UserId { get; private set; }
 
         [ForeignKey(nameof(UserId))]
@@ -18,11 +19,12 @@ namespace TheCharityDAL.Entities
         public DateTime? DeletedOn { get; private set; }
         public DateTime RegistrationDate { get; private set; } = DateTime.Now;
         public DateTime? UpdatedOn { get; private set; }
-        public Donation(double? amount, string userId, int campaignId)
+        public Donation(double? amount, string userId, int campaignId, long? transactionId)
         {
             this.Amount = amount;
             this.UserId = userId;
             this.CampaignId = campaignId;
+            this.transactionId = transactionId;
         }
         public void EditAmount(double? amount)
         {

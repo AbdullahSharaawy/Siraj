@@ -24,6 +24,7 @@ namespace TheCharityBLL.Mapper
             {
                 Id = donation.Id,
                 Amount = donation.Amount ?? 0,
+                transactionId = donation.transactionId,
                 UserId = donation.UserId,
                 CampaignId = donation.CampaignId,
                 Campaign = donation.Campaign is not null

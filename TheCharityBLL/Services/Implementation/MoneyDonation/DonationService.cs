@@ -38,7 +38,12 @@ namespace TheCharityBLL.Services.Implementation.MoneyDonation
                 Data = DonationsDto
             };
         }
-
+       
+             public async Task<ServiceResponse<DonationResponseDto?>> GetDonationByTransactionIdAsync(long id)
+        {
+            var donation = await _repo.GetDonationByTransactionIdAsync(id);
+            return donation is null ? null : new ServiceResponse<DonationResponseDto?> { Data = _mapper.MapToDonationResponseDto(donation), Success = true, Message = "retrieved donation info by id successfully." };
+        }
         public async Task<ServiceResponse<DonationResponseDto?>> GetDonationByIdAsync(int id)
         {
             var donation = await _repo.GetDonationByIdAsync(id);

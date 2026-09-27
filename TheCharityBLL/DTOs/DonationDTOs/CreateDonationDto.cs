@@ -7,7 +7,7 @@ namespace TheCharityBLL.DTOs.DonationDTOs
         [Required(ErrorMessage = "Amount is required.")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Amount must be greater than 0.")]
         public double? Amount { get; set; }
-
+        public long? transactionId { get; set; }
         public string? UserId { get; set; }
 
         [Required(ErrorMessage = "CampaignId is required.")]
