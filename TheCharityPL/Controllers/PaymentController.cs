@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -10,6 +10,7 @@ using TheCharityBLL.DTOs.PaymentDTOs;
 using TheCharityBLL.Services.Abstraction;
 using TheCharityBLL.Services.Abstraction.MoneyDonation;
 using TheCharityBLL.Services.Abstraction.Payment;
+using TheCharityDAL.Repositories.Abstraction;
 
 
 namespace TheCharityPL.Controllers
@@ -23,24 +24,32 @@ namespace TheCharityPL.Controllers
         private readonly ILogger<PaymentController> _logger;
         private readonly IConfiguration _configuration;
         private readonly IUserService _userService;
+        private readonly IPaymentInfoService _paymentInfoService;
+        private readonly ICampaignRepository _campaignRepository;
+
         public PaymentController(
             IPaymobService paymobService,
             IDonationService donationService,
             ILogger<PaymentController> logger,
             IConfiguration configuration,
-            IUserService userService)
+            IUserService userService,
+            IPaymentInfoService paymentInfoService,
+            ICampaignRepository campaignRepository)
         {
             _paymobService = paymobService;
             _donationService = donationService;
             _logger = logger;
             _configuration = configuration;
             _userService = userService;
+            _paymentInfoService = paymentInfoService;
+            _campaignRepository = campaignRepository;
         }
+
         /// <summary>
         /// create payment request to donate to specific campaign by user
         /// </summary>
         [HttpPost("create")]
-              [Authorize]
+        [Authorize]
         public async Task<IActionResult> Create([FromBody] CreatePaymentRequestDto request)
         {
             if (!ModelState.IsValid)
@@ -50,20 +59,24 @@ namespace TheCharityPL.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized(new { message = "User identity could not be resolved." });
 
-            //  Fetch user via repository to build real billing data
+            // Fetch user via repository to build real billing data
             var user = await _userService.GetUserByIdAsync(userId);
             if (user is null)
                 return Unauthorized(new { message = "User not found." });
 
-            //  Split FullName → FirstName / LastName (Paymob requires them separately)
-            var nameParts = (user.FullName ?? "NA").Split(' ', 2);
+            // Split FullName → FirstName / LastName (Paymob requires them separately)
+            var nameParts = (user.FullName ?? "Donor Contributor").Split(' ', 2);
+            var phone = !string.IsNullOrWhiteSpace(user.PhoneNumber) && user.PhoneNumber != "NA"
+                ? user.PhoneNumber
+                : "+201000000000";
+
             var billing = new BillingData
             {
-                FirstName = nameParts[0],
-                LastName = nameParts.Length > 1 ? nameParts[1] : "NA",
-                Email = user.Email ?? "NA",
-                PhoneNumber = user.PhoneNumber ?? "NA",
-                Street = user.Address ?? "NA",
+                FirstName = string.IsNullOrWhiteSpace(nameParts[0]) ? "Donor" : nameParts[0],
+                LastName = nameParts.Length > 1 && !string.IsNullOrWhiteSpace(nameParts[1]) ? nameParts[1] : "Contributor",
+                Email = user.Email ?? "donor@thecharity.org",
+                PhoneNumber = phone,
+                Street = user.Address ?? "Cairo",
                 Country = "EG"
             };
 
@@ -80,7 +93,7 @@ namespace TheCharityPL.Controllers
                 "Payment session created. UserId: {UserId}, CampaignId: {CampaignId}",
                 userId, request.CampaignId);
 
-            return Ok(new ServiceResponse<string>{Data= iframeUrl,Success=true,Message = $"Payment session created. UserId: {userId}, CampaignId: {request.CampaignId}" });
+            return Ok(new ServiceResponse<string> { Data = iframeUrl, Success = true, Message = $"Payment session created. UserId: {userId}, CampaignId: {request.CampaignId}" });
         }
 
         // =====================================================================
@@ -108,15 +121,31 @@ namespace TheCharityPL.Controllers
 
                 var transaction = wrapper.Obj;
 
-                // 1. Verify HMAC signature
+                // 1. Extract UserId + CampaignId + OrganizationId from Paymob order metadata
+                var userId = transaction.PaymentKeyClaims?.Extra?["user_id"]?.ToString();
+                var campaignIdRaw = transaction.PaymentKeyClaims?.Extra?["campaign_id"]?.ToString();
+                var organizationIdRaw = transaction.PaymentKeyClaims?.Extra?["organization_id"]?.ToString();
+                var campaignId = int.TryParse(campaignIdRaw, out var cid) ? cid : (int?)null;
+                var organizationId = int.TryParse(organizationIdRaw, out var oid) ? oid : (int?)null;
+
+                // 2. Verify HMAC signature (checking org HMAC key if available, else platform fallback)
                 var receivedHmac = Request.Query["hmac"].ToString();
-                if (!VerifyHmac(transaction, receivedHmac))
+                if (string.IsNullOrEmpty(receivedHmac))
+                {
+                    receivedHmac = Request.Headers["hmac"].ToString();
+                }
+                if (string.IsNullOrEmpty(receivedHmac))
+                {
+                    receivedHmac = Request.Headers["X-Paymob-Hmac"].ToString();
+                }
+
+                if (!await VerifyHmacAsync(transaction, receivedHmac, campaignId, organizationId))
                 {
                     _logger.LogWarning("Invalid HMAC for transaction {TransactionId}.", transaction.Id);
                     return Unauthorized(new { message = "Invalid HMAC signature." });
                 }
 
-                // 2. Check transaction outcome
+                // 3. Check transaction outcome
                 if (!transaction.Success)
                 {
                     _logger.LogInformation(
@@ -126,17 +155,8 @@ namespace TheCharityPL.Controllers
                     return Ok(new { message = "Payment not successful.", status = "failed" });
                 }
 
-                // 3. Extract UserId + CampaignId from Paymob order metadata
-
-                var userId = transaction.PaymentKeyClaims?.Extra?["user_id"]?.ToString();
-                var campaignIdRaw = transaction.PaymentKeyClaims?.Extra?["campaign_id"]?.ToString();
-                var campaignId = int.TryParse(campaignIdRaw, out var cid) ? cid : (int?)null;
-
-                if (
-                     string.IsNullOrEmpty(userId)
-                    || campaignId == 0)
+                if (string.IsNullOrEmpty(userId) || !campaignId.HasValue || campaignId.Value <= 0)
                 {
-
                     _logger.LogError(
                         "Missing or incomplete metadata on callback. OrderId: {OrderId}.",
                         transaction.OrderId);
@@ -144,12 +164,34 @@ namespace TheCharityPL.Controllers
                     return Ok(new { message = "Callback received but donation could not be recorded: missing metadata.", status = "error" });
                 }
 
-                // 4. Create donation record
+                var amount = (double)(transaction.AmountCents / 100m);
+
+                // 4. Deduplication / Idempotency check:
+                // Check if this EXACT transaction has already been processed
+                var existingDonation = await _donationService.GetDonationByTransactionIdAsync(transaction.Id);
+
+                if (existingDonation != null)
+                {
+                    _logger.LogInformation(
+                        "Duplicate callback detected for OrderId: {OrderId}, TransactionId: {TransactionId}. Existing DonationId: {DonationId}",
+                        transaction.OrderId, transaction.Id, existingDonation.Data.Id);
+
+                    return Ok(new
+                    {
+                        message = "Callback already processed.",
+                        transaction_id = transaction.Id,
+                        order_id = transaction.OrderId,
+                        donation_id = existingDonation.Data.Id,
+                        status = "success"
+                    });
+                }
+                // 5. Create donation record
                 var donationDto = new CreateDonationDto
                 {
-                    Amount = (double)(transaction.AmountCents / 100m),
+                    Amount = amount,
+                    transactionId = transaction.Id,
                     UserId = userId,
-                    CampaignId = campaignId
+                    CampaignId = campaignId.Value
                 };
 
                 var donation = await _donationService.CreateDonationAsync(donationDto);
@@ -162,7 +204,7 @@ namespace TheCharityPL.Controllers
                     donationDto.Amount, transaction.Currency ?? "EGP",
                     userId, campaignId);
 
-                // 5. Always return 200 to Paymob
+                // 6. Always return 200 to Paymob
                 return Ok(new
                 {
                     message = "Callback processed successfully.",
@@ -185,12 +227,18 @@ namespace TheCharityPL.Controllers
             }
         }
 
-        private bool VerifyHmac(PaymobTransaction transaction, string receivedHmac)
+        private async Task<bool> VerifyHmacAsync(PaymobTransaction transaction, string receivedHmac, int? campaignId, int? organizationId)
         {
-            var secret = _configuration["Paymob:HmacKey"];
-            if (string.IsNullOrEmpty(secret) || string.IsNullOrEmpty(receivedHmac))
+            if (string.IsNullOrEmpty(receivedHmac))
             {
-                _logger.LogWarning("HMAC verification failed: missing secret or received HMAC");
+                _logger.LogWarning("HMAC verification failed: received HMAC is empty.");
+                return false;
+            }
+
+            var secret = await GetHmacSecretAsync(campaignId, organizationId);
+            if (string.IsNullOrEmpty(secret))
+            {
+                _logger.LogWarning("HMAC verification failed: missing HMAC secret key.");
                 return false;
             }
 
@@ -220,18 +268,16 @@ namespace TheCharityPL.Controllers
                     transaction.Success.ToString().ToLowerInvariant()
                 );
 
-                _logger.LogDebug("HMAC data string: {Data}", data);
-
                 using var hmac = new HMACSHA512(Encoding.UTF8.GetBytes(secret));
                 var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(data));
                 var computed = BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
 
-                var isValid = computed == receivedHmac.ToLowerInvariant();
+                var isValid = string.Equals(computed, receivedHmac.Trim(), StringComparison.OrdinalIgnoreCase);
 
                 if (!isValid)
                 {
                     _logger.LogWarning("HMAC mismatch. Computed: {Computed}, Received: {Received}",
-                        computed, receivedHmac.ToLowerInvariant());
+                        computed, receivedHmac);
                 }
 
                 return isValid;
@@ -241,6 +287,37 @@ namespace TheCharityPL.Controllers
                 _logger.LogError(ex, "Error computing HMAC");
                 return false;
             }
+        }
+
+        private async Task<string?> GetHmacSecretAsync(int? campaignId, int? organizationId)
+        {
+            if (organizationId.HasValue && organizationId.Value > 0)
+            {
+                try
+                {
+                    var info = await _paymentInfoService.GetPaymentInfoByOrganizationIdAsync(organizationId.Value);
+                    if (!string.IsNullOrEmpty(info?.Data?.HmacKey))
+                        return info.Data.HmacKey;
+                }
+                catch { }
+            }
+
+            if (campaignId.HasValue && campaignId.Value > 0)
+            {
+                try
+                {
+                    var orgId = await _campaignRepository.GetCampaignCreatorOrganizationIdAsync(campaignId.Value);
+                    if (orgId.HasValue)
+                    {
+                        var info = await _paymentInfoService.GetPaymentInfoByOrganizationIdAsync(orgId.Value);
+                        if (!string.IsNullOrEmpty(info?.Data?.HmacKey))
+                            return info.Data.HmacKey;
+                    }
+                }
+                catch { }
+            }
+
+            return _configuration["Paymob:HmacKey"];
         }
 
     }
