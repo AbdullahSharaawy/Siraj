@@ -124,10 +124,35 @@ namespace TheCharityPL.Controllers
         [CanCreateDonation]
         public async Task<IActionResult> Create([FromBody] CreateDonationDto dto)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized();
+
+            // Default to current admin if UserId is not provided
+            if (string.IsNullOrWhiteSpace(dto.UserId))
+            {
+                dto.UserId = userId;
+            }
+            else if (dto.UserId.Contains('@'))
+            {
+                var userByEmail = await _userRepository.GetUserByEmailAsync(dto.UserId.Trim());
+                if (userByEmail != null)
+                {
+                    dto.UserId = userByEmail.Id;
+                }
+            }
+
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var created = await _service.CreateDonationAsync(dto);
-            return CreatedAtAction(nameof(GetById), new { id = created.Data.Id }, created);
+            try
+            {
+                var created = await _service.CreateDonationAsync(dto);
+                return CreatedAtAction(nameof(GetById), new { id = created.Data.Id }, created);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new ServiceResponse { Success = false, Message = ex.Message });
+            }
         }
         /// <summary>
         /// update specific donation 
