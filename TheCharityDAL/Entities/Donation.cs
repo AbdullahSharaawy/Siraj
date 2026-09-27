@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TheCharityDAL.Entities
 {
@@ -23,6 +23,14 @@ namespace TheCharityDAL.Entities
             this.Amount = amount;
             this.UserId = userId;
             this.CampaignId = campaignId;
+        }
+        public void EditAmount(double? amount)
+        {
+            if (amount.HasValue)
+            {
+                this.Amount = amount.Value;
+                this.UpdatedOn = DateTime.Now;
+            }
         }
         public void EditAmount(int? amount)
         {
