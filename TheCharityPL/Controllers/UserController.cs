@@ -307,10 +307,10 @@ namespace TheCharityPL.Controllers
                 return BadRequest(new ServiceResponse{Success = false, Message = "Email and token are required." });
             
             var targetUrl = string.IsNullOrEmpty(returnUrl) ? "/" : returnUrl;
-            var allowedFrontends = _configuration.GetSection("AllowedFrontends").Get<List<string>>();
+            var allowedOrigins = _configuration.GetSection("allowedOrigins").Get<List<string>>();
 
             // 2. Fallback to an empty list if the section is missing to avoid null reference errors
-            if (allowedFrontends == null || !allowedFrontends.Any())
+            if (allowedOrigins == null || !allowedOrigins.Any())
             {
                 return BadRequest("Frontend configuration is missing.");
             }
