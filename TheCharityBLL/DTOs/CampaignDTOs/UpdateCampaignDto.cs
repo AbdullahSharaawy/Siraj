@@ -14,6 +14,8 @@ namespace TheCharityBLL.DTOs.CampaignDTOs
         public string? ImgPath { get; set; }
         /// <example>150000</example>
         public double? Target { get; set; }
+        /// <example>true</example>
+        public bool isSolo { get; set; }
         /// <example>Solo</example>
         public CampaignType? Type { get; set; }
         public DateTime? Deadline { get; set; }

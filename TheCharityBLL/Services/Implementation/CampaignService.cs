@@ -95,7 +95,8 @@ namespace TheCharityBLL.Services.Repository
                 AchievementPercentage = CalculatePercentage(campaign.Achieved, campaign.Target),
                 RemainingAmount = (campaign.Target ?? 0) - (campaign.Achieved ?? 0),
                 TotalDonationsCount = donations.Count(),
-                RecentDonations = recentDonations
+                RecentDonations = recentDonations,
+                isSolo=campaign.isSolo,
             };
 
             return new ServiceResponse<CampaignDetailsResponseDto>

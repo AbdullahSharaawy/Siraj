@@ -18,9 +18,11 @@ namespace TheCharityBLL.DTOs.CampaignDTOs
         public double? Target { get; set; }
         /// <example>30000</example>
         public double? Achieved { get; set; }
+        /// <example>true</example>
+        public bool isSolo { get; set; }
         /// <example>Active</example>
         public CampaignStatus? Status { get; set; }
-        /// <example>Solo</example>
+        /// <example>help kids</example>
         public CampaignType? Type { get; set; }
         /// <example>false</example>
         public bool IsDeleted { get; set; }

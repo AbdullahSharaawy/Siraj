@@ -9,8 +9,11 @@ namespace TheCharityBLL.DTOs.CampaignDTOs
         /// <example>Providing education for underprivileged children</example>
         public string? Description { get; set; }
         /// <example>50000</example>
+        
         public double Target { get; set; }
-        /// <example>Solo</example>
+        /// <example>true</example>
+        public bool isSolo { get; set; }
+        /// <example>help kids</example>
         public CampaignType Type { get; set; }
         /// <example>2024-03-01T00:00:00</example>
         public DateTime? StartDate { get; set; }

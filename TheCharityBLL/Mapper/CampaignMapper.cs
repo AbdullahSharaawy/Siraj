@@ -29,6 +29,7 @@ namespace TheCharityBLL.Mapper
                 RegistrationDate = campaign.RegistrationDate,
                 UpdatedOn = campaign.UpdatedOn,
                 Deadline = campaign.Deadline,
+                isSolo=campaign.isSolo,
                 DaysRemaining = campaign.Deadline.HasValue
                     ? (int)Math.Ceiling((campaign.Deadline.Value - DateTime.Now).TotalDays)
                     : null
@@ -84,6 +85,7 @@ namespace TheCharityBLL.Mapper
                 OrganizationId = campaign.OrganizationId,
                 OrganizationName = campaign.Organization?.Name ?? string.Empty,
                 Deadline = campaign.Deadline,
+                isSolo=true,
             };
         }
 
@@ -112,6 +114,7 @@ namespace TheCharityBLL.Mapper
                 Status = campaign.Status,
                 Type = campaign.Type,
                 IsDeleted = campaign.IsDeleted,
+                isSolo = false,
                 RegistrationDate = campaign.RegistrationDate,
                 UpdatedOn = campaign.UpdatedOn,
                 Deadline = campaign.Deadline,
@@ -154,7 +157,9 @@ namespace TheCharityBLL.Mapper
                 achieved: 0,
                 status: CampaignStatus.Active,
                 type: CampaignType.type1,
-                organizationId: dto.OrganizationId
+                organizationId: dto.OrganizationId,
+                isSolo:true
+                
             );
         }
 
@@ -171,7 +176,8 @@ namespace TheCharityBLL.Mapper
                 achieved: 0,
                 status: CampaignStatus.Active,
                 type: CampaignType.type6,
-                 creatorOrganizationId: dto.CreatorOrganizationId
+                 creatorOrganizationId: dto.CreatorOrganizationId,
+                 isSolo:false
             );
         }
     }

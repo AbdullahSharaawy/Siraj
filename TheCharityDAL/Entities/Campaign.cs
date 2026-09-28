@@ -10,6 +10,7 @@ namespace TheCharityDAL.Entities
         public string? ImgPath { get; private set; }
         public double? Target { get; private set; } = 100;
         public double? Achieved { get; private set; } = 0;
+        public bool isSolo { get; private set; }
         public CampaignStatus? Status { get; private set; } = CampaignStatus.Active;
         public CampaignType? Type { get; private set; }
         public virtual int? OrganizationId { get; protected set; }
@@ -19,7 +20,7 @@ namespace TheCharityDAL.Entities
         public DateTime? UpdatedOn { get; private set; } = null;
         public DateTime? Deadline { get; private set; } = DateTime.Now.AddMonths(1);
         public DateTime? CompletionDate { get; private set; } = null;
-        public Campaign(string? title, string? description, string? imgPath, int? target, int? achieved, CampaignStatus? status, CampaignType? type, DateTime deadline)
+        public Campaign(string? title, string? description, string? imgPath, int? target, int? achieved, CampaignStatus? status, CampaignType? type, DateTime deadline,bool isSolo=true)
         {
             this.Title = title;
             this.Description = description;
@@ -29,6 +30,7 @@ namespace TheCharityDAL.Entities
             this.Status = status;
             this.Type = type;
             this.Deadline = deadline;
+            this.isSolo = isSolo;
         }
         protected Campaign() { }
         public void EditTitle(string? title)
@@ -38,6 +40,10 @@ namespace TheCharityDAL.Entities
                 this.Title = title;
                 this.UpdatedOn = DateTime.Now;
             }
+        }
+        public void EditIsSolo(bool isSolo) { 
+             this.isSolo |= isSolo;
+            this.UpdatedOn = DateTime.Now;
         }
         public void EditDescription(string? description)
         {
