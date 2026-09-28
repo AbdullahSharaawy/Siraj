@@ -62,13 +62,13 @@ namespace TheCharityPL
             // IDK but i got an error and i couldnt figuer out why so i asked claud and it said add this - Mohamed Rashid
             builder.Services.AddCors(options =>
             {
-                var allowedFrontends = builder.Configuration
-                    .GetSection("AllowedFrontends")
+                var allowedOrigins = builder.Configuration
+                    .GetSection("allowedOrigins")
                     .Get<string[]>() ?? Array.Empty<string>();
 
                 options.AddPolicy("AllowAngular", policy =>
                 {
-                    policy.WithOrigins(allowedFrontends)
+                    policy.WithOrigins(allowedOrigins)
                         .AllowAnyHeader()
                         .AllowAnyMethod()
                         .AllowCredentials();
