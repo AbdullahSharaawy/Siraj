@@ -93,16 +93,16 @@ namespace TheCharityPL.Controllers
             await HttpContext.SignOutAsync("ExternalCookie");
 
             // 1. Read the list from appsettings.json
-            var allowedFrontends = _configuration.GetSection("AllowedFrontends").Get<List<string>>();
+            var allowedOrigins = _configuration.GetSection("allowedOrigins").Get<List<string>>();
 
             // 2. Fallback to an empty list if the section is missing to avoid null reference errors
-            if (allowedFrontends == null || !allowedFrontends.Any())
+            if (allowedOrigins == null || !allowedOrigins.Any())
             {
                 return BadRequest("Frontend configuration is missing.");
             }
 
             // 3. Validate the returnUrl against the allowed list
-            bool isTrustedUrl = allowedFrontends.Any(url => returnUrl.StartsWith(url));
+            bool isTrustedUrl = allowedOrigins.Any(url => returnUrl.StartsWith(url));
 
             if (isTrustedUrl)
             {
