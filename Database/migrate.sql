@@ -640,3 +640,330 @@ GO
 COMMIT;
 GO
 
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260915091354_updated_organization'
+)
+BEGIN
+    ALTER TABLE [Organizations] ADD [Description] nvarchar(max) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260915091354_updated_organization'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260915091354_updated_organization', N'8.0.0');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923130902_updated_organizationv2'
+)
+BEGIN
+    ALTER TABLE [OrganizationRoles] DROP CONSTRAINT [FK_OrganizationRoles_Organizations_OrganizationId];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923130902_updated_organizationv2'
+)
+BEGIN
+    ALTER TABLE [Organizations] DROP CONSTRAINT [FK_Organizations_AspNetUsers_AdminUserId];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923130902_updated_organizationv2'
+)
+BEGIN
+    DROP INDEX [IX_Organizations_AdminUserId] ON [Organizations];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923130902_updated_organizationv2'
+)
+BEGIN
+    DECLARE @var0 sysname;
+    SELECT @var0 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[Organizations]') AND [c].[name] = N'AdminUserId');
+    IF @var0 IS NOT NULL EXEC(N'ALTER TABLE [Organizations] DROP CONSTRAINT [' + @var0 + '];');
+    ALTER TABLE [Organizations] DROP COLUMN [AdminUserId];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923130902_updated_organizationv2'
+)
+BEGIN
+    ALTER TABLE [Organizations] ADD [OrganizationRoleId] int NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923130902_updated_organizationv2'
+)
+BEGIN
+    ALTER TABLE [OrganizationRoles] ADD [OrganizationId1] int NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923130902_updated_organizationv2'
+)
+BEGIN
+    ALTER TABLE [OrganizationRoles] ADD [OrganizationRoleId] nvarchar(450) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923130902_updated_organizationv2'
+)
+BEGIN
+    ALTER TABLE [AspNetUsers] ADD [OrganizationRoleId] int NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923130902_updated_organizationv2'
+)
+BEGIN
+    CREATE INDEX [IX_OrganizationRoles_OrganizationId1] ON [OrganizationRoles] ([OrganizationId1]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923130902_updated_organizationv2'
+)
+BEGIN
+    CREATE INDEX [IX_OrganizationRoles_OrganizationRoleId] ON [OrganizationRoles] ([OrganizationRoleId]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923130902_updated_organizationv2'
+)
+BEGIN
+    ALTER TABLE [OrganizationRoles] ADD CONSTRAINT [FK_OrganizationRoles_AspNetUsers_OrganizationRoleId] FOREIGN KEY ([OrganizationRoleId]) REFERENCES [AspNetUsers] ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923130902_updated_organizationv2'
+)
+BEGIN
+    ALTER TABLE [OrganizationRoles] ADD CONSTRAINT [FK_OrganizationRoles_Organizations_OrganizationId] FOREIGN KEY ([OrganizationId]) REFERENCES [Organizations] ([Id]) ON DELETE NO ACTION;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923130902_updated_organizationv2'
+)
+BEGIN
+    ALTER TABLE [OrganizationRoles] ADD CONSTRAINT [FK_OrganizationRoles_Organizations_OrganizationId1] FOREIGN KEY ([OrganizationId1]) REFERENCES [Organizations] ([Id]);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923130902_updated_organizationv2'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260923130902_updated_organizationv2', N'8.0.0');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923142430_updated_organizationv3'
+)
+BEGIN
+    DECLARE @var1 sysname;
+    SELECT @var1 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[Organizations]') AND [c].[name] = N'OrganizationRoleId');
+    IF @var1 IS NOT NULL EXEC(N'ALTER TABLE [Organizations] DROP CONSTRAINT [' + @var1 + '];');
+    ALTER TABLE [Organizations] DROP COLUMN [OrganizationRoleId];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923142430_updated_organizationv3'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260923142430_updated_organizationv3', N'8.0.0');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923143840_updated_organizationrole_relation'
+)
+BEGIN
+    ALTER TABLE [OrganizationRoles] DROP CONSTRAINT [FK_OrganizationRoles_AspNetUsers_OrganizationRoleId];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923143840_updated_organizationrole_relation'
+)
+BEGIN
+    ALTER TABLE [OrganizationRoles] DROP CONSTRAINT [FK_OrganizationRoles_Organizations_OrganizationId1];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923143840_updated_organizationrole_relation'
+)
+BEGIN
+    DROP INDEX [IX_OrganizationRoles_OrganizationId1] ON [OrganizationRoles];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923143840_updated_organizationrole_relation'
+)
+BEGIN
+    DROP INDEX [IX_OrganizationRoles_OrganizationRoleId] ON [OrganizationRoles];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923143840_updated_organizationrole_relation'
+)
+BEGIN
+    DECLARE @var2 sysname;
+    SELECT @var2 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[OrganizationRoles]') AND [c].[name] = N'OrganizationId1');
+    IF @var2 IS NOT NULL EXEC(N'ALTER TABLE [OrganizationRoles] DROP CONSTRAINT [' + @var2 + '];');
+    ALTER TABLE [OrganizationRoles] DROP COLUMN [OrganizationId1];
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923143840_updated_organizationrole_relation'
+)
+BEGIN
+    DECLARE @var3 sysname;
+    SELECT @var3 = [d].[name]
+    FROM [sys].[default_constraints] [d]
+    INNER JOIN [sys].[columns] [c] ON [d].[parent_column_id] = [c].[column_id] AND [d].[parent_object_id] = [c].[object_id]
+    WHERE ([d].[parent_object_id] = OBJECT_ID(N'[OrganizationRoles]') AND [c].[name] = N'OrganizationRoleId');
+    IF @var3 IS NOT NULL EXEC(N'ALTER TABLE [OrganizationRoles] DROP CONSTRAINT [' + @var3 + '];');
+    ALTER TABLE [OrganizationRoles] ALTER COLUMN [OrganizationRoleId] nvarchar(max) NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260923143840_updated_organizationrole_relation'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260923143840_updated_organizationrole_relation', N'8.0.0');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260927212005_added_transactionId_field_to_donation'
+)
+BEGIN
+    ALTER TABLE [Donations] ADD [transactionId] bigint NULL;
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260927212005_added_transactionId_field_to_donation'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260927212005_added_transactionId_field_to_donation', N'8.0.0');
+END;
+GO
+
+COMMIT;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260928070012_added_isSolo_field_to_Campaign'
+)
+BEGIN
+    ALTER TABLE [Campaigns] ADD [isSolo] bit NOT NULL DEFAULT CAST(0 AS bit);
+END;
+GO
+
+IF NOT EXISTS (
+    SELECT * FROM [__EFMigrationsHistory]
+    WHERE [MigrationId] = N'20260928070012_added_isSolo_field_to_Campaign'
+)
+BEGIN
+    INSERT INTO [__EFMigrationsHistory] ([MigrationId], [ProductVersion])
+    VALUES (N'20260928070012_added_isSolo_field_to_Campaign', N'8.0.0');
+END;
+GO
+
+COMMIT;
+GO
+
